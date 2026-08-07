@@ -291,12 +291,8 @@ export const PassiveScreen: React.FC = () => {
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-          {/* Simple reliable MLB logo */}
-          <svg className="w-8 h-8" viewBox="0 0 100 75">
-            <ellipse cx="50" cy="38" rx="42" ry="33" fill="#E31837"/>
-            <path d="M 8,-15 C -10,-15 -50,45 -68,68 C -50,90 -10,100 8,100 C 22,100 32,85 42,75" fill="#0C2340"/>
-            <circle cx="20" cy="72" r="9" fill="#FFFFFF"/>
-          </svg>
+          {/* MLB Logo */}
+          <img src="/assets/Major_League_Baseball_logo.svg.webp" alt="MLB Logo" className="w-8 h-8 shrink-0"/>
             <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
               Todd's <span className="text-amber-400">MLB Gameday</span>
             </h1>
