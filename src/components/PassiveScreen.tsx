@@ -290,17 +290,18 @@ export const PassiveScreen: React.FC = () => {
       <header className="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg relative z-20">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <svg className="w-8 h-8 text-blue-500 fill-current shrink-0" viewBox="0 0 500 500">
-              <path fill="#002D62" d="M0,0h500v500H0V0z"/>
-              <path fill="#E31837" d="M250,0h250v500H250V0z"/>
-              <path fill="#FFFFFF" d="M250,75c-96.6,0-175,78.4-175,175s78.4,175,175,175s175-78.4,175-175S346.6,75,250,75z M250,390 c-77.3,0-140-62.7-140-140c0-77.3,62.7-140,140-140s140,62.7,140,140C390,327.3,327.3,390,250,390z"/>
-              <path fill="#FFFFFF" d="M225,140l-25,50h50L225,140z M275,360l25-50h-50L275,360z"/>
-            </svg>
-            <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-              Todd's <span className="text-amber-400">MLB Gameday</span>
-            </h1>
-          </div>
+          {/* Official MLB Logo */}
+          <svg className="w-8 h-8 fill-current shrink-0" viewBox="0 0 251 218">
+            <path fill="#007DC3" d="M96.2,127.6l25.4-25.4l25.4,25.4L96.2,127.6z M140.4,83.4l25.4-25.4l25.4,25.4L140.4,83.4z
+              M108.6,71.6l56.2-56.2L191,168.7l-56.2-56.2L108.6,71.6z"/>
+            <circle cx="134" cy="144" r="10" fill="#FFFFFF"/>
+            <path d="M134,144c0,0,5-10,2-20c-3-10-10-18-16-22l-27.2-15.9L83.6,88.6L83.6,95.4l23.6,57.5
+              l-12.6,23.6l-7.8-4.4l13.4-22l-46.6-122h0l39.2,53.8c-12.6,13.4-20.6,29.4-18.6,47.2C53.6,201.6,63.4,228.6,83.6,236
+              c20.2,7.4,43.4,1.4,62.4-11.6c19-13,32-34.8,33.4-58l-6.6,2.8C138,162.4,134,144,134,144z"/>
+            <path fill="#FFFFFF" d="M79.4,213.6c-0.4,0-0.8-0.2-1.2-0.4c-5.8-3.2-9.8-8.8-10.6-15.2C66,190.2,70,184.6,75,182
+              c1.4-0.6,3-1,4.6-1c3.8,0,7.2,1.4,9.8,4c0.6,0.6,1.4,0.6,2,0l46.6-27.4c1-0.6,2.4-0.6,3.4,0.2
+              c1,0.8,1.4,2,0.8,3l-59.6,55.2C85,213.4,82,213.6,79.4,213.6z"/>
+          </svg>
         </div>
 
         {/* Slide Stack Navigation Indicators */}
