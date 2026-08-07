@@ -290,17 +290,13 @@ export const PassiveScreen: React.FC = () => {
       <header className="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg relative z-20">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
           {/* Official MLB Logo */}
-          <svg className="w-8 h-8 shrink-0" viewBox="0 0 400 250">
-            <rect x="0" y="0" width="400" height="250" rx="60" ry="60" fill="#002D62"/>
-            <rect x="260" y="0" width="140" height="250" rx="60" ry="60" fill="#E31837"/>
-            
-            {/* Batter Silhouette */}
-            <path d="M 180,160 L 170,190 C 160,230 190,240 220,235 C 250,230 260,200 250,180 L 240,170 L 230,160 C 220,150 210,140 200,145 C 190,150 185,160 180,160 Z M 175,130 L 170,110 C 165,90 180,80 200,85 C 220,90 230,110 225,130 Z M 240,170 L 290,120 L 300,110 L 280,160 Z"/>
-            
-            {/* Baseball */}
-            <circle cx="40" cy="175" r="12" fill="#FFFFFF"/>
-          </svg>
+          <img src="/MLBlogo.png" alt="MLB Logo" className="w-8 h-8 shrink-0 object-contain"/>
+            <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+              Todd's <span className="text-amber-400">MLB Gameday</span>
+            </h1>
+          </div>
         </div>
 
         {/* Slide Stack Navigation Indicators */}
