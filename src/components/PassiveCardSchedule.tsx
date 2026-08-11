@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
@@ -15,69 +16,6 @@ interface PassiveCardScheduleProps {
   loadingNews?: boolean;
   loadingHot?: boolean;
 }
-
-const BASEBALL_LORE_ITEMS = [
-  {
-    id: "gaedel",
-    title: "Eddie Gaedel's 3'7\" Strike Zone (1951)",
-    tag: "WILD HISTORY",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/114515/headshot/silo/current",
-    statBadge: ".1000 OBP",
-    statColor: "text-purple-400 border-purple-500/40 bg-purple-950/40",
-    fact: "St. Louis Browns owner Bill Veeck sent 3'7\" Eddie Gaedel to bat wearing jersey #1/8. His strike zone was 1.5 inches tall! He drew a 4-pitch walk.",
-    whimsy: "MLB banned his contract the next day, but his 1.000 career OBP remains unbroken forever."
-  },
-  {
-    id: "bird",
-    title: "The 1-in-19-Billion Pigeon Fastball (2001)",
-    tag: "STATCAST ODDITY",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/116615/headshot/silo/current",
-    statBadge: "100 MPH",
-    statColor: "text-amber-400 border-amber-500/40 bg-amber-950/40",
-    fact: "On March 24, 2001, Randy Johnson's 100mph sinker intercepted a flying pigeon. Physicists calculated the probability at 1 in 19,000,000,000!",
-    whimsy: "The umpire officially ruled the pitch 'No Pitch (Fowl Ball)'."
-  },
-  {
-    id: "rickey",
-    title: "Rickey Henderson's Framed Million-Dollar Check",
-    tag: "LORE & LEGENDS",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/115749/headshot/silo/current",
-    statBadge: "1,406 SB",
-    statColor: "text-emerald-400 border-emerald-500/40 bg-emerald-950/40",
-    fact: "Rickey framed his $1,000,000 bonus check on his wall instead of cashing it! The A's accounting office had to call him to balance the team ledger.",
-    whimsy: "'Rickey doesn't need cash, Rickey needs trophies!' - Rickey in 3rd person."
-  },
-  {
-    id: "babe",
-    title: "Babe Ruth Out-Hit 14 Entire Teams (1920)",
-    tag: "HISTORIC POWER",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/121578/headshot/silo/current",
-    statBadge: "54 HR",
-    statColor: "text-pink-400 border-pink-500/40 bg-pink-950/40",
-    fact: "In 1920, Babe Ruth hit 54 home runs—more than 14 out of the 15 other MLB teams hit as an entire 25-man roster that full season!",
-    whimsy: "He also famously ate 12 hot dogs and two quarts of chocolate milk before doubleheaders."
-  },
-  {
-    id: "ellis",
-    title: "Dock Ellis' Outer-Space No-Hitter (1970)",
-    tag: "UNBELIEVABLE",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/113824/headshot/silo/current",
-    statBadge: "0 HITS",
-    statColor: "text-cyan-400 border-cyan-500/40 bg-cyan-950/40",
-    fact: "Pirates pitcher Dock Ellis threw a complete game no-hitter on June 12, 1970, despite claiming he thought the batter's box was flying through deep space.",
-    whimsy: "He walked 8 hitters and hit Richard Nixon's friend, but allowed zero hits all day."
-  },
-  {
-    id: "pizza",
-    title: "Ichiro's 10-Year Pizza & Toast Ritual",
-    tag: "FUN HABITS",
-    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/400085/headshot/silo/current",
-    statBadge: "262 HITS",
-    statColor: "text-blue-400 border-blue-500/40 bg-blue-950/40",
-    fact: "Ichiro set the single-season hit record with 262 hits in 2004. For 10 straight years, he ate the exact same pepperoni pizza and garlic toast before home games.",
-    whimsy: "When asked about pitching, Ichiro replied: 'I can throw 95mph, but I prefer hitting 200 singles.'"
-  }
-];
 
 export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   games = [],
@@ -96,6 +34,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
   const [hotPageIndex, setHotPageIndex] = useState<number>(0);
   const [lorePageIndex, setLorePageIndex] = useState<number>(0);
+  
+  // Track rotation count for each section to shuffle every 2nd rotation
+  const [newsRotations, setNewsRotations] = useState<number>(0);
+  const [hotRotations, setHotRotations] = useState<number>(0);
+  const [loreRotations, setLoreRotations] = useState<number>(0);
 
   // Sort games: Live games first, then scheduled, then final
   const sortedGames = [...games].sort((a, b) => {
@@ -117,36 +60,91 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
   useEffect(() => {
     const interval = setInterval(() => {
-      setLowerTab((prev) => (prev === 'news' ? 'hot' : prev === 'hot' ? 'lore' : 'news'));
+      setLowerTab((prev) => {
+        if (prev === 'news') {
+          setNewsRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'hot';
+        } else if (prev === 'hot') {
+          setHotRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'lore';
+        } else {
+          setLoreRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'news';
+        }
+      });
     }, 11500);
     return () => clearInterval(interval);
   }, []);
 
-  // Rotate News pages every 9.2s
+  // Shuffle function for random ordering
+  const shuffleEntries = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Rotate News pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (newsArticles.length <= 3) return;
     const interval = setInterval(() => {
+      setNewsRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          newsArticles.slice(0, 3).sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [newsArticles.length]);
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
-  // Rotate Hot Hitters every 9.2s
+
+  // Rotate Hot Hitters pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (hotHittersList.length <= 3) return;
     const interval = setInterval(() => {
+      setHotRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          hotHittersList.sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  // Rotate Baseball Lore pages every 9.2s
+  // Rotate Baseball Lore pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (BASEBALL_LORE_ITEMS.length <= 3) return;
     const interval = setInterval(() => {
+      setLoreRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          BASEBALL_LORE_ITEMS.sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setLorePageIndex((prev) => (prev + 1) % Math.ceil(BASEBALL_LORE_ITEMS.length / 3));
-    }, 9200);
+    }, []);
     return () => clearInterval(interval);
   }, []);
 
@@ -349,9 +347,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </button>
             </div>
 
-            <span className="text-[10.5px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold animate-pulse">
-              LIVE FEED
-            </span>
           </div>
 
           <div className="flex-1 overflow-hidden relative">
@@ -378,11 +373,183 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         <div className="flex items-center justify-between text-xs font-mono text-slate-400 mt-1">
                           <span className="text-blue-400 font-bold flex items-center gap-1">
                             <Newspaper className="w-3 h-3" />
-                            {art.publisher || "
+                            {art.publisher || "MLB.com"}
+                          </span>
+                          <span>{art.timeAgo || "Today"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
-... [OUTPUT TRUNCATED - 11,549 chars omitted out of 61,476 total] ...
+              {lowerTab === 'hot' && (
+                /* HOT HITTERS & STATCAST LEADERS */
+                <motion.div
+                  key="hot-mode"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full flex flex-col min-h-0"
+                >
+                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
+                    {(currentHotSlice.length > 0 ? currentHotSlice : [
+                      { personId: 1, name: "Shohei Ohtani", team: "LAD", position: "DH", ops: "1.185", opsSurge: "+0.210", hotReason: "Huge 2-wk surge: +.210 OPS vs season avg • 5 HR, 14 RBI" },
+                      { personId: 2, name: "Aaron Judge", team: "NYY", position: "OF", ops: "1.120", opsSurge: "+0.185", hotReason: "Power spike: +.185 OPS over season avg • 6 HR in L10G" },
+                      { personId: 3, name: "Juan Soto", team: "NYM", position: "OF", ops: "1.085", opsSurge: "+0.165", hotReason: "On-base surge: .485 OBP & +.165 OPS jump in past 14 days" }
+                    ]).map((hitter: any, idx: number) => (
+                      <div key={hitter.personId || idx} className="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {hitter.headshotUrl ? (
+                              <img src={hitter.headshotUrl} alt={hitter.name} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-amber-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-amber-500/40 flex items-center justify-center font-bold text-amber-400 font-mono text-xs shrink-0">
+                                #{idx + 1}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate leading-tight">{hitter.name}</p>
+                              <p className="text-[10px] text-slate-400 font-mono leading-tight">{hitter.team} • {hitter.position || "DH"}</p>
+                            </div>
+                          </div>
 
-             </td>
+                          <div className="text-right shrink-0 font-mono">
+                            <span className="text-xs font-black text-amber-400 block leading-tight">{hitter.ops || "1.050"} OPS</span>
+                            <span className="text-[10px] text-emerald-400 font-bold leading-tight">
+                              {hitter.opsSurge ? (typeof hitter.opsSurge === "number" ? (hitter.opsSurge >= 0 ? `+${hitter.opsSurge.toFixed(3)}` : hitter.opsSurge.toFixed(3)) : hitter.opsSurge) : "+.150"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Detailed Hot Reason Explanation - Compact 2-line layout */}
+                        <div className="bg-amber-950/40 border border-amber-900/50 rounded px-1.5 py-0.5 text-[10px] text-amber-300 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
+                          <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span className="line-clamp-2 leading-tight">{hitter.hotReason || hitter.breakoutNotes || hitter.hotStreak || "Huge 2-week breakout over season baseline"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {lowerTab === 'lore' && (
+                /* BASEBALL LORE, TRIVIA & CURIOSITIES */
+                <motion.div
+                  key="lore-mode"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full flex flex-col min-h-0"
+                >
+                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
+                    {currentLoreSlice.map((item) => (
+                      <div key={item.id} className="bg-slate-950 p-2 rounded-xl border border-purple-900/40 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {item.headshotUrl ? (
+                              <img src={item.headshotUrl} alt={item.title} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0">
+                                ⚾
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate leading-tight">{item.title}</p>
+                              <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider">{item.tag}</span>
+                            </div>
+                          </div>
+
+                          <div className={`px-2 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${item.statColor}`}>
+                            {item.statBadge}
+                          </div>
+                        </div>
+
+                        {/* Fact & Whimsical Quote */}
+                        <div className="bg-purple-950/30 border border-purple-900/40 rounded px-1.5 py-0.5 text-[10px] text-purple-200 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
+                          <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                          <span className="line-clamp-2 leading-tight">{item.whimsy || item.fact}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Right 7 Columns: Featured Live Game Feed, Pitch Tracker & Contextual Matchup / Final Summary Cards */}
+      <div className="col-span-7 flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full">
+        {loadingGame && !gameFeed ? (
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
+            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm font-semibold">Loading Live Pitch Tracker & Game Feed...</p>
+          </div>
+        ) : selectedGame ? (
+          <div className="h-full flex flex-col justify-between space-y-3">
+            {/* Header Title */}
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="flex items-center gap-3">
+                {isLive && <span className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping shrink-0" />}
+                <div>
+                  <h2 className="text-lg font-black text-white flex items-center gap-2">
+                    {selectedGame.teams?.away?.team?.name || "Away Team"}
+                    <span className="text-slate-500 font-normal text-sm">vs</span>
+                    {selectedGame.teams?.home?.team?.name || "Home Team"}
+                  </h2>
+                  <p className="text-xs text-slate-300 font-medium">
+                    {selectedGame.venue?.name || "Stadium"} • Broadcasts: {selectedGame.broadcasts?.[0] || "MLB Network"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 font-mono text-xs">
+                <div className={`px-3 py-1.5 rounded-xl border font-black ${
+                  isLive ? "bg-red-950 text-red-400 border-red-800" : isFinal ? "bg-emerald-950 text-emerald-400 border-emerald-800" : "bg-slate-950 text-blue-400 border-slate-800"
+                }`}>
+                  {isLive ? `INNING: ${gameFeed?.liveData?.linescore?.inningState || "Live"} ${gameFeed?.liveData?.linescore?.currentInningOrdinal || ""}` : isFinal ? "FINAL GAME RESULT" : "UPCOMING GAME"}
+                </div>
+                {isLive && (
+                  <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-200 font-bold">
+                    B: {gameFeed?.liveData?.linescore?.balls ?? 0} | S: {gameFeed?.liveData?.linescore?.strikes ?? 0} | O: {gameFeed?.liveData?.linescore?.outs ?? 0}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Linescore Table */}
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 shadow-inner">
+              <table className="w-full text-center text-xs font-mono">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-800 pb-1.5 text-xs font-bold">
+                    <th className="text-left font-sans text-slate-400 pb-1">TEAM</th>
+                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || [
+                      { num: 1 }, { num: 2 }, { num: 3 }, { num: 4 }, { num: 5 }, { num: 6 }, { num: 7 }, { num: 8 }, { num: 9 }
+                    ]).map((i: any, idx: number) => (
+                      <th key={i.num || idx} className="w-6 pb-1">
+                        {i.num || idx + 1}
+                      </th>
+                    ))}
+                    <th className="w-8 text-amber-400 font-black pb-1 text-sm">R</th>
+                    <th className="w-8 text-slate-200 font-bold pb-1 text-xs">H</th>
+                    <th className="w-8 text-slate-200 font-bold pb-1 text-xs">E</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  <tr>
+                    <td className="text-left py-1.5 font-bold font-sans text-white text-xs sm:text-sm flex items-center gap-2">
+                      <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                      <span className="truncate">{selectedGame.teams?.away?.team?.abbreviation}</span>
+                    </td>
+                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
+                      <td key={i.num || idx} className="text-slate-300 font-semibold">
+                        {i.away?.runs ?? "-"}
+                      </td>
                     ))}
                     <td className="text-amber-400 font-black text-base">{selectedGame.teams?.away?.score ?? 0}</td>
                     <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? 0}</td>
