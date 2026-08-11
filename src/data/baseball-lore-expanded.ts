@@ -512,6 +512,21 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
   }
 ];
 
+const categories = {
+  "FABULOUS FEATS": [],
+  "WILD HISTORY": [],
+  "HISTORIC POWER": [],
+  "UNBELIEVABLE": [],
+  "FUN HABITS": [],
+  "FAMOUS FIRSTS": [],
+  "FAMOUS LASTS": [],
+  "HALL OF FAME LEGEND": [],
+  "PHYSICS BASEBALL": [],
+  "IMPOSSIBLE PHYSICS": [],
+  "SCIENCE FICTION": [],
+  "STATCAST ODDITY": []
+};
+
 for (const [cat, items] of Object.entries(categories)) {
   console.log(`  ${cat}: ${items.length} items`);
 }
