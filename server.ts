@@ -10,6 +10,11 @@ const PORT = 3000;
 app.use(express.static('dist'));
 app.use(express.json());
 
+// SPA routing: catch-all for React Router / Vite history mode
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/index.html'));
+});
+
 // Initialize Gemini client lazily
 let aiClient: GoogleGenAI | null = null;
 function getGenAIClient(): GoogleGenAI | null {
