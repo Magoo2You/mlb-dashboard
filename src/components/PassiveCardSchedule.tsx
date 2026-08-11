@@ -287,11 +287,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </button>
             </div>
 
-            <span className="text-[10.5px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold animate-pulse">
-              LIVE FEED
-            </span>
-          </div>
-
+          <div className="flex-1 overflow-hidden relative">
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               {lowerTab === 'news' && (
