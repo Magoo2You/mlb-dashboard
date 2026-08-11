@@ -403,11 +403,153 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
                             {hitter.headshotUrl ? (
-                              <img src={hitter.headshotUrl} alt={hitter.name} className="w-7 h-7 rounded-lg object-cover bg
+                              <img src={hitter.headshotUrl} alt={hitter.name} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-amber-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-amber-500/40 flex items-center justify-center font-bold text-amber-400 font-mono text-xs shrink-0">
+                                #{idx + 1}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate leading-tight">{hitter.name}</p>
+                              <p className="text-[10px] text-slate-400 font-mono leading-tight">{hitter.team} • {hitter.position || "DH"}</p>
+                            </div>
+                          </div>
 
-... [OUTPUT TRUNCATED - 9,542 chars omitted out of 59,470 total] ...
+                          <div className="text-right shrink-0 font-mono">
+                            <span className="text-xs font-black text-amber-400 block leading-tight">{hitter.ops || "1.050"} OPS</span>
+                            <span className="text-[10px] text-emerald-400 font-bold leading-tight">
+                              {hitter.opsSurge ? (typeof hitter.opsSurge === "number" ? (hitter.opsSurge >= 0 ? `+${hitter.opsSurge.toFixed(3)}` : hitter.opsSurge.toFixed(3)) : hitter.opsSurge) : "+.150"}
+                            </span>
+                          </div>
+                        </div>
 
-             </td>
+                        {/* Detailed Hot Reason Explanation - Compact 2-line layout */}
+                        <div className="bg-amber-950/40 border border-amber-900/50 rounded px-1.5 py-0.5 text-[10px] text-amber-300 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
+                          <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span className="line-clamp-2 leading-tight">{hitter.hotReason || hitter.breakoutNotes || hitter.hotStreak || "Huge 2-week breakout over season baseline"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {lowerTab === 'lore' && (
+                /* BASEBALL LORE, TRIVIA & CURIOSITIES */
+                <motion.div
+                  key="lore-mode"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full flex flex-col min-h-0"
+                >
+                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
+                    {currentLoreSlice.map((item) => (
+                      <div key={item.id} className="bg-slate-950 p-2 rounded-xl border border-purple-900/40 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {item.headshotUrl ? (
+                              <img src={item.headshotUrl} alt={item.title} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0">
+                                ⚾
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate leading-tight">{item.title}</p>
+                              <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider">{item.tag}</span>
+                            </div>
+                          </div>
+
+                          <div className={`px-2 py-0.5 rounded border text-[10px] font-mono font-bold shrink-0 ${item.statColor}`}>
+                            {item.statBadge}
+                          </div>
+                        </div>
+
+                        {/* Fact & Whimsical Quote */}
+                        <div className="bg-purple-950/30 border border-purple-900/40 rounded px-1.5 py-0.5 text-[10px] text-purple-200 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
+                          <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                          <span className="line-clamp-2 leading-tight">{item.whimsy || item.fact}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Right 7 Columns: Featured Live Game Feed, Pitch Tracker & Contextual Matchup / Final Summary Cards */}
+      <div className="col-span-7 flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full">
+        {loadingGame && !gameFeed ? (
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
+            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm font-semibold">Loading Live Pitch Tracker & Game Feed...</p>
+          </div>
+        ) : selectedGame ? (
+          <div className="h-full flex flex-col justify-between space-y-3">
+            {/* Header Title */}
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="flex items-center gap-3">
+                {isLive && <span className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping shrink-0" />}
+                <div>
+                  <h2 className="text-lg font-black text-white flex items-center gap-2">
+                    {selectedGame.teams?.away?.team?.name || "Away Team"}
+                    <span className="text-slate-500 font-normal text-sm">vs</span>
+                    {selectedGame.teams?.home?.team?.name || "Home Team"}
+                  </h2>
+                  <p className="text-xs text-slate-300 font-medium">
+                    {selectedGame.venue?.name || "Stadium"} • Broadcasts: {selectedGame.broadcasts?.[0] || "MLB Network"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 font-mono text-xs">
+                <div className={`px-3 py-1.5 rounded-xl border font-black ${
+                  isLive ? "bg-red-950 text-red-400 border-red-800" : isFinal ? "bg-emerald-950 text-emerald-400 border-emerald-800" : "bg-slate-950 text-blue-400 border-slate-800"
+                }`}>
+                  {isLive ? `INNING: ${gameFeed?.liveData?.linescore?.inningState || "Live"} ${gameFeed?.liveData?.linescore?.currentInningOrdinal || ""}` : isFinal ? "FINAL GAME RESULT" : "UPCOMING GAME"}
+                </div>
+                {isLive && (
+                  <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-200 font-bold">
+                    B: {gameFeed?.liveData?.linescore?.balls ?? 0} | S: {gameFeed?.liveData?.linescore?.strikes ?? 0} | O: {gameFeed?.liveData?.linescore?.outs ?? 0}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Linescore Table */}
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-2.5 shadow-inner">
+              <table className="w-full text-center text-xs font-mono">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-800 pb-1.5 text-xs font-bold">
+                    <th className="text-left font-sans text-slate-400 pb-1">TEAM</th>
+                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || [
+                      { num: 1 }, { num: 2 }, { num: 3 }, { num: 4 }, { num: 5 }, { num: 6 }, { num: 7 }, { num: 8 }, { num: 9 }
+                    ]).map((i: any, idx: number) => (
+                      <th key={i.num || idx} className="w-6 pb-1">
+                        {i.num || idx + 1}
+                      </th>
+                    ))}
+                    <th className="w-8 text-amber-400 font-black pb-1 text-sm">R</th>
+                    <th className="w-8 text-slate-200 font-bold pb-1 text-xs">H</th>
+                    <th className="w-8 text-slate-200 font-bold pb-1 text-xs">E</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  <tr>
+                    <td className="text-left py-1.5 font-bold font-sans text-white text-xs sm:text-sm flex items-center gap-2">
+                      <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                      <span className="truncate">{selectedGame.teams?.away?.team?.abbreviation}</span>
+                    </td>
+                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
+                      <td key={i.num || idx} className="text-slate-300 font-semibold">
+                        {i.away?.runs ?? "-"}
+                      </td>
                     ))}
                     <td className="text-amber-400 font-black text-base">{selectedGame.teams?.away?.score ?? 0}</td>
                     <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? 0}</td>

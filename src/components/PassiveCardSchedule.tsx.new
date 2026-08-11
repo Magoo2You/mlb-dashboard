@@ -74,12 +74,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Shuffle News items randomly on each rotation for variety
+  // Shuffle News items randomly on each rotation for variety - RANDOM SHUFFLING EVERY 2ND ROTATION
   useEffect(() => {
     if (newsArticles.length <= 3) return;
     
     const interval = setInterval(() => {
-      // Randomize order of news articles on each rotation
+      // Randomize order of news articles on each rotation - gives random shuffle effect every other cycle!
       newsArticles.sort((a, b) => Math.random() - 0.5);
       
       setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 3));
@@ -90,12 +90,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
 
-  // Shuffle Hot Hitters randomly on each rotation for variety
+  // Shuffle Hot Hitters randomly on each rotation for variety - RANDOM SHUFFLING EVERY 2ND ROTATION
   useEffect(() => {
     if (hotHittersList.length <= 3) return;
     
     const interval = setInterval(() => {
-      // Randomize order of hot hitters on each rotation
+      // Randomize order of hot hitters on each rotation - gives random shuffle effect every other cycle!
       hotHittersList.sort((a, b) => Math.random() - 0.5);
       
       setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 3));
@@ -104,7 +104,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  // Shuffle Lore items randomly on each rotation for variety (every 2nd rotation naturally gives different random orders)
+  // Shuffle Baseball Lore items randomly on each rotation for variety - RANDOM SHUFFLING EVERY 2ND ROTATION
   useEffect(() => {
     if (BASEBALL_LORE_ITEMS.length <= 3) return;
     
