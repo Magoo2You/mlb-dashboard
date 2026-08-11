@@ -1,0 +1,8 @@
+{
+  "name": "Passive_Screen_MLB Stat Pulse",
+  "description": "Auto-rotating 1920x1080 non-interactive passive screen display with real-time MLB scoreboards, live game feeds, division standings, Statcast physics metrics, and Who's Hot surge analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

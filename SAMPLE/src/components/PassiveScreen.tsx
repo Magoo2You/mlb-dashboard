@@ -291,8 +291,12 @@ export const PassiveScreen: React.FC = () => {
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-          {/* MLB Logo - Proper proportions with aspect ratio preservation */}
-                    <img src="/assets/Major_League_Baseball_logo.svg" alt="MLB Logo" className="w-8 h-auto shrink-0" />
+            <svg className="w-8 h-8 text-blue-500 fill-current shrink-0" viewBox="0 0 500 500">
+              <path fill="#002D62" d="M0,0h500v500H0V0z"/>
+              <path fill="#E31837" d="M250,0h250v500H250V0z"/>
+              <path fill="#FFFFFF" d="M250,75c-96.6,0-175,78.4-175,175s78.4,175,175,175s175-78.4,175-175S346.6,75,250,75z M250,390 c-77.3,0-140-62.7-140-140c0-77.3,62.7-140,140-140s140,62.7,140,140C390,327.3,327.3,390,250,390z"/>
+              <path fill="#FFFFFF" d="M225,140l-25,50h50L225,140z M275,360l25-50h-50L275,360z"/>
+            </svg>
             <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
               Todd's <span className="text-amber-400">MLB Gameday</span>
             </h1>
