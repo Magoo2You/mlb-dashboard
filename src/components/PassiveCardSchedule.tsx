@@ -287,6 +287,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </button>
             </div>
 
+          </div>
+
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               {lowerTab === 'news' && (
