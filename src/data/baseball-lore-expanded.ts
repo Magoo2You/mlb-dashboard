@@ -477,7 +477,11 @@ const categories = {
   "FUN HABITS": [],
   "FAMOUS FIRSTS": [],
   "FAMOUS LASTS": [],
-  "HALL OF FAME LEGEND": []
+  "HALL OF FAME LEGEND": [],
+  "PHYSICS BASEBALL": [],
+  "IMPOSSIBLE PHYSICS": [],
+  "SCIENCE FICTION": [],
+  "STATCAST ODDITY": []
 };
 
 BASEBALL_LORE_ITEMS.forEach(item => {
