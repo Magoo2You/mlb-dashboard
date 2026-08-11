@@ -511,24 +511,3 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     source: "https://en.wikipedia.org/wiki/Robin_Roberts_(baseball)"
   }
 ];
-
-const categories = {
-  "FABULOUS FEATS": [],
-  "WILD HISTORY": [],
-  "HISTORIC POWER": [],
-  "UNBELIEVABLE": [],
-  "FUN HABITS": [],
-  "FAMOUS FIRSTS": [],
-  "FAMOUS LASTS": [],
-  "HALL OF FAME LEGEND": [],
-  "PHYSICS BASEBALL": [],
-  "IMPOSSIBLE PHYSICS": [],
-  "SCIENCE FICTION": [],
-  "STATCAST ODDITY": []
-};
-
-for (const [cat, items] of Object.entries(categories)) {
-  console.log(`  ${cat}: ${items.length} items`);
-}
-
-console.log("\n✅ All items ready for integration!");
