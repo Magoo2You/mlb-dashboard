@@ -34,6 +34,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
   const [hotPageIndex, setHotPageIndex] = useState<number>(0);
   const [lorePageIndex, setLorePageIndex] = useState<number>(0);
+  
+  // Track rotation count for each section to shuffle every 2nd rotation
+  const [newsRotations, setNewsRotations] = useState<number>(0);
+  const [hotRotations, setHotRotations] = useState<number>(0);
+  const [loreRotations, setLoreRotations] = useState<number>(0);
 
   // Sort games: Live games first, then scheduled, then final
   const sortedGames = [...games].sort((a, b) => {
@@ -55,36 +60,91 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
   useEffect(() => {
     const interval = setInterval(() => {
-      setLowerTab((prev) => (prev === 'news' ? 'hot' : prev === 'hot' ? 'lore' : 'news'));
+      setLowerTab((prev) => {
+        if (prev === 'news') {
+          setNewsRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'hot';
+        } else if (prev === 'hot') {
+          setHotRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'lore';
+        } else {
+          setLoreRotations((r) => {
+            const newCount = r + 1;
+            return newCount;
+          });
+          return 'news';
+        }
+      });
     }, 11500);
     return () => clearInterval(interval);
   }, []);
 
-  // Rotate News pages every 9.2s
+  // Shuffle function for random ordering
+  const shuffleEntries = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Rotate News pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (newsArticles.length <= 3) return;
     const interval = setInterval(() => {
+      setNewsRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          newsArticles.slice(0, 3).sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [newsArticles.length]);
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
-  // Rotate Hot Hitters every 9.2s
+
+  // Rotate Hot Hitters pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (hotHittersList.length <= 3) return;
     const interval = setInterval(() => {
+      setHotRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          hotHittersList.sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  // Rotate Baseball Lore pages every 9.2s
+  // Rotate Baseball Lore pages every 9.2s with shuffle every 2nd rotation
   useEffect(() => {
     if (BASEBALL_LORE_ITEMS.length <= 3) return;
     const interval = setInterval(() => {
+      setLoreRotations((prev) => {
+        const newCount = prev + 1;
+        // Shuffle entries every 2nd rotation
+        if (newCount % 2 === 0) {
+          BASEBALL_LORE_ITEMS.sort(() => Math.random() - 0.5);
+        }
+        return newCount;
+      });
       setLorePageIndex((prev) => (prev + 1) % Math.ceil(BASEBALL_LORE_ITEMS.length / 3));
-    }, 9200);
+    }, []);
     return () => clearInterval(interval);
   }, []);
 
