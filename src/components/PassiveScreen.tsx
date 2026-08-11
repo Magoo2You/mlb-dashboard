@@ -292,7 +292,7 @@ export const PassiveScreen: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
           {/* MLB Logo - Proper proportions with aspect ratio preservation */}
-          <img src="/assets/Major_League_Baseball_logo.svg.webp" alt="MLB Logo" className="w-8 h-auto shrink-0" />
+                    {/* MLB Logo - temporarily disabled due to corrupted asset */}
             <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
               Todd's <span className="text-amber-400">MLB Gameday</span>
             </h1>
