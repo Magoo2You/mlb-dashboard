@@ -1,0 +1,55 @@
+# This workflow runs automatically once per day at 3 AM UTC
+# It fetches new lore entries and rebuilds the production bundle
+
+name: Fetch and Build Lore
+
+on:
+  schedule:
+    # Run every day at 3 AM UTC (10 PM EST)
+    - cron: '0 3 * * *'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  
+jobs:
+  fetch-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Fetch new lore entries
+        run: |
+          echo "⏰ Running daily lore fetch at $(date)"
+          node test_lore_accumulator_built_in.js > lore-fetch.log
+          cat lore-fetch.log || true
+        
+      - name: Build production bundle
+        run: npm run build
+      
+      - name: Check for changes
+        id: git-check
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No new lore entries added"
+            exit 0
+          fi
+        
+      - name: Commit and push if changes
+        if: steps.git-check.outputs.has-changes == 'true'
+        run: |
+          git config user.name "mlb-dashboard-lore-bot"
+          git config user.email "bot@mlb-dashboard.com"
+          git add -A
+          git commit -m "chore: automatically fetch new lore entries"
+          git push origin main
