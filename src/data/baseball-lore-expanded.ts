@@ -512,26 +512,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
   }
 ];
 
-// Display summary
-console.log("🏆 BASEBALL LORE COLLECTION - EXPANDED!");
-console.log(`Total Items: ${BASEBALL_LORE_ITEMS.length}`);
-console.log("\nCategories:");
-const categories = {
-  "FABULOUS FEATS": [],
-  "WILD HISTORY": [],
-  "HISTORIC POWER": [],
-  "UNBELIEVABLE": [],
-  "FUN HABITS": [],
-  "FAMOUS FIRSTS": [],
-  "FAMOUS LASTS": [],
-  "HALL OF FAME LEGEND": [],
-  "PHYSICS BASEBALL": [],
-  "IMPOSSIBLE PHYSICS": [],
-  "SCIENCE FICTION": [],
-  "STATCAST ODDITY": []
-};
 
-BASEBALL_LORE_ITEMS.forEach(item => {
   categories[item.tag].push(item.id);
 });
 
