@@ -288,6 +288,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             </div>
 
           <div className="flex-1 overflow-hidden relative">
+          <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               {lowerTab === 'news' && (
                 /* BROADER & LARGER NEWS HEADLINES DISPLAY */
