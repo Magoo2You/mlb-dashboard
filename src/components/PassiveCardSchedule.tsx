@@ -869,7 +869,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </span>
               <p className="text-slate-200 font-semibold truncate flex-1 text-xs sm:text-sm">
                 {isLive
-                  ? (gameFeed?.liveData?.playByPlay?.currentPlay?.result?.description || "In progress - pitch sequence underway...")
+                  {String(gameFeed?.liveData?.playByPlay?.currentPlay?.result?.description || "In progress - pitch sequence underway...")}
                   : isFinal
                   ? `${selectedGame.teams?.away?.team?.name} (${selectedGame.teams?.away?.score}) @ ${selectedGame.teams?.home?.team?.name} (${selectedGame.teams?.home?.score}) - Final`
                   : `First pitch set for ${new Date(selectedGame.gameDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
