@@ -1,0 +1,119 @@
+import React, { useState, useEffect } from "react";
+import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
+import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+
+interface PassiveCardScheduleProps {
+  games: ScheduledGame[];
+  selectedGamePk: number | null;
+  onSelectGame?: (gamePk: number) => void;
+  gameFeed: DetailedGameFeed | null;
+  loadingSchedule: boolean;
+  loadingGame: boolean;
+  newsArticles?: MLBNewsArticle[];
+  hotData?: any;
+  loadingNews?: boolean;
+  loadingHot?: boolean;
+}
+
+const BASEBALL_LORE_ITEMS = [
+  {
+    id: "gaedel",
+    title: "Eddie Gaedel's 3'7\" Strike Zone (1951)",
+    tag: "WILD HISTORY",
+    fact: "St. Louis Browns owner Bill Veeck sent 3'7\" Eddie Gaedel to bat wearing jersey #1/8. His strike zone was 1.5 inches tall! He drew a 4-pitch walk.",
+    whimsy: "MLB banned his contract the next day, but his 1.000 career OBP remains unbroken forever."
+  },
+  {
+    id: "bird",
+    title: "The 1-in-19-Billion Pigeon Fastball (2001)",
+    tag: "STATCAST ODDITY",
+    fact: "On March 24, 2001, Randy Johnson's 100mph sinker intercepted a flying pigeon. Physicists calculated the probability at 1 in 19,000,000,000!",
+    whimsy: "The umpire officially ruled the pitch 'No Pitch (Fowl Ball)'."
+  },
+  {
+    id: "rickey",
+    title: "Rickey Henderson's Framed Million-Dollar Check",
+    tag: "LORE & LEGENDS",
+    fact: "Rickey framed his $1,000,000 bonus check on his wall instead of cashing it! The A's accounting office had to call him to balance the team ledger.",
+    whimsy: "'Rickey doesn't need cash, Rickey needs trophies!' - Rickey in 3rd person."
+  },
+  {
+    id: "babe",
+    title: "Babe Ruth Out-Hit 14 Entire Teams (1920)",
+    tag: "HISTORIC POWER",
+    fact: "In 1920, Babe Ruth hit 54 home runs—more than 14 out of the 15 other MLB teams hit as an entire 25-man roster that full season!",
+    whimsy: "He also famously ate 12 hot dogs and two quarts of chocolate milk before doubleheaders."
+  },
+  {
+    id: "ellis",
+    title: "Dock Ellis' Outer-Space No-Hitter (1970)",
+    tag: "UNBELIEVABLE",
+    fact: "Pirates pitcher Dock Ellis threw a complete game no-hitter on June 12, 1970, despite claiming he thought the batter's box was flying through deep space.",
+    whimsy: "He walked 8 hitters and hit Richard Nixon's friend, but allowed zero hits all day."
+  },
+  {
+    id: "pizza",
+    title: "Ichiro's 10-Year Pizza & Toast Ritual",
+    tag: "FUN HABITS",
+    fact: "Ichiro set the single-season hit record with 262 hits in 2004. For 10 straight years, he ate the exact same pepperoni pizza and garlic toast before home games.",
+    whimsy: "When asked about pitching, Ichiro replied: 'I can throw 95mph, but I prefer hitting 200 singles.'"
+  },
+  {
+    id: "lore-53",
+    title: "Barry Bonds' 'Perfect Game' Attempt (2004)",
+    tag: "HISTORIC POWER",
+    fact: "Bonds went 7-for-7 in a game at one point - but the record says 6-for-6, so there's a discrepancy!",
+    whimsy: "He was also known for wearing his socks inside out.",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/124583/headshot/silo/current"
+  },
+  {
+    id: "lore-54",
+    title: "Ted Williams' 'Perfect Season' Dream",
+    tag: "HISTORIC POWER",
+    fact: "In 1957, Ted Williams hit .406 - becoming only the second player in MLB history to do so.",
+    whimsy: "He once said he'd rather be an astronaut than the best hitter.",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/155972/headshot/silo/current"
+  },
+  {
+    id: "lore-55",
+    title: "Ken Griffey Jr.'s 'Perfect' Retirement Ceremony",
+    tag: "HALL OF FAME LEGEND",
+    fact: "Griffey Jr. retired with a perfect batting average of .301 - the last time he wore his number 24 jersey.",
+    whimsy: "He also famously said 'I'm not going to be here forever, but I will always be here.'",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/119769/headshot/silo/current"
+  },
+  {
+    id: "lore-56",
+    title: "Willie Mays' 'Greatest Catch' Moment (1954)",
+    tag: "WILD HISTORY",
+    fact: "Mays made a spectacular catch in the 1954 World Series that has become one of the greatest plays in baseball history.",
+    whimsy: "He later said it was 'the best play I ever made.'",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/153729/headshot/silo/current"
+  },
+  {
+    id: "lore-57",
+    title: "Hank Aaron's 'Perfect' Retirement (1976)",
+    tag: "HALL OF FAME LEGEND",
+    fact: "Aaron retired with a career batting average of .305 - the second highest in MLB history.",
+    whimsy: "He famously said 'I'm not here to make friends.'",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/135978/headshot/silo/current"
+  }
+];
+
+export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
+  games = [],
+  selectedGamePk,
+  onSelectGame,
+  gameFeed,
+  loadingSchedule,
+  loadingGame,
+  newsArticles = [],
+  hotData,
+  loadingNews = false,
+  loadingHot = false,
+}) => {
+  const [lowerTab, setLowerTab] = useState<'news' | 'hot' | 'lore'>('news');
+  const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
+  const [hotPageIndex, setHotPageIndex] = useState<number>(0);
+  const [lorePageIndex, setLorePageIndex] = useState<number>(0);
