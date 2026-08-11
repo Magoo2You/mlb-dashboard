@@ -26,12 +26,12 @@ async function fetchMLB(url: string) {
   try {
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(id);
-    if (!res.ok) throw new Error(`MLB API returned ${res.status}`);
+    if (!res.ok) return null;
     return await res.json();
   } catch (err) {
     clearTimeout(id);
-    throw err;
-  }
+    return null;
+}
 }
 
 // --- API ENDPOINTS ---
