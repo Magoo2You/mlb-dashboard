@@ -285,7 +285,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                 <span>LORE & CURIOS</span>
               </button>
-          <div className="flex-1 overflow-hidden relative">
+            </div>
+
+              LIVE FEED
+          </div>
+
           <div className="flex-1 overflow-hidden relative">
             <AnimatePresence mode="wait">
               {lowerTab === 'news' && (
