@@ -512,10 +512,6 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
   }
 ];
 
-
-  categories[item.tag].push(item.id);
-});
-
 for (const [cat, items] of Object.entries(categories)) {
   console.log(`  ${cat}: ${items.length} items`);
 }
