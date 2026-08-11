@@ -287,7 +287,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </button>
             </div>
 
-              LIVE FEED
           </div>
 
           <div className="flex-1 overflow-hidden relative">
