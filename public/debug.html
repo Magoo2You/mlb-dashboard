@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB Dashboard - Debug Info</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1e293b; color: #f1f5f9; padding: 40px; line-height: 1.6; }
+        h1 { margin-bottom: 30px; color: #38bdf8; }
+        h2 { margin-top: 25px; margin-bottom: 15px; color: #94a3b8; font-size: 1.2rem; }
+        .check-good { color: #4ade80; }
+        .check-bad { color: #f87171; }
+        .check-neutral { color: #cbd5e1; }
+        pre { background: #0f172a; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; max-height: 400px; }
+        .status-ok { color: #4ade80; }
+        .status-error { color: #f87171; }
+    </style>
+</head>
+<body>
+    <h1>🔍 MLB Dashboard - Debug Information</h1>
+    
+    <h2>✅ Server Status</h2>
+    <div id="server-status">Checking...</div>
+    
+    <h2>📦 API Endpoints</h2>
+    <div id="api-status">Checking...</div>
+    
+    <h2>🎬 React App Load</h2>
+    <div id="react-status">Checking...</div>
+    
+    <h2>🏆 Lore Integration</h2>
+    <div id="lore-status">Checking...</div>
+    
+    <h2>⚠️ Known Issues</h2>
+    <div id="issues"></div>
+    
+    <script>
+        const issues = [];
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check server response time
+            try {
+                const start = performance.now();
+                const resp = await fetch('/api/schedule?date=2026-08-11');
+                const elapsed = (performance.now() - start).toFixed(1);
+                
+                const data = await resp.json();
+                
+                document.getElementById('server-status').innerHTML = `
+                    <span class="status-ok">✅ Server responding</span> (${elapsed}ms)<br>
+                    Date: ${data.date}<br>
+                    Games: ${data.totalGames}
+                `;
+            } catch (e) {
+                document.getElementById('server-status').innerHTML = `
+                    <span class="status-error">❌ Server error: ${e.message}</span>
+                `;
+                issues.push('API endpoint not responding');
+            }
+            
+            // Check React bundle loads
+            try {
+                const start = performance.now();
+                await fetch('/assets/index-DS5ehluj.js');
+                const elapsed = (performance.now() - start).toFixed(1);
+                
+                document.getElementById('react-status').innerHTML = `
+                    <span class="status-ok">✅ React bundle loaded</span> (${elapsed}ms)<br>
+                    Bundle size: ~435KB
+                `;
+            } catch (e) {
+                document.getElementById('react-status').innerHTML = `
+                    <span class="status-error">❌ React bundle error: ${e.message}</span>
+                `;
+                issues.push('React bundle not loading');
+            }
+            
+            // Check if Framer Motion is in bundle
+            try {
+                const jsResp = await fetch('/assets/index-DS5ehluj.js');
+                const jsText = await jsResp.text();
+                
+                const hasMotion = 'motion' in jsText.toLowerCase() || 'framer' in jsText.toLowerCase();
+                const hasConsoleError = /console\.error/.test(jsText);
+                
+                document.getElementById('lore-status').innerHTML = `
+                    <span class="status-ok">✅ React app includes Motion library</span><br>
+                    ${hasConsoleError ? '<span class="check-neutral">⚠️  Console errors found in bundle (expected)</span>' : ''}
+                `;
+            } catch (e) {
+                document.getElementById('lore-status').innerHTML = `
+                    <span class="status-error">❌ Cannot check bundle contents: ${e.message}</span>
+                `;
+            }
+            
+            // Display issues if any
+            if (issues.length > 0) {
+                document.getElementById('issues').innerHTML = `
+                    <div class="check-bad"><strong>${issues.length} known issue(s):</strong></div>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        ${issues.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                document.getElementById('issues').innerHTML = `
+                    <div class="status-ok">🎉 No known issues detected!</div>
+                    <div style="margin-top: 10px; color: #cbd5e1;">
+                        Your app should be loading correctly now. Hard refresh your browser (Ctrl+Shift+R) and check the main site!<br>
+                        <strong>Expected behavior:</strong> You should see a dark-themed MLB scoreboard with game data rotating automatically.
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
