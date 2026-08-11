@@ -6,6 +6,8 @@ import { GoogleGenAI } from "@google/genai";
 const app = express();
 const PORT = 3000;
 
+// Serve static files from dist/ directory (Vite build output)
+app.use(express.static('dist'));
 app.use(express.json());
 
 // Initialize Gemini client lazily
