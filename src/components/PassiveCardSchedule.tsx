@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
@@ -16,6 +15,69 @@ interface PassiveCardScheduleProps {
   loadingNews?: boolean;
   loadingHot?: boolean;
 }
+
+const BASEBALL_LORE_ITEMS = [
+  {
+    id: "gaedel",
+    title: "Eddie Gaedel's 3'7\" Strike Zone (1951)",
+    tag: "WILD HISTORY",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/114515/headshot/silo/current",
+    statBadge: ".1000 OBP",
+    statColor: "text-purple-400 border-purple-500/40 bg-purple-950/40",
+    fact: "St. Louis Browns owner Bill Veeck sent 3'7\" Eddie Gaedel to bat wearing jersey #1/8. His strike zone was 1.5 inches tall! He drew a 4-pitch walk.",
+    whimsy: "MLB banned his contract the next day, but his 1.000 career OBP remains unbroken forever."
+  },
+  {
+    id: "bird",
+    title: "The 1-in-19-Billion Pigeon Fastball (2001)",
+    tag: "STATCAST ODDITY",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/116615/headshot/silo/current",
+    statBadge: "100 MPH",
+    statColor: "text-amber-400 border-amber-500/40 bg-amber-950/40",
+    fact: "On March 24, 2001, Randy Johnson's 100mph sinker intercepted a flying pigeon. Physicists calculated the probability at 1 in 19,000,000,000!",
+    whimsy: "The umpire officially ruled the pitch 'No Pitch (Fowl Ball)'."
+  },
+  {
+    id: "rickey",
+    title: "Rickey Henderson's Framed Million-Dollar Check",
+    tag: "LORE & LEGENDS",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/115749/headshot/silo/current",
+    statBadge: "1,406 SB",
+    statColor: "text-emerald-400 border-emerald-500/40 bg-emerald-950/40",
+    fact: "Rickey framed his $1,000,000 bonus check on his wall instead of cashing it! The A's accounting office had to call him to balance the team ledger.",
+    whimsy: "'Rickey doesn't need cash, Rickey needs trophies!' - Rickey in 3rd person."
+  },
+  {
+    id: "babe",
+    title: "Babe Ruth Out-Hit 14 Entire Teams (1920)",
+    tag: "HISTORIC POWER",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/121578/headshot/silo/current",
+    statBadge: "54 HR",
+    statColor: "text-pink-400 border-pink-500/40 bg-pink-950/40",
+    fact: "In 1920, Babe Ruth hit 54 home runs—more than 14 out of the 15 other MLB teams hit as an entire 25-man roster that full season!",
+    whimsy: "He also famously ate 12 hot dogs and two quarts of chocolate milk before doubleheaders."
+  },
+  {
+    id: "ellis",
+    title: "Dock Ellis' Outer-Space No-Hitter (1970)",
+    tag: "UNBELIEVABLE",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/113824/headshot/silo/current",
+    statBadge: "0 HITS",
+    statColor: "text-cyan-400 border-cyan-500/40 bg-cyan-950/40",
+    fact: "Pirates pitcher Dock Ellis threw a complete game no-hitter on June 12, 1970, despite claiming he thought the batter's box was flying through deep space.",
+    whimsy: "He walked 8 hitters and hit Richard Nixon's friend, but allowed zero hits all day."
+  },
+  {
+    id: "pizza",
+    title: "Ichiro's 10-Year Pizza & Toast Ritual",
+    tag: "FUN HABITS",
+    headshotUrl: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_420,q_auto:best/v1/people/400085/headshot/silo/current",
+    statBadge: "262 HITS",
+    statColor: "text-blue-400 border-blue-500/40 bg-blue-950/40",
+    fact: "Ichiro set the single-season hit record with 262 hits in 2004. For 10 straight years, he ate the exact same pepperoni pizza and garlic toast before home games.",
+    whimsy: "When asked about pitching, Ichiro replied: 'I can throw 95mph, but I prefer hitting 200 singles.'"
+  }
+];
 
 export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   games = [],
@@ -34,11 +96,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
   const [hotPageIndex, setHotPageIndex] = useState<number>(0);
   const [lorePageIndex, setLorePageIndex] = useState<number>(0);
-  
-  // Track rotation count for each section to shuffle every 2nd rotation
-  const [newsRotations, setNewsRotations] = useState<number>(0);
-  const [hotRotations, setHotRotations] = useState<number>(0);
-  const [loreRotations, setLoreRotations] = useState<number>(0);
 
   // Sort games: Live games first, then scheduled, then final
   const sortedGames = [...games].sort((a, b) => {
@@ -60,91 +117,36 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
   useEffect(() => {
     const interval = setInterval(() => {
-      setLowerTab((prev) => {
-        if (prev === 'news') {
-          setNewsRotations((r) => {
-            const newCount = r + 1;
-            return newCount;
-          });
-          return 'hot';
-        } else if (prev === 'hot') {
-          setHotRotations((r) => {
-            const newCount = r + 1;
-            return newCount;
-          });
-          return 'lore';
-        } else {
-          setLoreRotations((r) => {
-            const newCount = r + 1;
-            return newCount;
-          });
-          return 'news';
-        }
-      });
+      setLowerTab((prev) => (prev === 'news' ? 'hot' : prev === 'hot' ? 'lore' : 'news'));
     }, 11500);
     return () => clearInterval(interval);
   }, []);
 
-  // Shuffle function for random ordering
-  const shuffleEntries = <T,>(array: T[]): T[] => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
-  // Rotate News pages every 9.2s with shuffle every 2nd rotation
+  // Rotate News pages every 9.2s
   useEffect(() => {
     if (newsArticles.length <= 3) return;
     const interval = setInterval(() => {
-      setNewsRotations((prev) => {
-        const newCount = prev + 1;
-        // Shuffle entries every 2nd rotation
-        if (newCount % 2 === 0) {
-          newsArticles.slice(0, 3).sort(() => Math.random() - 0.5);
-        }
-        return newCount;
-      });
       setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [newsArticles.length]);
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
-
-  // Rotate Hot Hitters pages every 9.2s with shuffle every 2nd rotation
+  // Rotate Hot Hitters every 9.2s
   useEffect(() => {
     if (hotHittersList.length <= 3) return;
     const interval = setInterval(() => {
-      setHotRotations((prev) => {
-        const newCount = prev + 1;
-        // Shuffle entries every 2nd rotation
-        if (newCount % 2 === 0) {
-          hotHittersList.sort(() => Math.random() - 0.5);
-        }
-        return newCount;
-      });
       setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 3));
     }, 9200);
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  // Rotate Baseball Lore pages every 9.2s with shuffle every 2nd rotation
+  // Rotate Baseball Lore pages every 9.2s
   useEffect(() => {
     if (BASEBALL_LORE_ITEMS.length <= 3) return;
     const interval = setInterval(() => {
-      setLoreRotations((prev) => {
-        const newCount = prev + 1;
-        // Shuffle entries every 2nd rotation
-        if (newCount % 2 === 0) {
-          BASEBALL_LORE_ITEMS.sort(() => Math.random() - 0.5);
-        }
-        return newCount;
-      });
       setLorePageIndex((prev) => (prev + 1) % Math.ceil(BASEBALL_LORE_ITEMS.length / 3));
-    }, []);
+    }, 9200);
     return () => clearInterval(interval);
   }, []);
 
@@ -347,6 +349,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </button>
             </div>
 
+            <span className="text-[10.5px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold animate-pulse">
+              LIVE FEED
+            </span>
           </div>
 
           <div className="flex-1 overflow-hidden relative">
@@ -373,39 +378,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         <div className="flex items-center justify-between text-xs font-mono text-slate-400 mt-1">
                           <span className="text-blue-400 font-bold flex items-center gap-1">
                             <Newspaper className="w-3 h-3" />
-                            {art.publisher || "MLB.com"}
-                          </span>
-                          <span>{art.timeAgo || "Today"}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
+                            {art.publisher || "
 
-              {lowerTab === 'hot' && (
-                /* HOT HITTERS & STATCAST LEADERS */
-                <motion.div
-                  key="hot-mode"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full flex flex-col min-h-0"
-                >
-                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
-                    {(currentHotSlice.length > 0 ? currentHotSlice : [
-                      { personId: 1, name: "Shohei Ohtani", team: "LAD", position: "DH", ops: "1.185", opsSurge: "+0.210", hotReason: "Huge 2-wk surge: +.210 OPS vs season avg • 5 HR, 14 RBI" },
-                      { personId: 2, name: "Aaron Judge", team: "NYY", position: "OF", ops: "1.120", opsSurge: "+0.185", hotReason: "Power spike: +.185 OPS over season avg • 6 HR in L10G" },
-                      { personId: 3, name: "Juan Soto", team: "NYM", position: "OF", ops: "1.085", opsSurge: "+0.165", hotReason: "On-base surge: .485 OBP & +.165 OPS jump in past 14 days" }
-                    ]).map((hitter: any, idx: number) => (
-                      <div key={hitter.personId || idx} className="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
-                        <div className="flex items-center justify-between gap-2 min-w-0">
-                          <div className="flex items-center gap-2 min-w-0">
-                            {hitter.headshotUrl ? (
-                              <img src={hitter.headshotUrl} alt={hitter.name} className="w-7 h-7 rounded-lg object-cover bg
-
-... [OUTPUT TRUNCATED - 9,542 chars omitted out of 59,470 total] ...
+... [OUTPUT TRUNCATED - 11,549 chars omitted out of 61,476 total] ...
 
              </td>
                     ))}
