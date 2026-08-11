@@ -1,0 +1,129 @@
+export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
+  games = [],
+  selectedGamePk,
+  onSelectGame,
+  gameFeed,
+  loadingSchedule,
+  loadingGame,
+  newsArticles = [],
+  hotData,
+  loadingNews = false,
+  loadingHot = false,
+}) => {
+  // Lower box active tab: 'news' | 'hot' | 'lore'
+  const [lowerTab, setLowerTab] = useState<'news' | 'hot' | 'lore'>('news');
+  const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
+  const [hotPageIndex, setHotPageIndex] = useState<number>(0);
+  const [lorePageIndex, setLorePageIndex] = useState<number>(0);
+
+  // Sort games: Live games first, then scheduled, then final
+  const sortedGames = [...games].sort((a, b) => {
+    const isALive = a?.status?.abstractGameState === "Live" || a?.status?.detailedState === "In Progress";
+    const isBLive = b?.status?.abstractGameState === "Live" || b?.status?.detailedState === "In Progress";
+    if (isALive && !isBLive) return -1;
+    if (!isALive && isBLive) return 1;
+    return 0;
+  });
+
+  // Calculate 2-game page index based on selectedGamePk
+  const selectedIdx = sortedGames.findIndex((g) => g?.gamePk === selectedGamePk);
+  const activeIdx = selectedIdx >= 0 ? selectedIdx : 0;
+  const pageIndex = Math.floor(activeIdx / 2);
+
+  // Games for current page
+  const visibleGames = sortedGames.slice(pageIndex * 2, pageIndex * 2 + 2);
+
+  // Shuffle function - Fisher-Yates algorithm (returns new shuffled array without mutating original)
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLowerTab((prev) => {
+        if (prev === 'news') return 'hot';
+        else if (prev === 'hot') return 'lore';
+        else return 'news';
+      });
+    }, 11500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Rotate News pages every 9.2s with shuffle every 2nd rotation
+  useEffect(() => {
+    if (newsArticles.length <= 3) return;
+    
+    // Get all possible news slices (groups of 3)
+    const numSlices = Math.ceil(newsArticles.length / 3);
+    const allNewsSlices: any[][] = [];
+    for (let i = 0; i < numSlices; i++) {
+      allNewsSlices.push(newsArticles.slice(i * 3, (i + 1) * 3));
+    }
+
+    // Shuffle and pick one slice every rotation
+    useEffect(() => {
+      if (newsArticles.length <= 3) return;
+      
+      const interval = setInterval(() => {
+        // Every rotation: shuffle all available slices and pick one randomly
+        const shuffledSlices = shuffleArray(allNewsSlices);
+        const randomSliceIndex = Math.floor(Math.random() * shuffledSlices.length);
+        setNewsPageIndex(randomSliceIndex);
+      }, 9200);
+      
+      return () => clearInterval(interval);
+    }, [newsArticles.length, allNewsSlices]);
+
+  }, [newsArticles.length]);
+
+  const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
+
+  // Rotate Hot Hitters pages every 9.2s with shuffle every 2nd rotation
+  useEffect(() => {
+    if (hotHittersList.length <= 3) return;
+    
+    const numSlices = Math.ceil(hotHittersList.length / 3);
+    const allHotSlices: any[][] = [];
+    for (let i = 0; i < numSlices; i++) {
+      allHotSlices.push(hotHittersList.slice(i * 3, (i + 1) * 3));
+    }
+
+    const interval = setInterval(() => {
+      if (hotHittersList.length <= 3) return;
+      
+      // Shuffle and pick a random slice
+      const shuffledSlices = shuffleArray(allHotSlices);
+      const randomSliceIndex = Math.floor(Math.random() * shuffledSlices.length);
+      setHotPageIndex(randomSliceIndex);
+    }, 9200);
+    
+    return () => clearInterval(interval);
+  }, [hotHittersList.length]);
+
+  // Rotate Baseball Lore pages every 9.2s with shuffle every 2nd rotation
+  useEffect(() => {
+    if (BASEBALL_LORE_ITEMS.length <= 3) return;
+    
+    const numSlices = Math.ceil(BASEBALL_LORE_ITEMS.length / 3);
+    const allLoreSlices: any[][] = [];
+    for (let i = 0; i < numSlices; i++) {
+      allLoreSlices.push(BASEBALL_LORE_ITEMS.slice(i * 3, (i + 1) * 3));
+    }
+
+    const interval = setInterval(() => {
+      if (BASEBALL_LORE_ITEMS.length <= 3) return;
+      
+      // Shuffle and pick a random slice each time
+      const shuffledSlices = shuffleArray(allLoreSlices);
+      const randomSliceIndex = Math.floor(Math.random() * shuffledSlices.length);
+      setLorePageIndex(randomSliceIndex);
+    }, 9200);
+    
+    return () => clearInterval(interval);
+  }, []);
