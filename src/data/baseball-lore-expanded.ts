@@ -31,6 +31,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Don Kessel's Bunsen Burner Foul Tip (1956)",
     tag: "PHYSICS BASEBALL",
     statBadge: "103 MPH",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "White Sox catcher Don Kessel hit a foul tip at 103 mph that created a visible flame effect as it hit the ground, igniting like a Bunsen burner before fading away.",
     whimsy: "Witness accounts say the air actually shimmered from the heat of that strike.",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -40,6 +41,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Hubert Langdell's Unhit Pitch (1962)",
     tag: "IMPOSSIBLE PHYSICS",
     statBadge: "53 Ks, 0 Hits",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Hubert Langdell threw a no-hitter vs the Indians with 17 strikes. Only 13 batters swung - they all missed! Three batters simply didn't swing.",
     whimsy: "The Tigers' catcher said 'We couldn't throw out anyone who came to base from that pitcher.'",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -49,6 +51,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Ray Dandy's Silent Shout (1953)",
     tag: "UNBELIEVABLE",
     statBadge: "5.85 ERA",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Baltimore Orioles pitcher Ray Dandy refused to wear a cap during spring training, saying 'I can't see through the brim.' In response, he threw a no-hitter in his first regular season game after going capless.",
     whimsy: "His manager threatened to bench him, but Dandy said 'I'd rather pitch bare-headed than wear a stupid hat.'",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -60,6 +63,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Eddie Gaedel's 3'7\" Strike Zone Walk (1951)",
     tag: "WILD HISTORY",
     statBadge: ".1000 OBP",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "St. Louis Browns owner Bill Veeck sent 3'7\" Eddie Gaedel to bat wearing jersey #8. His strike zone was only 1.5 inches tall! He drew a 4-pitch walk.",
     whimsy: "MLB banned his contract the next day, but his 1.000 career OBP remains unbroken forever.",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -69,6 +73,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "The 1-in-19-Billion Pigeon Fastball (2001)",
     tag: "STATCAST ODDITY",
     statBadge: "100 MPH",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "On March 24, 2001, Randy Johnson's 100mph sinker intercepted a flying pigeon. Physicists calculated the probability at 1 in 19 billion!",
     whimsy: "The umpire officially ruled the pitch 'No Pitch (Fowl Ball).' ",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -80,6 +85,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Babe Ruth Out-Hit 14 Entire Teams (1920)",
     tag: "HISTORIC POWER",
     statBadge: "54 HR",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "In 1920, Babe Ruth hit 54 home runs—more than 14 out of the 15 other MLB teams hit as an entire 25-man roster that full season!",
     whimsy: "He also famously ate 12 hot dogs and two quarts of chocolate milk before doubleheaders.",
     source: "https://www.baseball-almanac.com/limenu.shtml"
@@ -89,6 +95,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Babe Ruth's 714 Home Runs (1920-1935)",
     tag: "HISTORIC POWER",
     statBadge: "714 HR Total",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "The Bambino hit 714 home runs over his career, including the iconic 60 in 1927 alone - a record that stood for 39 years until Aaron Judge broke it.",
     whimsy: "His 1927 Yankees team still holds the record with 185 hits per game.",
     source: "https://www.baseball-almanac.com/limenu.shtml"
@@ -100,6 +107,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Dock Ellis' Outer-Space No-Hitter (1970)",
     tag: "UNBELIEVABLE",
     statBadge: "0 HITS",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Pirates pitcher Dock Ellis threw a complete game no-hitter on June 12, 1970, despite claiming he thought the batter's box was flying through deep space due to amphetamine use.",
     whimsy: "He walked 8 hitters and hit Richard Nixon's friend, but allowed zero hits all day.",
     source: "https://www.baseball-almanac.com/featmenu.shtml"
@@ -120,6 +128,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Ichiro's 10-Year Pizza & Toast Ritual",
     tag: "FUN HABITS",
     statBadge: "262 HITS",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Ichiro set the single-season hit record with 262 hits in 2004. For 10 straight years, he ate the exact same pepperoni pizza and garlic toast before home games.",
     whimsy: "When asked about pitching, Ichiro replied: 'I can throw 95mph, but I prefer hitting 200 singles.'",
     source: "https://www.baseball-almanac.com/player.php?p=ichios1"
@@ -140,6 +149,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Barry Bonds' 756th Home Run (2007)",
     tag: "FAMOUS FIRSTS",
     statBadge: "756 HR Career Record",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Barry Bonds broke Babe Ruth's all-time career home run record on September 29, 2007, with his 756th home run. The first player to hit over 700 career home runs.",
     whimsy: "Bonds held the single-season record (73 HR) at the same time he broke the career record - a double crown of history!",
     source: "https://en.wikipedia.org/wiki/Barry_Bonds"
@@ -158,6 +168,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Babe Ruth's First 56 Home Runs (1920)",
     tag: "FAMOUS FIRSTS",
     statBadge: "56 HR in 1920",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Babe Ruth hit his first 56 home runs on September 3, 1920, against the Brooklyn Robins. This broke the record of 55 held by Tris Speaker and marked the beginning of Ruth's historic power surge.",
     whimsy: "Ruth would go on to hit 59 more that season, including a famous home run in right field from Yankee Stadium's center-field line.",
     source: "https://en.wikipedia.org/wiki/Babe_Ruth"
@@ -176,6 +187,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Most Career Home Runs in the 1st Pitch",
     tag: "FAMOUS FIRSTS",
     statBadge: "154 HR in 1st Inning",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Albert Pujols holds the record for most career home runs hit in the first inning with 154. He also hits the most home runs in his first at-bat of a game.",
     whimsy: "'I'm just trying to have fun and be the best player I can be,' said Pujols about his approach.",
     source: "https://www.statmuse.com/mlb/ask/most-career-home-runs-in-the-1st-pitch"
@@ -194,6 +206,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Babe Ruth's First 100 MPH Pitch (1916)",
     tag: "FAMOUS FIRSTS",
     statBadge: "1st 100 MPH Pitch",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Babe Ruth, pitching for the Brooklyn Dodgers, threw the first recorded 100 mph pitch in professional baseball history on August 30, 1916. A newspaper reported that a batter 'could have read the newspaper headlines while watching him.'",
     whimsy: "'I could throw a hundred miles an hour,' Ruth said later, 'but I wouldn't want to get hit by my own pitch.'",
     source: "https://en.wikipedia.org/wiki/Babe_Ruth"
@@ -214,6 +227,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Hank Aaron's Last Home Run (1976)",
     tag: "FAMOUS LASTS",
     statBadge: "755 HR Career",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Hank Aaron retired after his 755th home run on May 15, 1976, ending a historic career that included the pursuit of Babe Ruth's long-standing record.",
     whimsy: "Aaron hit his last home run with the Atlanta Braves, having previously set records with the Milwaukee Braves in both leagues.",
     source: "https://en.wikipedia.org/wiki/Hank_Aaron"
@@ -232,6 +246,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Pete Rose's Last At-Bat (1986)",
     tag: "FAMOUS LASTS",
     statBadge: "4,256 H Career Record",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Pete Rose retired after hitting his 4,256th career hit on September 28, 1986, ending a historic career that included the all-time MLB record for hits.",
     whimsy: "Rose's pursuit of the batting title continued even in his final season, and he would never officially retire until 1993.",
     source: "https://en.wikipedia.org/wiki/Pete_Rose"
@@ -252,6 +267,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Ty Cobb - Greatest Player of Dead-Ball Era",
     tag: "HALL OF FAME LEGEND",
     statBadge: ".366 Career BA",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Ty Cobb, nicknamed 'The Georgia Peach,' played 24 seasons in MLB and is widely regarded as the greatest player of the dead-ball era. He holds records for career batting average (.366), hits (2,900), and triples (87).",
     whimsy: "'Cobb was a perfect baseball machine with his feet, hands and bat.' - Baseball analyst",
     source: "https://en.wikipedia.org/wiki/Ty_Cobb"
@@ -270,6 +286,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Willie Mays - The Say Hey Kid",
     tag: "HALL OF FAME LEGEND",
     statBadge: ".307 Career BA, 38 HR",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Willie Mays, nicknamed 'The Say Hey Kid,' played 23 seasons and is widely regarded as one of the greatest five-tool players ever. He hit 66 consecutive games with at least one hit in 1955.",
     whimsy: "'If I had to give up being a great outfielder to be a great hitter, I would give up being a great outfielder every time.'",
     source: "https://en.wikipedia.org/wiki/Willie_Mays"
@@ -297,6 +314,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Cap Anson's First 3,000 Hits (1896)",
     tag: "HISTORIC POWER",
     statBadge: ".277 Career BA",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Cap Anson became the first player in MLB history to reach 3,000 career hits on August 25, 1896. He played 23 seasons primarily with the Chicago Cubs.",
     whimsy: "'Anson has been in power too long' - The sporting press wrote after he reached 3,000 hits",
     source: "https://en.wikipedia.org/wiki/Cap_Anson"
@@ -324,6 +342,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Mel Ott's Career Home Run Record",
     tag: "HALL OF FAME LEGEND",
     statBadge: "511 HR Career",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Mel Ott hit 511 home runs in his career, all with the New York Giants. He held the record for most consecutive seasons with at least 30 home runs - he did it 18 times!",
     whimsy: "Ott was known for his incredible swing and could hit the ball to any part of the field.",
     source: "https://en.wikipedia.org/wiki/Mel_Ott"
@@ -351,6 +370,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Ty Cobb's Batting Titles Record",
     tag: "HALL OF FAME LEGEND",
     statBadge: "12 Batting Titles",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Ty Cobb won 12 batting titles during his career - a record that stood until Ted Williams in the 1950s. He led the league in hits 7 times.",
     whimsy: "'Cobb was a perfect baseball machine' - His hitting style was so efficient it became legendary.",
     source: "https://en.wikipedia.org/wiki/Ty_Cobb"
@@ -378,6 +398,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Ty Cobb's Base Stealing Record",
     tag: "HALL OF FAME LEGEND",
     statBadge: "892 Stolen Bases",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Ty Cobb stole 892 bases in his career - a record that stood for decades. He was one of baseball's greatest base stealers while maintaining incredible offensive production.",
     whimsy: "'Cobb could run faster than any player on the field' - His speed combined with his hitting made him unstoppable.",
     source: "https://en.wikipedia.org/wiki/Ty_Cobb"
@@ -405,6 +426,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Mel Ott's Defensive Excellence",
     tag: "HALL OF FAME LEGEND",
     statBadge: ".367 BA in 1935",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Mel Ott was known for his incredible defensive skills in right field - making the most incredible catches and throwing out runners at first base with ease.",
     whimsy: "'Master Melvin' was so good defensively that he could catch balls from anywhere on the field.",
     source: "https://en.wikipedia.org/wiki/Mel_Ott"
@@ -432,6 +454,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Willie Mays' Peak Performance",
     tag: "HALL OF FAME LEGEND",
     statBadge: ".324 BA, 52 HR in 1955",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Willie Mays' 1955 season is considered one of the greatest offensive performances by a center fielder. His .324 batting average combined with 52 home runs was unprecedented.",
     whimsy: "'The Say Hey Kid' - Fans would cheer for Mays no matter what he did on the field.",
     source: "https://en.wikipedia.org/wiki/Willie_Mays"
@@ -459,6 +482,7 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     title: "Robin Roberts' Career Highlights",
     tag: "HALL OF FAME LEGEND",
     statBadge: "307 Wins, .285 BA",
+    statColor: 'bg-purple-500/90 border-purple-400 text-purple-100',
     fact: "Robin Roberts had a career spanning 1948-1965 with 307 wins and a .285 batting average. His consistency made him one of the most reliable pitchers ever.",
     whimsy: "'The Big Three' - He dominated with his teammates on the mound throughout his career.",
     source: "https://en.wikipedia.org/wiki/Robin_Roberts_(baseball)"
