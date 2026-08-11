@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { BASEBALL_LORE_ITEMS } from "@/data/baseball-lore-expanded";
+import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
@@ -16,16 +16,6 @@ interface PassiveCardScheduleProps {
   loadingNews?: boolean;
   loadingHot?: boolean;
 }
-
-import { BASEBALL_LORE_ITEMS } from "@/data/baseball-lore-expanded";
-
-const BASEBALL_LORE_ITEMS = [
-  // Generated from Baseball Almanac legendary categories:
-  // - Fabulous Feats (https://www.baseball-almanac.com/featmenu.shtml)
-  // - Famous Firsts/Lasts (https://www.baseball-almanac.com/frstmenu.shtml)  
-  // - Hall of Fame Legends (https://www.baseball-almanac.com/hofmenu.shtml)
-  // - Wild History & Historic Power records
-];
 
 export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   games = [],
