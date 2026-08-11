@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { BASEBALL_LORE_ITEMS } from "@/data/baseball-lore-expanded";
+import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
