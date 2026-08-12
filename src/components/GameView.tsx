@@ -367,7 +367,7 @@ export const GameView: React.FC<GameViewProps> = ({
                         </div>
                         {batter?.batSide && (
                           <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-                            BATS: {batter.batSide.code || batter.batSide.description || "R"}
+                            BATS: {String(batter.batSide?.code) || String(batter.batSide?.description) || "R"}
                           </span>
                         )}
                       </div>
@@ -487,7 +487,7 @@ export const GameView: React.FC<GameViewProps> = ({
                         </div>
                         {pitcher?.pitchHand && (
                           <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-                            THROWS: {pitcher.pitchHand.code || pitcher.pitchHand.description || "R"}
+                            THROWS: {String(pitcher.pitchHand?.code) || String(pitcher.pitchHand?.description) || "R"}
                           </span>
                         )}
                       </div>
