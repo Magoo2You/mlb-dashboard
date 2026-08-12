@@ -696,7 +696,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                                 {sp.batter?.fullName || "Scoring Play"}
                               </span>
                               <span className="text-amber-400 font-bold truncate text-[11px] max-w-[130px]">
-                                {String(sp.event || (typeof sp.description === 'string' ? sp.description.slice(0, 22) : (sp.description?.description || "Score")))}
+                                {String(sp.event || String(sp.description) || "Score")}
                               </span>
                             </div>
                           ))
