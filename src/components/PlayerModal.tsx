@@ -92,7 +92,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) =
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 mt-2 font-mono">
                   <span>Age: {profile.currentAge || "-"}</span>
-                  <span>B/T: {profile.batSide?.code || "-"}/{profile.pitchHand?.code || "-"}</span>
+                  <span>B/T: {String(profile.batSide?.code) || "-"}/{String(profile.pitchHand?.code) || "-"}</span>
                   <span>H/W: {profile.height || "-"}, {profile.weight ? `${profile.weight} lbs` : "-"}</span>
                   <span>Debut: {profile.mlbDebutDate || "-"}</span>
                 </div>
