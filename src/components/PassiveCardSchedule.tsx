@@ -554,7 +554,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <Target className="w-3.5 h-3.5 text-blue-400" /> AT BAT
                         </span>
                         <span className="text-xs font-mono text-slate-300 font-bold">
-                          {liveBatter?.batSide || "L"} | {liveBatter?.primaryPosition || "DH"}
+                          {String(liveBatter?.batSide?.code || liveBatter?.batSide?.description || liveBatter?.batSide || "L")} | {String(liveBatter?.primaryPosition?.abbreviation || liveBatter?.primaryPosition?.code || liveBatter?.primaryPosition || "DH")}
                         </span>
                       </div>
 
@@ -591,7 +591,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <Zap className="w-3.5 h-3.5 text-red-400" /> PITCHING
                         </span>
                         <span className="text-xs font-mono text-slate-300 font-bold">
-                          {livePitcher?.pitchHand || "RHP"}
+                          {String(livePitcher?.pitchHand?.code || livePitcher?.pitchHand?.description || livePitcher?.pitchHand || "RHP")}
                         </span>
                       </div>
 
