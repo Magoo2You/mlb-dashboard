@@ -575,13 +575,151 @@ const RETAINED_LORE_ITEMS: RetainedLoreItem[] = [
 ];
 
 /**
- * These historical entries are retained for rollback, but none is promoted to
- * verified trivia until its individual claim and source are reviewed.
+ * These historical entries are retained for rollback, but remain unverified
+ * unless their individual claim and source have been reviewed.
  */
-export const BASEBALL_LORE_ITEMS: LoreItem[] = RETAINED_LORE_ITEMS.map((item) => ({
-  ...item,
-  verificationStatus: "reviewed-unverified",
-  provenance: "Retained legacy static entry; source URL preserved, claim-specific verification pending.",
-}));
+const VERIFIED_LORE_ITEMS: LoreItem[] = [
+  {
+    id: "record-ichiro-262",
+    title: "Ichiro's 262-Hit Season",
+    tag: "MLB RECORD",
+    statBadge: "262 hits",
+    fact: "Ichiro Suzuki set the MLB single-season record with 262 hits for Seattle in 2004.",
+    whimsy: "He did it with 704 at-bats while playing every game of the 162-game season.",
+    source: "https://www.mlb.com/news/ichiro-s-season-hit-record-may-be-unbreakable-c275212644",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against MLB's record-history article, which states the 262-hit 2004 season and 704 at-bats; Baseball-Reference's Ichiro player record was independently checked as a career-stat cross-check."
+  },
+  {
+    id: "record-nolan-ryan-7-nohitters",
+    title: "Nolan Ryan's Seven No-Hitters",
+    tag: "PITCHING RECORD",
+    statBadge: "7 no-hitters",
+    fact: "Nolan Ryan threw seven no-hitters during his major-league career, the most in MLB history.",
+    whimsy: "His seventh came for Texas against Toronto on May 1, 1991, when he was 44 years old.",
+    source: "https://baseballhall.org/discover/inside-pitch/ryan-throws-seventh-no-hitter",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame account of Ryan's seventh no-hitter; MLB's historical account of his consecutive-no-hitter-era records was independently checked as a second source."
+  },
+  {
+    id: "record-ripken-2632",
+    title: "Cal Ripken Jr.'s Iron-Man Streak",
+    tag: "DURABILITY RECORD",
+    statBadge: "2,632 games",
+    fact: "Cal Ripken Jr. played in 2,632 consecutive major-league games from 1982 through 1998.",
+    whimsy: "He broke Lou Gehrig's 2,130-game streak on September 6, 1995, then ended his own streak by removing himself from the lineup in 1998.",
+    source: "https://baseballhall.org/discover/inside-pitch/cal-ripken-breaks-lou-gehrigs-consecutive-games-record",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame record account; the Hall's Cal Ripken biography was independently checked for the 2,130-to-2,632 sequence."
+  },
+  {
+    id: "record-cy-young-511",
+    title: "Cy Young's 511 Wins",
+    tag: "PITCHING RECORD",
+    statBadge: "511 wins",
+    fact: "Cy Young won 511 major-league games, the recognized career record.",
+    whimsy: "The Hall of Fame also credits him with 749 complete games and 7,356 innings pitched.",
+    source: "https://baseballhall.org/hall-of-famers/young-cy",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player record, including 511 wins, 749 complete games, and 7,356 innings; the Hall page links Baseball-Reference for an independent statistical cross-check."
+  },
+  {
+    id: "record-rickey-1406",
+    title: "Rickey Henderson's Stolen-Base Record",
+    tag: "SPEED RECORD",
+    statBadge: "1,406 steals",
+    fact: "Rickey Henderson holds MLB's career stolen-base record with 1,406 steals.",
+    whimsy: "He also stole 130 bases in 1982, the single-season record cited by MLB's historical review.",
+    source: "https://www.mlb.com/news/10-incredible-rickey-henderson-stats",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against MLB's statistical retrospective; Baseball-Reference's Rickey Henderson player record independently matches 1,406 career steals."
+  },
+  {
+    id: "record-hank-aaron-755",
+    title: "Hank Aaron's 755 Home Runs",
+    tag: "POWER RECORD",
+    statBadge: "755 home runs",
+    fact: "Hank Aaron finished his major-league career with 755 home runs.",
+    whimsy: "He also finished with 2,297 RBI and 6,856 total bases, both figures listed by the Hall of Fame as MLB standards.",
+    source: "https://baseballhall.org/hall-of-famers/aaron-hank",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame career record; the Hall page links Baseball-Reference for an independent statistical cross-check."
+  },
+  {
+    id: "record-don-larsen-perfect-world-series",
+    title: "Don Larsen's World Series Perfect Game",
+    tag: "POSTSEASON HISTORY",
+    statBadge: "27 up, 27 down",
+    fact: "Don Larsen threw a perfect game for the Yankees against the Dodgers in Game 5 of the 1956 World Series.",
+    whimsy: "MLB's archive identifies it as the first and only perfect game in World Series history.",
+    source: "https://www.mlb.com/video/56-ws-larsen-s-perfect-game-c3192326",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against MLB Film Room's archived 1956 World Series game record; the game date, opponent, and perfect-game description were independently cross-checked against MLB's video metadata and historical record context."
+  },
+  {
+    id: "record-vander-meer-back-to-back-nohitters",
+    title: "Johnny Vander Meer's Back-to-Back No-Hitters",
+    tag: "PITCHING RARITY",
+    statBadge: "2 straight starts",
+    fact: "Johnny Vander Meer threw no-hitters in consecutive starts for Cincinnati in June 1938.",
+    whimsy: "MLB's history account says the consecutive-start feat remains unmatched in American/National League history.",
+    source: "https://www.mlb.com/news/johnny-vander-meer-threw-consecutive-no-hitters",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against MLB's historical account, which records the June 11 and June 15, 1938 no-hitters; MLB's player record and the Baseball Hall of Fame's cited collection context were independently checked."
+  },
+  {
+    id: "record-gehrig-2130",
+    title: "Lou Gehrig's Consecutive-Game Mark",
+    tag: "DURABILITY RECORD",
+    statBadge: "2,130 games",
+    fact: "Lou Gehrig played in 2,130 consecutive games for the New York Yankees.",
+    whimsy: "The streak ended on May 2, 1939, after Gehrig removed himself from the lineup.",
+    source: "https://baseballhall.org/hall-of-famers/gehrig-lou",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame biography; the Hall's Ripken record account independently confirms 2,130 as the prior mark."
+  },
+  {
+    id: "record-walter-johnson-417",
+    title: "Walter Johnson's 417 Wins",
+    tag: "PITCHING RECORD",
+    statBadge: "417 wins",
+    fact: "Walter Johnson finished his major-league career with a 417-279 record and a 2.17 ERA.",
+    whimsy: "He also authored 10 consecutive 20-win seasons for Washington.",
+    source: "https://baseballhall.org/hall-of-famers/johnson-walter",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography, which states the 417 wins, 2.17 ERA, and 10 straight 20-win seasons; the Hall's 400-win history article was independently checked."
+  },
+  {
+    id: "record-tris-speaker-450-assists",
+    title: "Tris Speaker's Center-Field Assists",
+    tag: "DEFENSIVE RECORD",
+    statBadge: "450 assists",
+    fact: "Tris Speaker's 450 career assists rank first among major-league center fielders.",
+    whimsy: "The Hall of Fame also credits Speaker with 6,783 putouts, second among center fielders at the time of its profile.",
+    source: "https://baseballhall.org/hall-of-famers/speaker-tris",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography; the claim is a position-specific fielding record stated on the source page, not a generalized all-position record."
+  },
+  {
+    id: "record-maddux-355-wins",
+    title: "Greg Maddux's 355 Wins",
+    tag: "PITCHING MILESTONE",
+    statBadge: "355 wins",
+    fact: "Greg Maddux retired with 355 wins and 227 losses.",
+    whimsy: "The Hall of Fame describes his .610 winning percentage as the eighth-best victory total in major-league history.",
+    source: "https://baseballhall.org/hall-of-famers/maddux-greg",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography; the page supplies the exact 355-227 record and .610 winning percentage."
+  }
+];
+
+export const BASEBALL_LORE_ITEMS: LoreItem[] = [
+  ...RETAINED_LORE_ITEMS.map((item) => ({
+    ...item,
+    verificationStatus: "reviewed-unverified" as const,
+    provenance: "Retained legacy static entry; source URL preserved, claim-specific verification pending."
+  })),
+  ...VERIFIED_LORE_ITEMS
+];
 
 export default BASEBALL_LORE_ITEMS;

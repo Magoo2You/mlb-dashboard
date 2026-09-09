@@ -29,7 +29,27 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks, browserless navigation/API contract checks, and MLB schedule/live-feed transformer fixture checks. |
 | MLB transformer coverage | Captured-shape fixtures cover schedule score fallback from `linescore.teams`, scoring-play text/inning mapping, live status and linescore mappings, reverse chronological plays, scoring-play filtering, RBI, and per-play `about.awayScore`/`about.homeScore`. |
 | Statcast leaderboard integrity | Season-scoped hitting, pitching, and fielding requests use explicit `statGroup` values and `statType=season`. Captured fixtures reject cross-scope duplicates, preserve verified provider categories, map WHIP from `walksAndHitsPerInningPitched`, and map fielding `putOuts` without confusing catcher stolen-bases-allowed with hitting stolen bases. |
-| Trivia/lore provenance | Active lore inventory: 55 retained entries; 0 verified, 55 reviewed-unverified, 55 unique IDs, 0 missing/invalid HTTPS URLs. All entries carry explicit status/provenance and the wallboard labels them `REVIEWED · UNVERIFIED`; claim-level verification is pending. |
+| Trivia/lore provenance | Active lore inventory: 67 retained entries; 12 verified, 55 reviewed-unverified, 67 unique IDs, 0 missing/invalid HTTPS URLs. Verified IDs are listed below; retained legacy claims remain explicitly unverified, including the contradicted Pedro Martínez item. |
+| Trivia/lore rotation | Passive wallboard rotation filters to verified entries only, uses a deterministic seeded shuffle, covers the full verified pool before reshuffling, prevents the prior pool's final item from opening the next pool, and renders no lore cards when the verified pool is empty. |
+| Historical player profiles | Separate schema added at `src/data/historical-player-profiles.ts`; no pilot is presented yet because image usage rights and image provenance were not verified. |
+
+### Verified lore IDs and sources (evidence checked 2026-09-09)
+
+- `record-ichiro-262` — https://www.mlb.com/news/ichiro-s-season-hit-record-may-be-unbreakable-c275212644
+- `record-nolan-ryan-7-nohitters` — https://baseballhall.org/discover/inside-pitch/ryan-throws-seventh-no-hitter
+- `record-ripken-2632` — https://baseballhall.org/discover/inside-pitch/cal-ripken-breaks-lou-gehrigs-consecutive-games-record
+- `record-cy-young-511` — https://baseballhall.org/hall-of-famers/young-cy
+- `record-rickey-1406` — https://www.mlb.com/news/10-incredible-rickey-henderson-stats
+- `record-hank-aaron-755` — https://baseballhall.org/hall-of-famers/aaron-hank
+- `record-don-larsen-perfect-world-series` — https://www.mlb.com/video/56-ws-larsen-s-perfect-game-c3192326
+- `record-vander-meer-back-to-back-nohitters` — https://www.mlb.com/news/johnny-vander-meer-threw-consecutive-no-hitters
+- `record-gehrig-2130` — https://baseballhall.org/hall-of-famers/gehrig-lou
+- `record-walter-johnson-417` — https://baseballhall.org/hall-of-famers/johnson-walter
+- `record-tris-speaker-450-assists` — https://baseballhall.org/hall-of-famers/speaker-tris
+- `record-maddux-355-wins` — https://baseballhall.org/hall-of-famers/maddux-greg
+
+Sources were used for factual verification only. The repository does not copy source prose or images. Existing attribution/licensing notes remain applicable; no historical-player image is displayed until its source and usage rights are separately verified.
+
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Interactive scroll ownership | The reported Schedule/Standings wheel-scroll symptom was traced to nested vertical overflow shells. Schedule, Standings, Statcast, Who's Hot, and Sports now leave vertical scrolling to the document; `.responsive-table-wrap` retains horizontal scrolling and wallboard clipping remains intentional. |
 | Scroll contract | Browserless source checks assert active interactive shells do not use nested vertical overflow, while responsive table wrappers retain `overflow-x: auto`. |

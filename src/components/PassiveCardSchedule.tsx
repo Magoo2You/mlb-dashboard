@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
+import { createLoreSequence, lorePage } from "@/src/utils/lore-rotation";
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
@@ -40,6 +41,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
   const [hotPageIndex, setHotPageIndex] = useState<number>(0);
   const [lorePageIndex, setLorePageIndex] = useState<number>(0);
+  const [loreRound, setLoreRound] = useState<number>(0);
+  const [loreBoundaryId, setLoreBoundaryId] = useState<string | undefined>();
 
   // Sort games: Live games first, then scheduled, then final
   const sortedGames = [...games].sort((a, b) => {
@@ -85,18 +88,31 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  // Rotate Baseball Lore pages every 9.2s
+  const verifiedLore = useMemo(() => BASEBALL_LORE_ITEMS.filter((item) => item.verificationStatus === "verified"), []);
+  const loreSequence = useMemo(
+    () => createLoreSequence(verifiedLore, 20260909 + loreRound, loreBoundaryId),
+    [loreBoundaryId, loreRound, verifiedLore]
+  );
+
+  // Rotate verified lore as a shuffled pool: every item is covered before a
+  // seeded reshuffle, and the boundary item cannot repeat immediately.
   useEffect(() => {
-    if (BASEBALL_LORE_ITEMS.length <= 3) return;
+    if (loreSequence.length <= 3) return;
     const interval = setInterval(() => {
-      setLorePageIndex((prev) => (prev + 1) % Math.ceil(BASEBALL_LORE_ITEMS.length / 3));
+      setLorePageIndex((previous) => {
+        const next = previous + 3;
+        if (next < loreSequence.length) return next;
+        setLoreBoundaryId(loreSequence[loreSequence.length - 1]?.id);
+        setLoreRound((round) => round + 1);
+        return 0;
+      });
     }, 9200);
     return () => clearInterval(interval);
-  }, []);
+  }, [loreSequence]);
 
   const currentNewsSlice = newsArticles.slice(newsPageIndex * 3, newsPageIndex * 3 + 3);
   const currentHotSlice = hotHittersList.slice(hotPageIndex * 3, hotPageIndex * 3 + 3);
-  const currentLoreSlice = BASEBALL_LORE_ITEMS.slice(lorePageIndex * 3, lorePageIndex * 3 + 3);
+  const currentLoreSlice = lorePage(loreSequence, lorePageIndex);
 
   // Selected Game and detailed game Feed properties
   const selectedGame = sortedGames.find((g) => g.gamePk === selectedGamePk) || sortedGames[0];
