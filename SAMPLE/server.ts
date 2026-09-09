@@ -1,21 +1,13 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 
-// Initialize Gemini client lazily
-let aiClient: GoogleGenAI | null = null;
-function getGenAIClient(): GoogleGenAI | null {
-  if (!aiClient && process.env.GEMINI_API_KEY) {
-    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  }
-  return aiClient;
-}
 
 // Fetch helper with timeout
 async function fetchMLB(url: string) {
@@ -866,42 +858,6 @@ app.get("/api/whos-hot", async (req, res) => {
     res.status(500).json({ error: "Failed to calculate hot streaks" });
   }
 });
-
-// 7. Gemini AI Matchup & Game Scout Endpoint
-app.post("/api/ai-scout", async (req, res) => {
-  try {
-    const ai = getGenAIClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API key is not configured.",
-        insight: "Configure GEMINI_API_KEY in secrets to unlock AI Game Scout breakdown.",
-      });
-    }
-
-    const { matchup, gameSituation } = req.body;
-    const prompt = `You are an elite MLB Statcast & Sabermetrics Analyst. Analyze this current game situation and matchup:
-Game Situation: ${JSON.stringify(gameSituation)}
-Matchup Context: ${JSON.stringify(matchup)}
-
-Provide a concise, 3-bullet point scouting report:
-1. Pitching Strategy & Arsenal (how the pitcher should attack this batter)
-2. Batter Edge & Statcast Profile (key zone strengths or weakness)
-3. Prediction / Key Factor for this at-bat
-
-Keep it snappy, energetic, and analytical. Format as clear bullet points.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    res.json({ insight: response.text });
-  } catch (error: any) {
-    console.error("Error generating AI scout report:", error.message);
-    res.status(500).json({ error: "Failed to generate AI insight", details: error.message });
-  }
-});
-
 
 function buildStarterStats(p: any) {
   if (!p || !p.id) return undefined;

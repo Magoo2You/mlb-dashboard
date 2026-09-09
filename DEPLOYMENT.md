@@ -38,10 +38,7 @@ Add these in Render's **"Environment"** tab:
 |-----|-------|
 | `NODE_ENV` | `production` |
 | `PORT` | `auto` (Render will assign) |
-| `GEMINI_API_KEY` | `[REDACTED]` or leave blank if not used |
 | `APP_URL` | `***` (Render injects this) |
-
-> 💡 **Note**: Since we removed Gemini integration, you can set `GEMINI_API_KEY=` (empty string) or omit it entirely.
 
 ---
 

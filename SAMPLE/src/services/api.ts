@@ -73,23 +73,6 @@ export async function fetchStandings(season = "2026"): Promise<DivisionStanding[
   }
 }
 
-export async function fetchAIScoutReport(matchup: any, gameSituation: any): Promise<string> {
-  try {
-    const res = await fetch("/api/ai-scout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchup, gameSituation }),
-    });
-    if (!res.ok) {
-      const errData = await res.json();
-      return errData.insight || "AI Scout analysis currently unavailable.";
-    }
-    const data = await res.json();
-    return data.insight;
-  } catch (err) {
-    return "• Pitcher strategy: Attack top-inner quadrant with high 4-seam heat above the belt.\n• Batter edge: Batting .340 against sliders away this season; protect outer edge.\n• Key Factor: High pitch count in 7th inning could force bullpen matchup.";
-  }
-}
 
 export async function fetchTicker(): Promise<TickerItem[]> {
   try {

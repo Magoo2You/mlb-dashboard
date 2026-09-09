@@ -1,22 +1,44 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
 
 const app = express();
-const PORT = 3000;
+const PORT = Number.parseInt(process.env.PORT || "3000", 10) || 3000;
 
-// Serve static files from dist/ directory (Vite build output)
-app.use(express.static('dist'));
-app.use(express.json());
+// Keep API request bodies small; the UI sends only compact JSON payloads.
+app.use(express.json({ limit: "32kb" }));
 
-// Initialize Gemini client lazily
-let aiClient: GoogleGenAI | null = null;
-function getGenAIClient(): GoogleGenAI | null {
-  if (!aiClient && process.env.GEMINI_API_KEY) {
-    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  }
-  return aiClient;
+const INVALID_INPUT = "Invalid request parameters";
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function singleQueryValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function validDate(value: unknown): value is string {
+  if (typeof value !== "string" || !DATE_PATTERN.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function validSeason(value: unknown): value is string {
+  const year = typeof value === "string" && /^\d{4}$/.test(value) ? Number(value) : NaN;
+  return Number.isInteger(year) && year >= 1876 && year <= new Date().getUTCFullYear() + 1;
+}
+
+function validNumericId(value: unknown): value is string {
+  return typeof value === "string" && /^[1-9]\d{0,8}$/.test(value);
+}
+
+function logServerError(context: string, error: unknown) {
+  console.error(context, error);
+}
+
+function genericRequestError(error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) {
+  logServerError("Request parsing error:", error);
+  if (error?.type === "entity.too.large") return res.status(413).json({ error: "Request is too large" });
+  if (error instanceof SyntaxError) return res.status(400).json({ error: "Invalid request body" });
+  return res.status(500).json({ error: "Internal server error" });
 }
 
 // Fetch helper with timeout
@@ -39,7 +61,9 @@ async function fetchMLB(url: string) {
 // 1. Schedule endpoint
 app.get("/api/schedule", async (req, res) => {
   try {
-    const date = (req.query.date as string) || new Date().toISOString().split("T")[0];
+    const requestedDate = singleQueryValue(req.query.date);
+    const date = requestedDate || new Date().toISOString().split("T")[0];
+    if (requestedDate && !validDate(requestedDate)) return res.status(400).json({ error: INVALID_INPUT });
     const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=team,linescore(matchup,runners),flags,liveLookin,decisions,scoringPlays,probablePitcher(stats)`;
     const data = await fetchMLB(url);
 
@@ -55,8 +79,8 @@ app.get("/api/schedule", async (req, res) => {
       games: games.map(transformScheduleGame),
     });
   } catch (error: any) {
-    console.error("Error fetching schedule:", error.message);
-    res.status(500).json({ error: "Failed to fetch MLB schedule", details: error.message });
+    logServerError("Error fetching schedule:", error);
+    res.status(500).json({ error: "Failed to fetch MLB schedule" });
   }
 });
 
@@ -64,14 +88,15 @@ app.get("/api/schedule", async (req, res) => {
 app.get("/api/game/:gamePk", async (req, res) => {
   try {
     const { gamePk } = req.params;
+    if (!validNumericId(gamePk)) return res.status(400).json({ error: INVALID_INPUT });
     const url = `https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`;
     const data = await fetchMLB(url);
 
     const transformed = transformGameLiveFeed(data);
     res.json(transformed);
   } catch (error: any) {
-    console.error("Error fetching game live feed:", error.message);
-    res.status(500).json({ error: "Failed to fetch game feed", details: error.message });
+    logServerError("Error fetching game live feed:", error);
+    res.status(500).json({ error: "Failed to fetch game feed" });
   }
 });
 
@@ -79,6 +104,7 @@ app.get("/api/game/:gamePk", async (req, res) => {
 app.get("/api/player/:personId", async (req, res) => {
   try {
     const { personId } = req.params;
+    if (!validNumericId(personId)) return res.status(400).json({ error: INVALID_INPUT });
     const currentYear = new Date().getFullYear();
     // Strictly hydrate MLB Regular Season stats (sportId=1, gameType=R)
     const bioUrl = `https://statsapi.mlb.com/api/v1/people/${personId}?hydrate=currentTeam,team,stats(type=[season,career],group=[hitting,pitching,fielding],gameType=R,sportId=1),awards,draft`;
@@ -99,8 +125,8 @@ app.get("/api/player/:personId", async (req, res) => {
     const profile = transformPlayerProfile(person, awardsList);
     res.json(profile);
   } catch (error: any) {
-    console.error("Error fetching player:", error.message);
-    res.status(500).json({ error: "Failed to fetch player details", details: error.message });
+    logServerError("Error fetching player:", error);
+    res.status(500).json({ error: "Failed to fetch player details" });
   }
 });
 
@@ -108,7 +134,9 @@ app.get("/api/player/:personId", async (req, res) => {
 app.get("/api/standings", async (req, res) => {
   try {
     const currentYear = new Date().getFullYear().toString();
-    const season = (req.query.season as string) || currentYear;
+    const requestedSeason = singleQueryValue(req.query.season);
+    const season = requestedSeason || currentYear;
+    if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
     const url = `https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&hydrate=team,division&season=${season}&standingsTypes=regularSeason`;
     const data = await fetchMLB(url);
 
@@ -160,8 +188,8 @@ app.get("/api/standings", async (req, res) => {
 
     res.json({ season, divisions });
   } catch (error: any) {
-    console.error("Error fetching standings:", error.message);
-    res.status(500).json({ error: "Failed to fetch standings", details: error.message });
+    logServerError("Error fetching standings:", error);
+    res.status(500).json({ error: "Failed to fetch standings" });
   }
 });
 
@@ -394,8 +422,8 @@ app.get("/api/ticker", async (req, res) => {
 
     res.json(resultPayload);
   } catch (error: any) {
-    console.error("Error fetching ticker:", error.message);
-    res.status(500).json({ error: "Failed to fetch ticker feed", details: error.message });
+    logServerError("Error fetching ticker:", error);
+    res.status(500).json({ error: "Failed to fetch ticker feed" });
   }
 });
 
@@ -427,7 +455,7 @@ app.get("/api/news", async (req, res) => {
 
     res.json({ count: items.length, articles: items });
   } catch (error: any) {
-    res.status(500).json({ error: "Failed to fetch news", details: error.message });
+    res.status(500).json({ error: "Failed to fetch news" });
   }
 });
 
@@ -435,6 +463,7 @@ app.get("/api/news", async (req, res) => {
 app.get("/api/game/:gamePk/highlights", async (req, res) => {
   try {
     const { gamePk } = req.params;
+    if (!validNumericId(gamePk)) return res.status(400).json({ error: INVALID_INPUT });
     const content = await fetchMLB(`https://statsapi.mlb.com/api/v1/game/${gamePk}/content`);
     const hlItems = content.highlights?.highlights?.items || content.highlights?.scoreboard?.items || [];
 
@@ -459,7 +488,7 @@ app.get("/api/game/:gamePk/highlights", async (req, res) => {
 
     res.json({ gamePk, count: formatted.length, highlights: formatted });
   } catch (error: any) {
-    res.status(500).json({ error: "Failed to fetch highlights", details: error.message });
+    res.status(500).json({ error: "Failed to fetch highlights" });
   }
 });
 
@@ -467,7 +496,9 @@ app.get("/api/game/:gamePk/highlights", async (req, res) => {
 app.get("/api/statcast-leaders", async (req, res) => {
   try {
     const currentYear = new Date().getFullYear().toString();
-    const season = (req.query.season as string) || currentYear;
+    const requestedSeason = singleQueryValue(req.query.season);
+    const season = requestedSeason || currentYear;
+    if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
     const categories = "homeRuns,battingAverage,runsBattedIn,onBasePlusSlugging,stolenBases,earnedRunAverage,strikeouts,wins,whip,saves";
     const url = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${categories}&season=${season}&limit=10&hydrate=person,team`;
 
@@ -494,30 +525,49 @@ app.get("/api/statcast-leaders", async (req, res) => {
 
     res.json({ season, categories: formattedCategories });
   } catch (error: any) {
-    console.error("Error fetching statcast leaders:", error.message);
-    res.status(500).json({ error: "Failed to fetch statcast leaders", details: error.message });
+    logServerError("Error fetching statcast leaders:", error);
+    res.status(500).json({ error: "Failed to fetch statcast leaders" });
   }
 });
 
 // 6b. Who's Hot Endpoint (Live Official MLB Stats API Analytics with Date Range support)
 const whosHotCache = new Map<string, { timestamp: number; data: any }>();
+const WHOSE_HOT_CACHE_TTL = 10 * 60 * 1000;
+const WHOSE_HOT_CACHE_MAX = 32;
 
 app.get("/api/whos-hot", async (req, res) => {
   try {
-    const timeframe = (req.query.timeframe as string) || "14";
-    const startDate = req.query.startDate as string | undefined;
-    const endDate = req.query.endDate as string | undefined;
+    const rawTimeframe = req.query.timeframe;
+    const rawStartDate = req.query.startDate;
+    const rawEndDate = req.query.endDate;
+    const rawSeason = req.query.season;
+    if ([rawTimeframe, rawStartDate, rawEndDate, rawSeason].some((value) => value !== undefined && typeof value !== "string")) {
+      return res.status(400).json({ error: INVALID_INPUT });
+    }
+    const timeframe = (rawTimeframe as string | undefined) || "14";
+    const startDate = rawStartDate as string | undefined;
+    const endDate = rawEndDate as string | undefined;
     const currentYear = new Date().getFullYear().toString();
-    const season = (req.query.season as string) || currentYear;
+    const season = (rawSeason as string | undefined) || currentYear;
+    const numDays = Number(timeframe);
+    if (!/^\d+$/.test(timeframe) || !Number.isInteger(numDays) || numDays < 1 || numDays > 31) {
+      return res.status(400).json({ error: INVALID_INPUT });
+    }
+    if ((startDate || endDate) && (!startDate || !endDate || !validDate(startDate) || !validDate(endDate) || startDate > endDate)) {
+      return res.status(400).json({ error: INVALID_INPUT });
+    }
+    if (rawSeason !== undefined && !validSeason(rawSeason)) return res.status(400).json({ error: INVALID_INPUT });
     const cacheKey = `${timeframe}-${startDate || ""}-${endDate || ""}-${season}`;
 
-    // 10-minute in-memory cache
+    // Expire stale entries and cap cardinality before accepting a new key.
+    const now = Date.now();
+    for (const [key, entry] of whosHotCache) {
+      if (now - entry.timestamp >= WHOSE_HOT_CACHE_TTL) whosHotCache.delete(key);
+    }
     const cached = whosHotCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < 10 * 60 * 1000) {
+    if (cached) {
       return res.json(cached.data);
     }
-
-    const numDays = parseInt(timeframe, 10) || 14;
 
     // Fetch top leaders across hitting & pitching categories to get active player pool
     const leadersUrl = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=homeRuns,battingAverage,onBasePlusSlugging,runsBattedIn,stolenBases,earnedRunAverage,strikeouts,wins,whip,saves&season=${season}&limit=25&hydrate=person,team`;
@@ -861,6 +911,10 @@ app.get("/api/whos-hot", async (req, res) => {
       surgePitchers,
     };
 
+    if (whosHotCache.size >= WHOSE_HOT_CACHE_MAX) {
+      const oldestKey = whosHotCache.keys().next().value;
+      if (oldestKey) whosHotCache.delete(oldestKey);
+    }
     whosHotCache.set(cacheKey, { timestamp: Date.now(), data: result });
     res.json(result);
   } catch (err: any) {
@@ -868,42 +922,6 @@ app.get("/api/whos-hot", async (req, res) => {
     res.status(500).json({ error: "Failed to calculate hot streaks" });
   }
 });
-
-// 7. Gemini AI Matchup & Game Scout Endpoint
-app.post("/api/ai-scout", async (req, res) => {
-  try {
-    const ai = getGenAIClient();
-    if (!ai) {
-      return res.status(503).json({
-        error: "Gemini API key is not configured.",
-        insight: "Configure GEMINI_API_KEY in secrets to unlock AI Game Scout breakdown.",
-      });
-    }
-
-    const { matchup, gameSituation } = req.body;
-    const prompt = `You are an elite MLB Statcast & Sabermetrics Analyst. Analyze this current game situation and matchup:
-Game Situation: ${JSON.stringify(gameSituation)}
-Matchup Context: ${JSON.stringify(matchup)}
-
-Provide a concise, 3-bullet point scouting report:
-1. Pitching Strategy & Arsenal (how the pitcher should attack this batter)
-2. Batter Edge & Statcast Profile (key zone strengths or weakness)
-3. Prediction / Key Factor for this at-bat
-
-Keep it snappy, energetic, and analytical. Format as clear bullet points.`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    res.json({ insight: response.text });
-  } catch (error: any) {
-    console.error("Error generating AI scout report:", error.message);
-    res.status(500).json({ error: "Failed to generate AI insight", details: error.message });
-  }
-});
-
 
 function buildStarterStats(p: any) {
   if (!p || !p.id) return undefined;
@@ -1590,6 +1608,8 @@ function transformPlayerProfile(person: any, awardsList: any[]) {
 }
 
 
+app.use(genericRequestError);
+
 // --- VITE MIDDLEWARE & SERVER BOOTSTRAP ---
 
 async function startServer() {
@@ -1602,6 +1622,13 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
+    app.use((req, res, next) => {
+      const requestedPath = req.path.toLowerCase();
+      if (requestedPath === "/server.cjs" || requestedPath === "/server.cjs.map") {
+        return res.status(404).json({ error: "Not found" });
+      }
+      next();
+    });
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
