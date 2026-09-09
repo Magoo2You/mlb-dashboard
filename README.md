@@ -8,6 +8,12 @@ This contains everything you need to run your app locally.
 
 View your app in AI Studio: https://ai.studio/apps/c2a823e5-77fb-474b-ae2b-e055e5465f10
 
+## Dashboard modes
+
+The passive wallboard remains the default view. The fixed **Views** tablist provides keyboard-accessible access to Schedule, Standings, Statcast, and Who's Hot; use Left/Right (or Up/Down), Home, and End to move between tabs. Every interactive view includes a **Return to wallboard** control.
+
+The Schedule view reuses the existing date navigator and schedule cards and opens player profiles when the feed contains valid decision-player IDs. The existing `GameView` component is intentionally not mounted yet because its auto-refresh and refresh-callback contract is not connected to the shell; schedule selection is retained without claiming full play-by-play support. The current API helpers may return their existing mock fallback when an endpoint fails or returns no data; the shell does not relabel that fallback as live.
+
 ## Run Locally
 
 **Prerequisites:**  Node.js

@@ -111,7 +111,16 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
             <div
               key={game.gamePk}
               onClick={() => onSelectGame(game.gamePk)}
-              className={`group relative rounded-2xl p-4 transition-all cursor-pointer border ${
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectGame(game.gamePk);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${away.team.name} at ${home.team.name}`}
+              className={`focus-ring group relative rounded-2xl p-4 transition-all cursor-pointer border ${
                 isSelected
                   ? "bg-slate-800/90 border-blue-500 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20"
                   : "bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-850"
