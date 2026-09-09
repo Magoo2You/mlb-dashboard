@@ -60,9 +60,10 @@ export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSele
           </div>
         </div>
         <select
+          aria-label="Leaderboard season"
           value={selectedSeason}
           onChange={(event) => setSelectedSeason(event.target.value)}
-          className="bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
+          className="focus-ring bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
         >
           <option value={CURRENT_SEASON}>{CURRENT_SEASON} MLB Season</option>
           <option value="2025">2025 MLB Season</option>
@@ -92,7 +93,7 @@ export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSele
                 ) : (
                   <div className="space-y-1.5">
                     {list.slice(0, 5).map((player: any) => (
-                      <button key={player.personId || player.fullName} type="button" onClick={() => player.personId && onSelectPlayer(player.personId)} className="w-full flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/50 text-left transition-all">
+                      <button key={player.personId || player.fullName} type="button" aria-label={`View ${player.fullName} player profile`} onClick={() => player.personId && onSelectPlayer(player.personId)} className="focus-ring w-full flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800/80 hover:border-amber-500/50 text-left transition-all">
                         <span className="flex items-center gap-2 min-w-0"><span className="w-5 h-5 rounded bg-slate-800 text-slate-300 font-mono font-black text-[10px] flex items-center justify-center shrink-0">#{player.rank}</span><span className="truncate"><span className="text-xs font-bold text-white block truncate">{player.fullName}</span><span className="text-[10px] text-slate-400 font-mono">{player.teamAbbr}</span></span></span>
                         <span className={`text-xs font-black font-mono shrink-0 ${color}`}>{player.value} <span className="text-[10px] text-slate-500">{unit}</span></span>
                       </button>

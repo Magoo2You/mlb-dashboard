@@ -37,13 +37,15 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) =
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden my-8">
+      <div role="dialog" aria-modal="true" aria-labelledby="player-modal-title" className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden my-8">
         {/* Top Close Button */}
         <button
+          type="button"
+          aria-label="Close player profile"
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+          className="focus-ring absolute top-4 right-4 z-20 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {loading || !profile ? (
@@ -77,7 +79,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) =
               <div className="flex-1 min-w-[200px]">
                 <div className="flex items-center gap-2 mb-1">
                   {profile.currentTeam && (
-                    <img src={profile.currentTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                    <img src={profile.currentTeam.logoUrl} alt={`${profile.currentTeam.name} logo`} className="w-6 h-6 object-contain" />
                   )}
                   <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
                     {profile.currentTeam?.name || "MLB"}
@@ -88,7 +90,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) =
                   </span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">{profile.fullName}</h2>
+                <h2 id="player-modal-title" className="text-2xl sm:text-3xl font-black text-white tracking-tight">{profile.fullName}</h2>
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 mt-2 font-mono">
                   <span>Age: {profile.currentAge || "-"}</span>

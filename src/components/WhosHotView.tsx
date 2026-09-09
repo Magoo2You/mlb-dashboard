@@ -315,10 +315,12 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {hotData.aggregateHitters.map((player, idx) => (
-                      <div
+                      <button
                         key={`agg-hitter-${player.personId}-${idx}`}
+                        type="button"
+                        aria-label={`View ${player.name} player profile`}
                         onClick={() => onSelectPlayer(player.personId)}
-                        className="group bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between"
+                        className="focus-ring group w-full text-left bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between"
                       >
                         <div className="space-y-3">
                           {/* Player Header */}
@@ -379,7 +381,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                         <div className="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-end text-[11px] text-amber-400 font-bold group-hover:underline">
                           View Statcast Card <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -396,10 +398,12 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {hotData.aggregatePitchers.map((player, idx) => (
-                      <div
+                      <button
                         key={`agg-pitcher-${player.personId}-${idx}`}
+                        type="button"
+                        aria-label={`View ${player.name} player profile`}
                         onClick={() => onSelectPlayer(player.personId)}
-                        className="group bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-between"
+                        className="focus-ring group w-full text-left bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-between"
                       >
                         <div className="space-y-3">
                           {/* Pitcher Header */}
@@ -460,7 +464,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                         <div className="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-end text-[11px] text-indigo-400 font-bold group-hover:underline">
                           View Statcast Card <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -499,10 +503,12 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
 
                   <div className="space-y-4">
                     {hotData.surgeHitters.map((player, idx) => (
-                      <div
+                      <button
                         key={`surge-hitter-${player.personId}-${idx}`}
+                        type="button"
+                        aria-label={`View ${player.name} player profile`}
                         onClick={() => onSelectPlayer(player.personId)}
-                        className="group bg-slate-900 border border-slate-800 hover:border-amber-500/60 rounded-2xl p-4 sm:p-5 transition-all cursor-pointer shadow-md hover:shadow-amber-500/10 space-y-4"
+                        className="focus-ring group w-full text-left bg-slate-900 border border-slate-800 hover:border-amber-500/60 rounded-2xl p-4 sm:p-5 transition-all cursor-pointer shadow-md hover:shadow-amber-500/10 space-y-4"
                       >
                         {/* Top Info Bar */}
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -587,7 +593,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -602,10 +608,12 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
 
                   <div className="space-y-4">
                     {hotData.surgePitchers.map((player, idx) => (
-                      <div
+                      <button
                         key={`surge-pitcher-${player.personId}-${idx}`}
+                        type="button"
+                        aria-label={`View ${player.name} player profile`}
                         onClick={() => onSelectPlayer(player.personId)}
-                        className="group bg-slate-900 border border-slate-800 hover:border-indigo-500/60 rounded-2xl p-4 sm:p-5 transition-all cursor-pointer shadow-md hover:shadow-indigo-500/10 space-y-4"
+                        className="focus-ring group w-full text-left bg-slate-900 border border-slate-800 hover:border-indigo-500/60 rounded-2xl p-4 sm:p-5 transition-all cursor-pointer shadow-md hover:shadow-indigo-500/10 space-y-4"
                       >
                         {/* Top Info Bar */}
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -672,7 +680,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>

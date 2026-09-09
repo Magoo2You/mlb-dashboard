@@ -119,6 +119,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               }}
               role="button"
               tabIndex={0}
+              aria-pressed={isSelected}
               aria-label={`Select ${away.team.name} at ${home.team.name}`}
               className={`focus-ring group relative rounded-2xl p-4 transition-all cursor-pointer border ${
                 isSelected

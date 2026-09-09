@@ -44,26 +44,32 @@ export const DateNavigator: React.FC<DateNavigatorProps> = ({
         {/* Left: Day Navigator Controls */}
         <div className="flex items-center gap-2">
           <button
+            type="button"
+            aria-label="Previous scheduled games day"
             onClick={handlePrevDay}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center justify-center"
+            className="focus-ring p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center justify-center"
             title="Previous Scheduled Games Day"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5" aria-hidden="true" />
           </button>
 
           <button
+            type="button"
+            aria-label="Next scheduled games day"
             onClick={handleNextDay}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center justify-center"
+            className="focus-ring p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center justify-center"
             title="Next Scheduled Games Day"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5" aria-hidden="true" />
           </button>
 
           <button
+            type="button"
+            aria-label="Show today's scheduled games"
             onClick={handleToday}
-            className="px-3 py-1.5 rounded-xl bg-blue-900/40 hover:bg-blue-800/50 text-blue-300 border border-blue-700/50 text-xs font-semibold transition-colors flex items-center gap-1.5"
+            className="focus-ring px-3 py-1.5 rounded-xl bg-blue-900/40 hover:bg-blue-800/50 text-blue-300 border border-blue-700/50 text-xs font-semibold transition-colors flex items-center gap-1.5"
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
             Today
           </button>
 
@@ -71,9 +77,10 @@ export const DateNavigator: React.FC<DateNavigatorProps> = ({
           <div className="relative">
             <input
               type="date"
+              aria-label="Choose schedule date"
               value={currentDate}
               onChange={(e) => e.target.value && onDateChange(e.target.value)}
-              className="bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="focus-ring bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-blue-500 cursor-pointer"
             />
           </div>
         </div>

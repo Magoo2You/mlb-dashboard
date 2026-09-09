@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-.focus-ring:focus-visible {
+.focus-ring:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+select:focus-visible,
+input:focus-visible {
   outline: 3px solid #fbbf24;
   outline-offset: 3px;
 }

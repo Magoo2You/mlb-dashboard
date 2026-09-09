@@ -98,7 +98,7 @@ export const StandingsView: React.FC = () => {
           </span>
           <img
             src={tr.team.logoUrl}
-            alt=""
+            alt={`${tr.team.name} logo`}
             className="w-6 h-6 object-contain"
             onError={(e) => {
               (e.target as HTMLElement).style.display = "none";
@@ -248,7 +248,7 @@ export const StandingsView: React.FC = () => {
                         className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between"
                       >
                         <div className="flex items-center gap-2">
-                          <img src={dl.team.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                          <img src={dl.team.logoUrl} alt={`${dl.team.name} logo`} className="w-5 h-5 object-contain" />
                           <span className="font-sans font-bold text-xs text-white truncate">{dl.team.name}</span>
                         </div>
                         <span className="font-mono text-xs font-black text-amber-400">
@@ -332,9 +332,10 @@ export const StandingsView: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3">
           {/* Season Picker */}
           <select
+            aria-label="Standings season"
             value={season}
             onChange={(e) => setSeason(e.target.value)}
-            className="bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
+            className="focus-ring bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
           >
             <option value={CURRENT_SEASON}>{CURRENT_SEASON} Season</option>
             <option value="2025">2025 Season</option>
@@ -342,26 +343,41 @@ export const StandingsView: React.FC = () => {
           </select>
 
           {/* View Mode Tabs */}
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+          <div role="tablist" aria-label="Standings display" className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
             <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === "division"}
+              aria-controls="standings-panel"
+              tabIndex={viewMode === "division" ? 0 : -1}
               onClick={() => setViewMode("division")}
-              className={`px-3.5 py-1.5 rounded-lg transition-colors ${
+              className={`focus-ring px-3.5 py-1.5 rounded-lg transition-colors ${
                 viewMode === "division" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
               }`}
             >
               By Division
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === "league"}
+              aria-controls="standings-panel"
+              tabIndex={viewMode === "league" ? 0 : -1}
               onClick={() => setViewMode("league")}
-              className={`px-3.5 py-1.5 rounded-lg transition-colors ${
+              className={`focus-ring px-3.5 py-1.5 rounded-lg transition-colors ${
                 viewMode === "league" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
               }`}
             >
               By League
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === "wildcard"}
+              aria-controls="standings-panel"
+              tabIndex={viewMode === "wildcard" ? 0 : -1}
               onClick={() => setViewMode("wildcard")}
-              className={`px-3.5 py-1.5 rounded-lg transition-colors ${
+              className={`focus-ring px-3.5 py-1.5 rounded-lg transition-colors ${
                 viewMode === "wildcard" ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 font-bold" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -377,7 +393,7 @@ export const StandingsView: React.FC = () => {
           <p className="text-sm font-semibold">Loading MLB Standings Feed...</p>
         </div>
       ) : viewMode === "division" ? (
-        <div className="space-y-8">
+        <div id="standings-panel" role="tabpanel" aria-label="Standings by division" tabIndex={0} className="space-y-8">
           {(() => {
             const leagueWcMaps = new Map<number, Map<number, { wcgb: string; wcRank?: number }>>();
             [103, 104].forEach((lgId) => {
@@ -433,7 +449,9 @@ export const StandingsView: React.FC = () => {
           })()}
         </div>
       ) : (
-        renderLeagueOrWildCardView()
+        <div id="standings-panel" role="tabpanel" aria-label={viewMode === "league" ? "Standings by league" : "Wild card standings"} tabIndex={0}>
+          {renderLeagueOrWildCardView()}
+        </div>
       )}
     </div>
   );
