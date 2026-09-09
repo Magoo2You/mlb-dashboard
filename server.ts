@@ -455,6 +455,7 @@ app.get("/api/news", async (req, res) => {
 
     res.json({ count: items.length, articles: items });
   } catch (error: any) {
+    logServerError("Error fetching news:", error);
     res.status(500).json({ error: "Failed to fetch news" });
   }
 });
