@@ -9,7 +9,7 @@ The active product is a React 19 + Vite frontend served by an Express 5 server. 
 Use this file to create a new checkout and reach a verified local build. Use the other documents for different purposes:
 
 - [`README.md`](README.md): short current-user overview and local start commands.
-- [`DEPLOYMENT.md`](DEPLOYMENT.md): historical Render deployment runbook. Check every branch, service, and environment value before using it; its example currently names `master`, while this verified branch is `ChatGPT2026Version`.
+- [`DEPLOYMENT.md`](DEPLOYMENT.md): historical Render deployment runbook. Check every branch, service, and environment value before using it; this verified branch is `ChatGPT2026Version`.
 - [`docs/DEVELOPMENT_STATUS.md`](docs/DEVELOPMENT_STATUS.md): current verified status, limitations, and deferred work; it is not a build recipe.
 - [`docs/multi-sport-architecture.md`](docs/multi-sport-architecture.md): provider-neutral architecture rules.
 - [`docs/nhl-web-api-experimental.md`](docs/nhl-web-api-experimental.md), [`docs/nfl-espn-scoreboard-experimental.md`](docs/nfl-espn-scoreboard-experimental.md), and [`docs/nba-scoreboard-experimental.md`](docs/nba-scoreboard-experimental.md): provider observations and limits.
