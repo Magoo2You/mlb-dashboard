@@ -14,6 +14,10 @@ The passive wallboard remains the default view. The fixed **Views** tablist prov
 
 The Schedule view reuses the existing date navigator and schedule cards and opens player profiles when the feed contains valid decision-player IDs. The existing `GameView` component is intentionally not mounted yet because its auto-refresh and refresh-callback contract is not connected to the shell; schedule selection is retained without claiming full play-by-play support. The current API helpers may return their existing mock fallback when an endpoint fails or returns no data; the shell does not relabel that fallback as live.
 
+## Sports status panel
+
+The discoverable **Sports** view is a status-only selector built from `src/domain/sport-registry.ts`. MLB remains the only supported live sport and selecting MLB returns to the default wallboard. NFL and NHL are labeled **Experimental preview**; their incomplete adapters are not mounted and the panel shows no game data. NBA is labeled **Unavailable · provider blocked** and is not selectable. The panel uses native buttons, visible focus rings, arrow/Home/End navigation in the surrounding tablist, and explanatory status text so unavailable coverage is never presented as live.
+
 ## Run Locally
 
 **Prerequisites:**  Node.js

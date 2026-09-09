@@ -1,7 +1,9 @@
 import React, { useRef, useState } from "react";
-import { BarChart3, CalendarDays, Flame, MonitorPlay, Trophy, Zap } from "lucide-react";
+import { BarChart3, CalendarDays, CircleDot, Flame, MonitorPlay, Trophy, Zap } from "lucide-react";
 import { InteractiveDashboard, DashboardMode } from "./components/InteractiveDashboard";
 import { PassiveScreen } from "./components/PassiveScreen";
+import { SportsPanel } from "./components/SportsPanel";
+import type { SportId } from "./domain/sports";
 
 const modes: { id: DashboardMode; label: string; description: string; icon: typeof MonitorPlay }[] = [
   { id: "wallboard", label: "Wallboard", description: "Passive rotating scoreboard", icon: MonitorPlay },
@@ -9,6 +11,7 @@ const modes: { id: DashboardMode; label: string; description: string; icon: type
   { id: "standings", label: "Standings", description: "Division, league, and wild card", icon: Trophy },
   { id: "statcast", label: "Statcast", description: "Official leaderboards", icon: Zap },
   { id: "hot", label: "Who's Hot", description: "Hot streak and surge analysis", icon: Flame },
+  { id: "sports", label: "Sports", description: "Supported and preview sport status", icon: CircleDot },
 ];
 
 export default function App() {
@@ -16,6 +19,9 @@ export default function App() {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const selectMode = (nextMode: DashboardMode) => setMode(nextMode);
+  const selectSport = (sport: SportId) => {
+    if (sport === "mlb") setMode("wallboard");
+  };
   const moveFocus = (index: number) => {
     const nextIndex = (index + modes.length) % modes.length;
     tabRefs.current[nextIndex]?.focus();
@@ -64,6 +70,10 @@ export default function App() {
       {mode === "wallboard" ? (
         <section id="dashboard-panel" role="tabpanel" aria-label="Passive wallboard">
           <PassiveScreen />
+        </section>
+      ) : mode === "sports" ? (
+        <section id="dashboard-panel" role="tabpanel" aria-labelledby="sports-tab">
+          <SportsPanel onSelectSport={selectSport} onReturnToWallboard={() => selectMode("wallboard")} />
         </section>
       ) : (
         <section id="dashboard-panel" role="tabpanel" aria-labelledby={`${mode}-tab`}>

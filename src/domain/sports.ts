@@ -2,7 +2,7 @@
 
 export type SportId = 'mlb' | 'nfl' | 'nba' | 'nhl';
 
-export type SportAvailability = 'supported' | 'planned' | 'unavailable';
+export type SportAvailability = 'supported' | 'experimental' | 'planned' | 'unavailable';
 
 export type GameState = 'scheduled' | 'live' | 'final' | 'postponed' | 'canceled';
 

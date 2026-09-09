@@ -9,10 +9,10 @@ import { StandingsView } from "./StandingsView";
 import { StatcastLeaderboard } from "./StatcastLeaderboard";
 import { WhosHotView } from "./WhosHotView";
 
-export type DashboardMode = "wallboard" | "schedule" | "standings" | "statcast" | "hot";
+export type DashboardMode = "wallboard" | "schedule" | "standings" | "statcast" | "hot" | "sports";
 
 interface InteractiveDashboardProps {
-  mode: Exclude<DashboardMode, "wallboard">;
+  mode: Exclude<DashboardMode, "wallboard" | "sports">;
   onReturnToWallboard: () => void;
 }
 

@@ -47,6 +47,8 @@ export interface SportRegistryEntry {
   id: SportId;
   displayName: string;
   availability: SportAvailability;
+  statusLabel: string;
+  statusDescription: string;
   adapter: SportAdapter;
   capabilities: SportCapabilities;
 }
@@ -56,27 +58,35 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     id: 'mlb',
     displayName: 'Major League Baseball',
     availability: 'supported',
+    statusLabel: 'Supported',
+    statusDescription: 'Official MLB feeds power the wallboard and interactive views.',
     adapter: mlbAdapter,
     capabilities: MLB_CAPABILITIES,
   },
   nfl: {
     id: 'nfl',
     displayName: 'National Football League',
-    availability: 'planned',
+    availability: 'experimental',
+    statusLabel: 'Experimental preview',
+    statusDescription: 'A read-only adapter is being evaluated. No NFL data is shown in this shell yet.',
     adapter: plannedAdapter('nfl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
   nba: {
     id: 'nba',
     displayName: 'National Basketball Association',
-    availability: 'planned',
+    availability: 'unavailable',
+    statusLabel: 'Unavailable · provider blocked',
+    statusDescription: 'The current provider is blocked, so NBA data is not presented as live.',
     adapter: plannedAdapter('nba'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
   nhl: {
     id: 'nhl',
     displayName: 'National Hockey League',
-    availability: 'planned',
+    availability: 'experimental',
+    statusLabel: 'Experimental preview',
+    statusDescription: 'A read-only adapter is being evaluated. No NHL data is shown in this shell yet.',
     adapter: plannedAdapter('nhl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
