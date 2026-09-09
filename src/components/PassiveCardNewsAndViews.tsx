@@ -31,49 +31,22 @@ export const PassiveCardNewsAndViews: React.FC<PassiveCardNewsAndViewsProps> = (
   loadingNews,
   loadingHot,
 }) => {
-  // Fallback news if feed is empty
+  // Do not substitute fabricated headlines when the feed is empty.
   const articlesToDisplay =
     newsArticles.length > 0
       ? newsArticles.slice(0, 4)
       : [
           {
-            id: "1",
-            title: "Ohtani's Historic Power Display Continues in Coors Field Surge",
+            id: "news-unavailable",
+            title: "MLB news feed unavailable",
             link: "https://www.mlb.com/news",
-            description:
-              "Shohei Ohtani launched a 476-foot home run with a 119.2 MPH exit velocity over the last 14 days, setting a new Statcast mark.",
-            pubDate: "2 hours ago",
-            imageUrl:
-              "https://img.mlbstatic.com/mlb-photos/image/upload/v1/people/660271/headshot/silo/current",
-          },
-          {
-            id: "2",
-            title: "Cy Young Race Heats Up as Skenes Striking Out Side in 8th Inning",
-            link: "https://www.mlb.com/news",
-            description:
-              "Paul Skenes lowered his ERA to 2.15 while touching 103.5 MPH on his splinker over his past 3 starts.",
-            pubDate: "4 hours ago",
-            imageUrl:
-              "https://img.mlbstatic.com/mlb-photos/image/upload/v1/people/694973/headshot/silo/current",
-          },
-          {
-            id: "3",
-            title: "Yankees and Dodgers Maintain Lead in High-Stakes Division Battles",
-            link: "https://www.mlb.com/news",
-            description:
-              "Pennant races tighten across both leagues as teams approach the stretch run with critical bullpen matchups.",
-            pubDate: "6 hours ago",
+            description: "No unverified headlines are shown.",
+            pubDate: "",
             imageUrl: null,
           },
         ];
 
-  // 14-Day Statcast physics metrics
-  const physics14Days = [
-    { label: "14D Max Exit Velo", player: "Shohei Ohtani (LAD)", stat: "119.2 MPH" },
-    { label: "14D Longest HR", player: "Aaron Judge (NYY)", stat: "476 FT" },
-    { label: "14D Peak Fastball", player: "Aroldis Chapman (PIT)", stat: "103.8 MPH" },
-    { label: "14D Max Sprint Speed", player: "Elly De La Cruz (CIN)", stat: "30.5 FT/S" },
-  ];
+  // Statcast event metrics are intentionally omitted here until the API supplies them.
 
   return (
     <div className="w-full h-full p-6 bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden">
@@ -255,34 +228,19 @@ export const PassiveCardNewsAndViews: React.FC<PassiveCardNewsAndViewsProps> = (
             <span className="text-xs font-black uppercase text-amber-300 font-mono flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-amber-300" /> Statcast (Past 14D)
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">Physics</span>
+            <span className="text-[10px] text-slate-500 font-mono">API only</span>
           </div>
 
-          <div className="flex-1 space-y-2 overflow-hidden">
-            {physics14Days.map((item, idx) => (
-              <div key={idx} className="bg-slate-950 p-2 rounded-xl border border-slate-800/80">
-                <div className="text-[9px] text-slate-400 font-mono uppercase">{item.label}</div>
-                <div className="font-bold text-xs text-white truncate">{item.player}</div>
-                <div className="text-xs font-black text-amber-400 font-mono">{item.stat}</div>
-              </div>
-            ))}
-
-            {/* Top HR Leader Badge over 14 Days */}
-            <div className="bg-amber-950/40 border border-amber-800/60 p-2 rounded-xl flex items-center justify-between">
-              <div>
-                <div className="text-[9px] text-amber-400 font-mono font-bold">14D HR LEADER</div>
-                <div className="font-bold text-xs text-white truncate">Shohei Ohtani</div>
-              </div>
-              <span className="font-black text-amber-400 text-sm font-mono">6 HR</span>
+            <div className="flex-1 flex items-center justify-center overflow-hidden">
+              <p className="text-xs text-slate-500 text-center">No Statcast event metrics available from the current feed.</p>
             </div>
-          </div>
         </div>
       </div>
 
       {/* Footer */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs font-mono text-slate-400 flex items-center justify-between shrink-0">
         <span>Integrated MLB API Feed: RSS Headlines + 14-Day Statcast & Hot Streak Analytics</span>
-        <span className="text-amber-400 font-bold">Updated Live</span>
+        <span className="text-slate-500 font-bold">Live status depends on successful API responses</span>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { ScheduledGame, DetailedGameFeed, DivisionStanding, TickerItem, MLBNewsA
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
 import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
+import { CURRENT_SEASON } from "../utils/season";
 
 export const PassiveScreen: React.FC = () => {
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard & Live Feed, 1: Division Standings
@@ -166,7 +167,7 @@ export const PassiveScreen: React.FC = () => {
 
     const loadStandingsData = async () => {
       try {
-        const data = await fetchStandings("2026");
+        const data = await fetchStandings(CURRENT_SEASON);
         if (isMounted) {
           setStandings(data);
           setStandingsError(null);
@@ -195,7 +196,7 @@ export const PassiveScreen: React.FC = () => {
 
     const loadWhosHotData = async () => {
       try {
-        const data = await fetchWhosHot({ season: "2026", timeframe: "14" });
+        const data = await fetchWhosHot({ season: CURRENT_SEASON, timeframe: "14" });
         if (isMounted) {
           setHotData(data);
           setLoadingHot(false);

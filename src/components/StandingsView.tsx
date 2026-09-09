@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DivisionStanding, StandingTeamRow } from "../types";
 import { fetchStandings } from "../services/api";
 import { Trophy, Shield, Flame, CheckCircle2, Award } from "lucide-react";
+import { CURRENT_SEASON } from "../utils/season";
 
 // Helper to compute Games Behind between leader (w0, l0) and team (wi, li)
 function computeGB(w0: number, l0: number, wi: number, li: number): string {
@@ -63,7 +64,7 @@ export const StandingsView: React.FC = () => {
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<"division" | "league" | "wildcard">("division");
-  const [season, setSeason] = useState<string>("2026");
+  const [season, setSeason] = useState<string>(CURRENT_SEASON);
 
   useEffect(() => {
     setLoading(true);
@@ -321,10 +322,10 @@ export const StandingsView: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
               Official MLB Standings
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">
-                Current As of Aug 6, 2026
+                Current season: {season}
               </span>
             </h2>
-            <p className="text-xs text-slate-400">2026 Regular Season Division, League & Wild Card Race Status</p>
+            <p className="text-xs text-slate-400">{season} regular-season division, league & wild-card standings from the MLB Stats API</p>
           </div>
         </div>
 
@@ -335,7 +336,7 @@ export const StandingsView: React.FC = () => {
             onChange={(e) => setSeason(e.target.value)}
             className="bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none"
           >
-            <option value="2026">2026 Season</option>
+            <option value={CURRENT_SEASON}>{CURRENT_SEASON} Season</option>
             <option value="2025">2025 Season</option>
             <option value="2024">2024 Season</option>
           </select>

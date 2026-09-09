@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Flame, Zap, TrendingUp, Award, Trophy, Activity, ArrowUpRight, Shield, Target, Sparkles, User, RefreshCw, Calendar, Clock } from "lucide-react";
 import { fetchWhosHot } from "../services/api";
+import { CURRENT_SEASON, CURRENT_SEASON_END, CURRENT_SEASON_START } from "../utils/season";
 
 interface WhosHotViewProps {
   onSelectPlayer: (personId: number) => void;
@@ -9,8 +10,8 @@ interface WhosHotViewProps {
 export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
   const [timeMode, setTimeMode] = useState<"preset" | "custom">("preset");
   const [timeframe, setTimeframe] = useState<string>("14");
-  const [startDate, setStartDate] = useState<string>("2026-07-01");
-  const [endDate, setEndDate] = useState<string>("2026-08-06");
+  const [startDate, setStartDate] = useState<string>(CURRENT_SEASON_START);
+  const [endDate, setEndDate] = useState<string>(CURRENT_SEASON_END);
   const [positionFilter, setPositionFilter] = useState<"all" | "hitters" | "pitchers">("all");
   const [analysisMode, setAnalysisMode] = useState<"all" | "aggregate" | "surge">("all");
 
@@ -37,8 +38,8 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
 
     const queryParams =
       timeMode === "custom" && startDate && endDate
-        ? { season: "2026", startDate, endDate }
-        : { season: "2026", timeframe };
+        ? { season: CURRENT_SEASON, startDate, endDate }
+        : { season: CURRENT_SEASON, timeframe };
 
     fetchWhosHot(queryParams).then((data) => {
       if (isMounted) {
@@ -84,7 +85,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                 Hot Streak Leaders & Personal Breakouts
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Filter MLB players across any relevant date span or preset window, comparing recent performance directly against their <strong className="text-amber-300">2026 full season baseline</strong>.
+                Filter MLB players across any relevant date span or preset window, comparing recent performance directly against their <strong className="text-amber-300">{CURRENT_SEASON} full season baseline</strong>.
               </p>
             </div>
 
@@ -156,8 +157,8 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                       <input
                         type="date"
                         value={startDate}
-                        min="2026-03-20"
-                        max="2026-11-01"
+                        min={CURRENT_SEASON_START}
+                        max={CURRENT_SEASON_END}
                         onChange={(e) => setStartDate(e.target.value)}
                         className="bg-slate-900 text-amber-300 font-mono font-bold text-xs px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-500"
                       />
@@ -167,8 +168,8 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                       <input
                         type="date"
                         value={endDate}
-                        min="2026-03-20"
-                        max="2026-11-01"
+                        min={CURRENT_SEASON_START}
+                        max={CURRENT_SEASON_END}
                         onChange={(e) => setEndDate(e.target.value)}
                         className="bg-slate-900 text-amber-300 font-mono font-bold text-xs px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none focus:border-amber-500"
                       />
@@ -178,28 +179,28 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                   <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-800 text-[11px]">
                     <span className="text-slate-500 uppercase font-mono tracking-wider text-[10px]">Quick Spans:</span>
                     <button
-                      onClick={() => { setStartDate("2026-03-26"); setEndDate("2026-07-13"); }}
+                      onClick={() => { setStartDate(`${CURRENT_SEASON}-03-26`); setEndDate(`${CURRENT_SEASON}-07-13`); }}
                       className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800"
                     >
                       First Half
                     </button>
                     <button
-                      onClick={() => { setStartDate("2026-07-17"); setEndDate("2026-08-06"); }}
+                      onClick={() => { setStartDate(`${CURRENT_SEASON}-07-17`); setEndDate(`${CURRENT_SEASON}-08-06`); }}
                       className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800"
                     >
                       Post All-Star
                     </button>
                     <button
-                      onClick={() => { setStartDate("2026-07-07"); setEndDate("2026-08-06"); }}
+                      onClick={() => { setStartDate(`${CURRENT_SEASON}-07-07`); setEndDate(`${CURRENT_SEASON}-08-06`); }}
                       className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800"
                     >
                       Last Month
                     </button>
                     <button
-                      onClick={() => { setStartDate("2026-03-26"); setEndDate("2026-08-06"); }}
+                      onClick={() => { setStartDate(CURRENT_SEASON_START); setEndDate(`${CURRENT_SEASON}-08-06`); }}
                       className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-amber-300 hover:text-amber-200 border border-slate-800"
                     >
-                      Full 2026 Season
+                      Full {CURRENT_SEASON} Season
                     </button>
                   </div>
                 </div>
@@ -368,12 +369,6 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                             </div>
                           </div>
 
-                          {/* Statcast Details */}
-                          <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono px-1">
-                            <span>Hard-Hit: <strong className="text-slate-200">{player.hardHitPct}</strong></span>
-                            <span>Exit Velo: <strong className="text-slate-200">{player.avgExitVelo}</strong></span>
-                          </div>
-
                           {/* Hot Streak Pill */}
                           <div className="bg-amber-950/40 border border-amber-900/50 rounded-lg p-2 text-[11px] text-amber-300 font-medium flex items-start gap-1.5">
                             <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
@@ -455,12 +450,6 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                             </div>
                           </div>
 
-                          {/* Velo & Opponent Avg */}
-                          <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono px-1">
-                            <span>Opp Avg: <strong className="text-slate-200">{player.oppAvg}</strong></span>
-                            <span>Fastball Velo: <strong className="text-indigo-300">{player.fastballVelo}</strong></span>
-                          </div>
-
                           {/* Hot Streak Pill */}
                           <div className="bg-indigo-950/40 border border-indigo-900/50 rounded-lg p-2 text-[11px] text-indigo-300 font-medium flex items-center gap-1.5">
                             <Zap className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
@@ -491,7 +480,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                     <h3 className="text-lg font-black tracking-tight text-white flex items-center gap-2 flex-wrap">
                       Individual Baseline Surge Analysis
                       <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-red-400 border border-slate-700">
-                        {timeMode === "custom" ? `${startDate} to ${endDate}` : `Past ${timeframe} Days`} vs 2026 Season Baseline
+                        {timeMode === "custom" ? `${startDate} to ${endDate}` : `Past ${timeframe} Days`} vs {CURRENT_SEASON} Season Baseline
                       </span>
                     </h3>
                     <p className="text-xs text-slate-400">

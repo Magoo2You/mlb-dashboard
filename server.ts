@@ -396,26 +396,6 @@ app.get("/api/ticker", async (req, res) => {
       }
     });
 
-    // D. 2026 Season Leaders Facts
-    tickerItems.push(
-      {
-        id: "fact-1",
-        category: "2026 STATCAST",
-        type: "fact",
-        badge: "2026 STATCAST",
-        text: "Shohei Ohtani (LAD): 119.2 MPH Max Exit Velocity & 476 FT Max HR Distance in 2026",
-        description: "Statcast elite exit velocity & distance leaderboards.",
-      },
-      {
-        id: "fact-2",
-        category: "2026 PITCHING",
-        type: "fact",
-        badge: "2026 CY YOUNG",
-        text: "Paul Skenes (PIT): 2.15 ERA, 0.94 WHIP & 185 K's in 2026 Season",
-        description: "Cy Young contender pitching leaderboards.",
-      }
-    );
-
     const resultPayload = { date: today, items: tickerItems };
     tickerCache.timestamp = Date.now();
     tickerCache.data = resultPayload;
@@ -755,8 +735,6 @@ app.get("/api/whos-hot", async (req, res) => {
         opsSurgeVal: opsSurge,
         opsVal: opsNum,
         heatLevel,
-        hardHitPct: "Statcast Verified",
-        avgExitVelo: "Real MLB Log",
         hotReason,
         hotStreak,
         breakoutNotes,
@@ -869,8 +847,6 @@ app.get("/api/whos-hot", async (req, res) => {
         strikeouts: so,
         ip: ipNum.toFixed(1),
         kPer9: kPer9Val.toFixed(2),
-        oppAvg: seasonStat?.avg || ".200",
-        fastballVelo: "Live Log",
         wins,
         lastGameDate: recentStarts[0]?.date,
         recentSpan: `${dateSpanLabel} (${recentStarts.length} Games)`,
@@ -1596,15 +1572,8 @@ function transformPlayerProfile(person: any, awardsList: any[]) {
       careerPitching,
       currentSeasonFielding,
     },
-    // Realistic Statcast metric benchmarks based on position
-    statcastHighlights: {
-      avgExitVelocityMph: person.primaryPosition?.code === "1" ? undefined : 91.4,
-      maxExitVelocityMph: person.primaryPosition?.code === "1" ? undefined : 115.8,
-      hardHitPct: person.primaryPosition?.code === "1" ? undefined : 46.8,
-      barrelPct: person.primaryPosition?.code === "1" ? undefined : 11.2,
-      fastballVeloMph: person.primaryPosition?.code === "1" ? 96.8 : undefined,
-      spinRateRpm: person.primaryPosition?.code === "1" ? 2450 : undefined,
-    },
+    // Statcast metrics are omitted until sourced from an actual Statcast response.
+    statcastHighlights: {},
   };
 }
 

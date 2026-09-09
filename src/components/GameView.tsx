@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { CURRENT_SEASON } from "../utils/season";
 import { DetailedGameFeed, PlayEvent, PlayerProfile } from "../types";
 import { fetchPlayerProfile } from "../services/api";
 import { getPlayerExtendedInfo } from "../utils/playerEnrichment";
@@ -458,7 +459,7 @@ export const GameView: React.FC<GameViewProps> = ({
                         </div>
 
                         <div className="grid grid-cols-5 text-center font-bold text-slate-200 py-0.5 border-t border-slate-800/50">
-                          <span className="text-left text-blue-400 font-mono text-[10px]">2026 Season</span>
+                          <span className="text-left text-blue-400 font-mono text-[10px]">{CURRENT_SEASON} Season</span>
                           <span className="text-white font-black">{batterSeason.avg}</span>
                           <span className="text-amber-400 font-black">{batterSeason.hr}</span>
                           <span className="text-white font-black">{batterSeason.rbi}</span>
@@ -576,7 +577,7 @@ export const GameView: React.FC<GameViewProps> = ({
                         </div>
 
                         <div className="grid grid-cols-5 text-center font-bold text-slate-200 py-0.5 border-t border-slate-800/50">
-                          <span className="text-left text-red-400 font-mono text-[10px]">2026 Season</span>
+                          <span className="text-left text-red-400 font-mono text-[10px]">{CURRENT_SEASON} Season</span>
                           <span className="text-white font-black">{pitcherSeason.era}</span>
                           <span className="text-slate-300">
                             {pitcherSeason.wins}-{pitcherSeason.losses}

@@ -1,5 +1,6 @@
 import { ScheduledGame, DetailedGameFeed, PlayerProfile, DivisionStanding, TickerItem, MLBNewsArticle, GameHighlight } from "../types";
 import { MOCK_SCHEDULE_GAMES, MOCK_DETAILED_GAME } from "./mockData";
+import { CURRENT_SEASON } from "../utils/season";
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -48,7 +49,7 @@ export async function fetchPlayerProfile(personId: number): Promise<PlayerProfil
   return requestJson<PlayerProfile>(`/api/player/${personId}`);
 }
 
-export async function fetchStandings(season = "2026"): Promise<DivisionStanding[]> {
+export async function fetchStandings(season = CURRENT_SEASON): Promise<DivisionStanding[]> {
   const data = await requestJson<{ divisions?: DivisionStanding[] }>(`/api/standings?season=${season}`);
   return Array.isArray(data.divisions) ? data.divisions : [];
 }
@@ -68,7 +69,7 @@ export async function fetchGameHighlights(gamePk: number): Promise<GameHighlight
   return Array.isArray(data.highlights) ? data.highlights : [];
 }
 
-export async function fetchStatcastLeaders(season = "2026"): Promise<Record<string, any[]>> {
+export async function fetchStatcastLeaders(season = CURRENT_SEASON): Promise<Record<string, any[]>> {
   const data = await requestJson<{ categories?: Record<string, any[]> }>(`/api/statcast-leaders?season=${season}`);
   return data.categories && typeof data.categories === "object" ? data.categories : {};
 }

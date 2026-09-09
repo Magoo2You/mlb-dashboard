@@ -56,9 +56,8 @@ export const Header: React.FC<HeaderProps> = React.memo(({
   }, [isAutoRefresh]);
 
   const itemsToRender: TickerItem[] = tickerItems.length > 0 ? tickerItems : [
-    { id: "1", category: "2026 SEASON", type: "live", badge: "2026 LIVE", text: "Fetching Live 2026 MLB Scores & Real-Time Scoring Plays..." },
-    { id: "2", category: "BREAKING NEWS", type: "news", badge: "MLB NEWS", text: "Latest Major League Baseball Headlines & Video Highlights Loading..." },
-    { id: "3", category: "STATCAST LEAD", type: "fact", badge: "STATCAST", text: "Shohei Ohtani & Paul Skenes leading 2026 Statcast & Pitching Leaderboards" },
+    { id: "unavailable", category: "LIVE FEED", type: "live", badge: "WAITING", text: "Live MLB feed unavailable; no unverified scores or leaderboards are shown." },
+    { id: "news-unavailable", category: "NEWS", type: "news", badge: "WAITING", text: "MLB headlines feed unavailable; waiting for the next successful response." },
   ];
 
   const handleOpenItem = (item: TickerItem) => {
