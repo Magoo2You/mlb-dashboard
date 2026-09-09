@@ -414,7 +414,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             )}
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-white truncate leading-tight">{item.title}</p>
-                              <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider">{item.tag}</span>
+                              <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider">{item.tag} · {item.verificationStatus === "verified" ? "VERIFIED" : "REVIEWED · UNVERIFIED"}</span>
                             </div>
                           </div>
 
@@ -423,7 +423,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           </div>
                         </div>
 
-                        {/* Fact & Whimsical Quote */}
+                        {/* Retained trivia is explicitly labeled until claim-level verification is complete. */}
                         <div className="bg-purple-950/30 border border-purple-900/40 rounded px-1.5 py-0.5 text-[10px] text-purple-200 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
                           <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                           <span className="line-clamp-2 leading-tight">{item.whimsy || item.fact}</span>

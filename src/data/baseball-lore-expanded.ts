@@ -1,7 +1,9 @@
 /**
- * 🏆 BASEBALL ALMANAC LORE COLLECTION - v9.0.0
- * All entries curated from Baseball Almanac official sources
+ * RETAINED BASEBALL LORE COLLECTION - legacy rollback data
+ * Source URLs are preserved provenance pointers; claim-level verification is tracked below.
  */
+
+export type LoreVerificationStatus = "reviewed-unverified" | "verified";
 
 export type LoreItem = {
   id: string;
@@ -13,9 +15,13 @@ export type LoreItem = {
   fact: string;
   whimsy: string;
   source: string;
+  verificationStatus: LoreVerificationStatus;
+  provenance: string;
 };
 
-export const BASEBALL_LORE_ITEMS: LoreItem[] = [
+type RetainedLoreItem = Omit<LoreItem, "verificationStatus" | "provenance">;
+
+const RETAINED_LORE_ITEMS: RetainedLoreItem[] = [
   {
     id: "hof-pedro",
     title: "Pedro Martínez - Perfect Game Dominator",
@@ -567,5 +573,15 @@ export const BASEBALL_LORE_ITEMS: LoreItem[] = [
     source: "https://en.wikipedia.org/wiki/Jackie_Robinson"
   },
 ];
+
+/**
+ * These historical entries are retained for rollback, but none is promoted to
+ * verified trivia until its individual claim and source are reviewed.
+ */
+export const BASEBALL_LORE_ITEMS: LoreItem[] = RETAINED_LORE_ITEMS.map((item) => ({
+  ...item,
+  verificationStatus: "reviewed-unverified",
+  provenance: "Retained legacy static entry; source URL preserved, claim-specific verification pending.",
+}));
 
 export default BASEBALL_LORE_ITEMS;
