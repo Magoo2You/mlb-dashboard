@@ -1,10 +1,12 @@
 import { transformGameLiveFeed, transformScheduleGame } from "./src/sports/mlb/mlb-transformers";
+import { transformStatcastLeaderGroups } from "./src/sports/mlb/statcast-transformers";
 import { nhlReadOnlyAdapter } from "./src/sports/nhl/nhl-adapter";
 import { isNormalizedNhlSchedule } from "./src/sports/nhl/nhl-route-contract";
 import { nflReadOnlyAdapter } from "./src/sports/nfl/nfl-adapter";
 import { isNormalizedNflScoreboard } from "./src/sports/nfl/nfl-route-contract";
 import { espnNbaScoreboardAdapter } from "./src/sports/nba/espn";
 import { isEspnNbaScoreboardRouteResponse } from "./src/sports/nba/espn";
+import { analyzeHitterEvidence, analyzePitcherEvidence } from "./src/sports/mlb/whos-hot-analysis";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -566,29 +568,18 @@ app.get("/api/statcast-leaders", async (req, res) => {
     const requestedSeason = singleQueryValue(req.query.season);
     const season = requestedSeason || currentYear;
     if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
-    const categories = "homeRuns,battingAverage,runsBattedIn,onBasePlusSlugging,stolenBases,earnedRunAverage,strikeouts,wins,whip,saves";
-    const url = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${categories}&season=${season}&limit=10&hydrate=person,team`;
-
-    const data = await fetchMLB(url);
-    const leagueLeaders = data.leagueLeaders || [];
-
-    const formattedCategories: Record<string, any[]> = {};
-
-    leagueLeaders.forEach((group: any) => {
-      const catName = group.leaderCategory;
-      const leadersList = (group.leaders || []).map((ld: any, idx: number) => ({
-        rank: ld.rank || idx + 1,
-        personId: ld.person?.id,
-        fullName: ld.person?.fullName || "Player",
-        teamAbbr: ld.team?.abbreviation || ld.team?.teamName || "MLB",
-        teamName: ld.team?.name || "Team",
-        value: ld.value,
-        season: ld.season,
-        headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${ld.person?.id}/headshot/silo/current`,
-      }));
-
-      formattedCategories[catName] = leadersList;
-    });
+    const hittingCategories = "homeRuns,battingAverage,runsBattedIn,onBasePlusSlugging,stolenBases";
+    const pitchingCategories = "earnedRunAverage,strikeouts,wins,walksAndHitsPerInningPitched,saves";
+    const makeUrl = (categories: string, statGroup: string) =>
+      `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${categories}&season=${season}&limit=10&hydrate=person,team&statGroup=${statGroup}&statType=season`;
+    const [hittingData, pitchingData] = await Promise.all([
+      fetchMLB(makeUrl(hittingCategories, "hitting")),
+      fetchMLB(makeUrl(pitchingCategories, "pitching")),
+    ]);
+    const formattedCategories = {
+      ...transformStatcastLeaderGroups(hittingData.leagueLeaders || [], "hitting"),
+      ...transformStatcastLeaderGroups(pitchingData.leagueLeaders || [], "pitching"),
+    };
 
     res.json({ season, categories: formattedCategories });
   } catch (error: any) {

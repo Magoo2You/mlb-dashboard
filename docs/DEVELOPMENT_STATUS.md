@@ -28,6 +28,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Multi-sport foundation | Shared contracts and experimental NHL, NFL, and NBA provider adapters exist without false live claims. |
 | Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks, browserless navigation/API contract checks, and MLB schedule/live-feed transformer fixture checks. |
 | MLB transformer coverage | Captured-shape fixtures cover schedule score fallback from `linescore.teams`, scoring-play text/inning mapping, live status and linescore mappings, reverse chronological plays, scoring-play filtering, RBI, and per-play `about.awayScore`/`about.homeScore`. |
+| Statcast leaderboard integrity | Season-scoped hitting and pitching requests use explicit `statGroup` values. Captured collision fixtures reject cross-scope duplicates, preserve all displayed categories, and map WHIP from provider category `walksAndHitsPerInningPitched`. |
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Interactive scroll ownership | The reported Schedule/Standings wheel-scroll symptom was traced to nested vertical overflow shells. Schedule, Standings, Statcast, Who's Hot, and Sports now leave vertical scrolling to the document; `.responsive-table-wrap` retains horizontal scrolling and wallboard clipping remains intentional. |
 | Scroll contract | Browserless source checks assert active interactive shells do not use nested vertical overflow, while responsive table wrappers retain `overflow-x: auto`. |
@@ -40,6 +41,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 ## Provider status
 
 - **MLB StatsAPI/RSS:** active production path; real schedule and game-feed data were smoke-tested.
+- **MLB StatsAPI leaders:** read-only probes confirmed separate `statGroup=hitting` and `statGroup=pitching` requests return the expected five categories per group for season 2026. Returned lists are ordered by provider (descending for counting/rate leader highs such as HR/OPS/K and ascending for ERA/WHIP); qualification metadata is not present in the response, so no local qualification claim is made.
 - **NHL Web API:** experimental same-origin schedule preview; browser user-agent access worked, plain requests returned `403`; standings and play-by-play remain unavailable.
 - **NFL ESPN scoreboard:** experimental same-origin current-scoreboard preview; public endpoint returned HTTP 200 during verification and normalized route checks pass. Undocumented schema/rate limits remain; standings, rosters, drives, and play-by-play are not exposed.
 - **NBA ESPN scoreboard:** experimental same-origin current-scoreboard preview; the provider returned HTTP 200 during verification, and route/normalization/browserless checks pass. Date navigation, standings, leaders, and play-by-play are not exposed; undocumented schema/rate limits remain.
@@ -56,6 +58,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - The error-boundary fallback contract is checked deterministically without a DOM; full DOM interaction, including activating the recovery button and observing a browser reload, remains browser-tested.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.
 - MLB transformer coverage now includes deterministic schedule/live-feed fixtures; live provider variation beyond the covered fields remains unverified.
+- Statcast leader qualification thresholds are provider-controlled and not exposed in the captured leader-group payloads; the route does not guess or synthesize them. The route intentionally does not expose ambiguous unscoped category groups.
 - Experimental sports remain clearly labeled and limited to verified read-only preview contracts; NFL exposes current scoreboard only.
 - The production build is code-split, but the main application chunk remains substantial and should be monitored. The verified post-pass build emitted `dist/assets/index-ChRJfwRR.js` at 447.13 kB (129.99 kB gzip) and `dist/assets/index-CV3ihz9j.css` at 84.52 kB (12.93 kB gzip); no new dependency or bundle-splitting change was justified by this focused pass.
 - Legacy copies and explicit demo fixtures remain for rollback/experimental purposes and must not be mistaken for the active production path.

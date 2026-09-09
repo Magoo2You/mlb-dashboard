@@ -8,15 +8,15 @@ interface StatcastLeaderboardProps {
 }
 
 const categories = [
-  { key: "homeRuns", label: "Home Runs", unit: "HR", color: "text-amber-400" },
-  { key: "onBasePlusSlugging", label: "OPS Leaders", unit: "OPS", color: "text-emerald-400" },
-  { key: "battingAverage", label: "Batting Average", unit: "AVG", color: "text-blue-400" },
-  { key: "runsBattedIn", label: "RBI Leaders", unit: "RBI", color: "text-amber-300" },
-  { key: "earnedRunAverage", label: "ERA Starters", unit: "ERA", color: "text-indigo-400" },
-  { key: "strikeouts", label: "Pitcher Strikeouts", unit: "K", color: "text-blue-400" },
-  { key: "whip", label: "WHIP Starters", unit: "WHIP", color: "text-purple-400" },
-  { key: "saves", label: "Relief Saves", unit: "SV", color: "text-emerald-400" },
-  { key: "stolenBases", label: "Stolen Bases", unit: "SB", color: "text-yellow-400" },
+  { key: "homeRuns", label: "Hitting Home Runs", description: "Season hitting home run leaders", unit: "HR", color: "text-amber-400" },
+  { key: "onBasePlusSlugging", label: "Hitting OPS", description: "Season hitting OPS leaders", unit: "OPS", color: "text-emerald-400" },
+  { key: "battingAverage", label: "Hitting Batting Average", description: "Season hitting batting-average leaders", unit: "AVG", color: "text-blue-400" },
+  { key: "runsBattedIn", label: "Hitting RBI", description: "Season hitting RBI leaders", unit: "RBI", color: "text-amber-300" },
+  { key: "earnedRunAverage", label: "Pitching ERA", description: "Season pitching ERA leaders", unit: "ERA", color: "text-indigo-400" },
+  { key: "strikeouts", label: "Pitcher Strikeouts", description: "Season pitching strikeout leaders", unit: "K", color: "text-blue-400" },
+  { key: "whip", label: "WHIP Starters", description: "Season pitching WHIP leaders", unit: "WHIP", color: "text-purple-400" },
+  { key: "saves", label: "Pitching Saves", description: "Season pitching save leaders", unit: "SV", color: "text-emerald-400" },
+  { key: "stolenBases", label: "Hitting Stolen Bases", description: "Season hitting stolen-base leaders", unit: "SB", color: "text-yellow-400" },
 ];
 
 export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSelectPlayer }) => {
@@ -80,7 +80,7 @@ export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSele
         <div className="p-12 text-center text-amber-300 bg-slate-950 border border-amber-900/60 rounded-2xl text-sm">{error}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map(({ key, label, unit, color }) => {
+          {categories.map(({ key, label, description, unit, color }) => {
             const list = leaders[key] || [];
             return (
               <div key={key} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -88,6 +88,7 @@ export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSele
                   <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5"><BarChart2 className="w-3.5 h-3.5 text-amber-400" />{label}</h3>
                   <span className="text-[10px] text-slate-500 font-mono">{selectedSeason} Official</span>
                 </div>
+                <p className="text-[10px] text-slate-500">{description}</p>
                 {list.length === 0 ? (
                   <p className="text-xs text-slate-500 italic p-2">No leaderboard entries available.</p>
                 ) : (

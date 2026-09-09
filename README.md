@@ -14,6 +14,8 @@ The passive wallboard remains the default view. The fixed **Views** tablist prov
 
 The Schedule view reuses the existing date navigator and schedule cards and opens player profiles when the feed contains valid decision-player IDs. Select a game and use its **Open game feed** action to load the detailed `GameView`; it provides loading, retryable error, empty play-by-play, and return-to-schedule states. The view is mounted only after the API response satisfies the typed detail-feed contract, and no mock fallback is presented as live data.
 
+The Statcast view uses season-scoped MLB StatsAPI leaderboards with separate `statGroup=hitting` and `statGroup=pitching` requests. Hitting cards are home runs, OPS, batting average, RBI, and stolen bases; pitching cards are ERA, strikeouts, WHIP, and saves. WHIP is mapped from the provider's `walksAndHitsPerInningPitched` category. The provider returns already ordered leader lists, but does not expose qualification metadata in these responses; the dashboard does not invent qualification rules or values.
+
 Interactive views use a separate responsive shell: narrow screens and browser zoom can scroll vertically without changing the passive wallboard's fixed broadcast canvas. Schedule cards collapse to one column on small widths; standings, inning linescores, and box-score tables retain readable columns in horizontal scrollers with a visible narrow-screen scroll hint. Very wide tables remain horizontally scrollable on desktop; their dense column sets are not converted to card layouts.
 
 ## Sports status panel
