@@ -29,6 +29,8 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks, browserless navigation/API contract checks, and MLB schedule/live-feed transformer fixture checks. |
 | MLB transformer coverage | Captured-shape fixtures cover schedule score fallback from `linescore.teams`, scoring-play text/inning mapping, live status and linescore mappings, reverse chronological plays, scoring-play filtering, RBI, and per-play `about.awayScore`/`about.homeScore`. |
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
+| Interactive scroll ownership | The reported Schedule/Standings wheel-scroll symptom was traced to nested vertical overflow shells. Schedule, Standings, Statcast, Who's Hot, and Sports now leave vertical scrolling to the document; `.responsive-table-wrap` retains horizontal scrolling and wallboard clipping remains intentional. |
+| Scroll contract | Browserless source checks assert active interactive shells do not use nested vertical overflow, while responsive table wrappers retain `overflow-x: auto`. |
 | Game detail | Schedule selections can open validated MLB live-feed details with loading, retry, empty, and return states. |
 | Request coalescing | Client JSON requests coalesce identical concurrent endpoints and preserve errors; server MLB upstream fetches coalesce identical in-flight URLs and always discard failed promises. |
 | Polling/cache alignment | Passive Who's Hot refresh runs at the verified ten-minute server TTL; ticker polling is 30 seconds in both Header and passive mode, matching its server cache TTL. |
@@ -50,6 +52,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - Server upstream coalescing is process-local and does not coordinate across multiple server processes/instances. Who's Hot cache remains process-local, bounded to 32 keys, and expires after ten minutes.
 - The fixture suite does not verify provider availability or semantics for optional `scoringPlays` hydration, `liveData.plays.currentPlay`, pitch/hit `pitchData`, box-score player maps, or decision fields. These remain provider-integration concerns and require separately captured responses.
 - No full browser/device visual test runner is installed; responsive layout, focus behavior, lazy image timing/fallback paint, lazy view mounting, and rendered error/empty states still require a real browser or desktop preview. Browserless smoke checks cover pure navigation state and mocked fetch contracts only.
+- The local preview can verify reachable page scroll behavior, but wheel-event interaction is not fully proven by the browserless suite; modal internals and game-detail play lists intentionally retain bounded vertical scrolling.
 - The error-boundary fallback contract is checked deterministically without a DOM; full DOM interaction, including activating the recovery button and observing a browser reload, remains browser-tested.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.
 - MLB transformer coverage now includes deterministic schedule/live-feed fixtures; live provider variation beyond the covered fields remains unverified.

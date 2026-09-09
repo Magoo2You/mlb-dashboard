@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fetchGameDetail, fetchSchedule, fetchNflScoreboard, fetchNbaScoreboard, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
 import {
   DASHBOARD_MODES,
@@ -45,6 +47,20 @@ function runErrorBoundaryChecks(): void {
   assert.equal(fallback.props.children.props.children[2].props.children, 'Try again');
   assert.match(JSON.stringify(fallback), /No dashboard data or technical details were exposed/);
   assert.doesNotMatch(JSON.stringify(fallback), /stack|Error:|secret|token/i);
+}
+
+function runScrollOwnershipChecks(): void {
+  const readSource = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), 'utf8');
+  const interactiveDashboard = readSource('src/components/InteractiveDashboard.tsx');
+  const sportsPanel = readSource('src/components/SportsPanel.tsx');
+  const indexCss = readSource('src/index.css');
+
+  assert.match(interactiveDashboard, /dashboard-interactive-shell min-h-screen min-w-0 bg-slate-950/);
+  assert.doesNotMatch(interactiveDashboard, /dashboard-interactive-shell[^"`]*overflow-y-(?:auto|scroll)/);
+  assert.doesNotMatch(sportsPanel, /min-h-screen overflow-y-(?:auto|scroll)/);
+  assert.match(indexCss, /\.dashboard-shell--wallboard[\s\S]*overflow: hidden/);
+  assert.match(indexCss, /\.responsive-table-wrap[\s\S]*overflow-x: auto/);
+  assert.doesNotMatch(indexCss, /\.responsive-table-wrap[\s\S]*overflow-y:\s*(?:auto|scroll)/);
 }
 
 async function runApiChecks(): Promise<void> {
@@ -169,5 +185,7 @@ await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
 runErrorBoundaryChecks();
 console.log('PASS error boundary fallback contract');
+runScrollOwnershipChecks();
+console.log('PASS interactive document scroll ownership contract');
 await runApiChecks();
 console.log('PASS API error/empty handling and game-detail request contract');

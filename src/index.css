@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Keep the broadcast canvas intentionally clipped; interactive shells own scrolling. */
+/* Keep the broadcast canvas intentionally clipped; interactive pages use document scrolling. */
 .dashboard-shell--wallboard {
   overflow: hidden;
 }

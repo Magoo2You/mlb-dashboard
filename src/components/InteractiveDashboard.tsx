@@ -117,7 +117,7 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
   };
 
   return (
-    <div className="dashboard-interactive-shell min-h-screen min-w-0 overflow-y-auto bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
+    <div className="dashboard-interactive-shell min-h-screen min-w-0 bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
       <header className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-amber-400">Interactive MLB dashboard</p>

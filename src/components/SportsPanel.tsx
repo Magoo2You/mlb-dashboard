@@ -47,7 +47,7 @@ export const SportsPanel: React.FC<SportsPanelProps> = ({ onSelectSport, onRetur
   };
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
+    <div className="min-h-screen bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
       <header className="mx-auto flex max-w-5xl flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-amber-400">Sports</p>
