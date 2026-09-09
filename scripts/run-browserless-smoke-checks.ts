@@ -64,6 +64,7 @@ function runScrollOwnershipChecks(): void {
   assert.match(statcastComponent, /id: "fielding"/);
   assert.doesNotMatch(whosHotComponent, /Exit Velo Spike|recentExitVelo|baselineExitVelo|exitVeloSurge/);
   assert.match(serverSource, /statGroup=\$\{statGroup\}&statType=season/);
+  assert.match(serverSource, /numDays > 120/);
   assert.match(serverSource, /makeUrl\(fieldingCategories, "fielding"\)/);
   assert.match(serverSource, /transformStatcastLeaderGroups\(fieldingData\.leagueLeaders \|\| \[\], "fielding", season\)/);
 

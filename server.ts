@@ -626,7 +626,7 @@ app.get("/api/whos-hot", async (req, res) => {
     const currentYear = new Date().getFullYear().toString();
     const season = (rawSeason as string | undefined) || currentYear;
     const numDays = Number(timeframe);
-    if (!/^\d+$/.test(timeframe) || !Number.isInteger(numDays) || numDays < 1 || numDays > 31) {
+    if (!/^\d+$/.test(timeframe) || !Number.isInteger(numDays) || numDays < 1 || numDays > 120) {
       return res.status(400).json({ error: INVALID_INPUT });
     }
     if ((startDate || endDate) && (!startDate || !endDate || !validDate(startDate) || !validDate(endDate) || startDate > endDate)) {
