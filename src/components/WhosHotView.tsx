@@ -82,7 +82,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                 Who's Hot & Surge Analytics
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Hot Streak Leaders & Personal Breakouts
+                Hot Streak Leaders & Recent Trends
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed">
                 Filter MLB players across any relevant date span or preset window, comparing recent performance directly against their <strong className="text-amber-300">{CURRENT_SEASON} full season baseline</strong>.
@@ -500,7 +500,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
               {(positionFilter === "all" || positionFilter === "hitters") && (
                 <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
                   <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2 font-mono">
-                    🔥 Hitter Baseline Breakouts (OPS Surge)
+                    🔥 Hitter Recent Trends
                   </h4>
 
                   <div className="space-y-4">
@@ -578,23 +578,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                             </div>
                           </div>
 
-                          {/* Metric 3: Exit Velo Gain */}
-                          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/90 font-mono flex items-center justify-between">
-                            <div>
-                              <div className="text-[10px] text-slate-500 uppercase font-sans">Exit Velo Spike</div>
-                              <div className="text-xs text-slate-400">
-                                Recent: <strong className="text-white">{player.recentExitVelo}</strong>
-                              </div>
-                              <div className="text-[11px] text-slate-500">
-                                Baseline: {player.baselineExitVelo}
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <span className="inline-block px-2 py-0.5 rounded bg-blue-950 text-blue-400 font-black text-sm border border-blue-800">
-                                {player.exitVeloSurge}
-                              </span>
-                            </div>
-                          </div>
+
                         </div>
                       </button>
                     ))}
