@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   fetchSchedule,
   fetchGameDetail,
@@ -12,13 +12,15 @@ import {
 import { ScheduledGame, DetailedGameFeed, DivisionStanding, TickerItem, MLBNewsArticle } from "../types";
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
-import { Activity, Clock, Trophy, Radio } from "lucide-react";
+import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
 
 export const PassiveScreen: React.FC = () => {
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard & Live Feed, 1: Division Standings
   const [progress, setProgress] = useState<number>(0); // 0 to 100
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>("");
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const isAutoRotationPaused = isPaused || prefersReducedMotion;
 
   // Data States
   const [scheduleGames, setScheduleGames] = useState<ScheduledGame[]>([]);
@@ -69,7 +71,7 @@ export const PassiveScreen: React.FC = () => {
 
   // Auto-Rotation logic across games & guaranteed transition to Division Standings
   useEffect(() => {
-    if (isPaused) return;
+    if (isAutoRotationPaused) return;
 
     if (activeSlideIndex === 0) {
       // 1. Cycle through selected game on the scoreboard every 8 seconds
@@ -104,11 +106,11 @@ export const PassiveScreen: React.FC = () => {
 
       return () => clearTimeout(transitionToScoreboardTimer);
     }
-  }, [isPaused, activeSlideIndex]);
+  }, [isAutoRotationPaused, activeSlideIndex]);
 
   // Smooth Progress Bar ticker
   useEffect(() => {
-    if (isPaused) return;
+    if (isAutoRotationPaused) return;
 
     const duration = activeSlideIndex === 0 ? SLATE_DURATION_SECONDS : STANDINGS_DURATION_SECONDS;
     const tickMs = 100;
@@ -119,7 +121,7 @@ export const PassiveScreen: React.FC = () => {
     }, tickMs);
 
     return () => clearInterval(interval);
-  }, [isPaused, activeSlideIndex, selectedGamePk]);
+  }, [isAutoRotationPaused, activeSlideIndex, selectedGamePk]);
 
   // Initial Data Loader & Poller
   useEffect(() => {
@@ -335,6 +337,24 @@ export const PassiveScreen: React.FC = () => {
 
         {/* Clock */}
         <div className="flex items-center gap-4 font-mono">
+          <button
+            type="button"
+            onClick={() => setIsPaused((paused) => !paused)}
+            disabled={prefersReducedMotion}
+            aria-label={isAutoRotationPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
+            aria-pressed={isAutoRotationPaused}
+            title={
+              prefersReducedMotion
+                ? "Auto-rotation disabled by reduced-motion preference"
+                : isAutoRotationPaused
+                  ? "Resume auto-rotation"
+                  : "Pause auto-rotation"
+            }
+            className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-1.5 text-sm font-bold text-slate-200 transition-colors hover:border-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isAutoRotationPaused ? <Play className="h-4 w-4 text-amber-400" /> : <Pause className="h-4 w-4 text-amber-400" />}
+            <span>{isAutoRotationPaused ? "Paused" : "Playing"}</span>
+          </button>
           <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800 text-slate-200 text-sm font-bold">
             <Clock className="w-4 h-4 text-amber-400" />
             <span>{currentTime || "12:00:00 PM"}</span>
@@ -359,7 +379,7 @@ export const PassiveScreen: React.FC = () => {
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.01 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               className="w-full h-full absolute inset-0"
             >
               <PassiveCardSchedule
@@ -383,7 +403,7 @@ export const PassiveScreen: React.FC = () => {
               initial={{ opacity: 0, scale: 0.99 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.01 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               className="w-full h-full absolute inset-0"
             >
               <PassiveCardStandings standings={standings} loading={loadingStandings} />
