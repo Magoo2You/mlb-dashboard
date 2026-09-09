@@ -27,3 +27,9 @@ The discoverable **Sports** view is a status-only selector built from `src/domai
    `npm install`
 2. Run the app:
    `npm run dev`
+
+## Deterministic checks
+
+Run the pure sport adapter and normalization checks without contacting providers:
+
+`npm test`

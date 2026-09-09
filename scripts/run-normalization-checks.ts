@@ -1,0 +1,16 @@
+import { runEspnNbaNormalizationChecks } from '../src/sports/nba/espn/espn-normalization-checks';
+import { runNbaNormalizationChecks } from '../src/sports/nba/nba-normalization-checks';
+import { runNflNormalizationChecks } from '../src/sports/nfl/nfl-normalization-checks';
+import { runNhlNormalizationChecks } from '../src/sports/nhl/nhl-normalization-checks';
+
+const checks = [
+  ['NHL normalization', runNhlNormalizationChecks],
+  ['NFL normalization', runNflNormalizationChecks],
+  ['NBA normalization', runNbaNormalizationChecks],
+  ['ESPN NBA normalization', runEspnNbaNormalizationChecks],
+] as const;
+
+for (const [name, runCheck] of checks) {
+  runCheck();
+  console.log(`PASS ${name}`);
+}
