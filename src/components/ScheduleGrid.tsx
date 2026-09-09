@@ -110,23 +110,20 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           return (
             <div
               key={game.gamePk}
-              onClick={() => onSelectGame(game.gamePk)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onSelectGame(game.gamePk);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isSelected}
-              aria-label={`Select ${away.team.name} at ${home.team.name}`}
-              className={`focus-ring group relative rounded-2xl p-4 transition-all cursor-pointer border ${
+              className={`group relative rounded-2xl p-4 transition-all cursor-pointer border ${
                 isSelected
                   ? "bg-slate-800/90 border-blue-500 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20"
                   : "bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-850"
               }`}
             >
+              <button
+                type="button"
+                aria-pressed={isSelected}
+                aria-label={`Select ${away.team.name} at ${home.team.name}`}
+                onClick={() => onSelectGame(game.gamePk)}
+                className="absolute inset-0 z-0 rounded-2xl focus-ring"
+              />
+              <div className="relative z-10 pointer-events-none">
               {/* Header Status & Broadcast */}
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
                 <div className="flex items-center gap-2">
@@ -297,7 +294,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                         e.stopPropagation();
                         game.decisions?.winner && onSelectPlayer(game.decisions.winner.id);
                       }}
-                      className="hover:underline font-semibold text-slate-200"
+                      className="pointer-events-auto hover:underline font-semibold text-slate-200"
                     >
                       {game.decisions.winner?.fullName}
                     </button>
@@ -307,7 +304,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                         e.stopPropagation();
                         game.decisions?.loser && onSelectPlayer(game.decisions.loser.id);
                       }}
-                      className="hover:underline font-semibold text-slate-200"
+                      className="pointer-events-auto hover:underline font-semibold text-slate-200"
                     >
                       {game.decisions.loser?.fullName}
                     </button>
@@ -329,6 +326,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
               {/* Individual Game Play-by-Play Vertical Ticker */}
               <VerticalGameTicker playByPlay={game.playByPlay} game={game} />
+              </div>
             </div>
           );
         })}

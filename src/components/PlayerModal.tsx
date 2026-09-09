@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PlayerProfile } from "../types";
 import { fetchPlayerProfile } from "../services/api";
 import {
@@ -23,6 +23,8 @@ interface PlayerModalProps {
 export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) => {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!personId) return;
@@ -33,11 +35,64 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({ personId, onClose }) =
     });
   }, [personId]);
 
+  useEffect(() => {
+    if (!personId) {
+      previouslyFocusedElement.current?.focus();
+      previouslyFocusedElement.current = null;
+      return;
+    }
+
+    if (!previouslyFocusedElement.current && document.activeElement instanceof HTMLElement) {
+      previouslyFocusedElement.current = document.activeElement;
+    }
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusable = dialog.querySelector<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    (focusable || dialog).focus();
+  }, [personId]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || !personId) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+
+      const focusable: HTMLElement[] = Array.from(
+        dialog.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => dialog.removeEventListener("keydown", handleKeyDown);
+  }, [personId, loading, profile]);
+
   if (!personId) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-      <div role="dialog" aria-modal="true" aria-labelledby="player-modal-title" className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden my-8">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="player-modal-title" tabIndex={-1} className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden my-8">
         {/* Top Close Button */}
         <button
           type="button"
