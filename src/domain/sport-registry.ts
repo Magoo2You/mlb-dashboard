@@ -37,9 +37,9 @@ export const mlbAdapter: SportAdapter = {
   capabilities: MLB_CAPABILITIES,
 };
 
-const plannedAdapter = (id: Exclude<SportId, 'mlb'>): SportAdapter => ({
+const experimentalAdapter = (id: Exclude<SportId, 'mlb'>): SportAdapter => ({
   id,
-  availability: 'planned',
+  availability: 'experimental',
   capabilities: UNAVAILABLE_CAPABILITIES,
 });
 
@@ -69,16 +69,16 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     availability: 'experimental',
     statusLabel: 'Experimental preview',
     statusDescription: 'A read-only adapter is being evaluated. No NFL data is shown in this shell yet.',
-    adapter: plannedAdapter('nfl'),
+    adapter: experimentalAdapter('nfl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
   nba: {
     id: 'nba',
     displayName: 'National Basketball Association',
-    availability: 'unavailable',
-    statusLabel: 'Unavailable · provider blocked',
-    statusDescription: 'The current provider is blocked, so NBA data is not presented as live.',
-    adapter: plannedAdapter('nba'),
+    availability: 'experimental',
+    statusLabel: 'Experimental · provider-limited',
+    statusDescription: 'An ESPN current-scoreboard adapter exists, but it is not UI-wired; date queries are unverified, so NBA is not playable here.',
+    adapter: experimentalAdapter('nba'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
   nhl: {
@@ -87,7 +87,7 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     availability: 'experimental',
     statusLabel: 'Experimental preview',
     statusDescription: 'A read-only adapter is being evaluated. No NHL data is shown in this shell yet.',
-    adapter: plannedAdapter('nhl'),
+    adapter: experimentalAdapter('nhl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },
 };

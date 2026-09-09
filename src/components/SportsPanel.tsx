@@ -85,7 +85,7 @@ export const SportsPanel: React.FC<SportsPanelProps> = ({ onSelectSport, onRetur
                 <p id={`${sport.id}-description`} className="mt-3 text-sm leading-6 text-slate-400">{sport.statusDescription}</p>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-slate-300">
                   {isSelected ? <Check className="h-4 w-4 text-amber-400" aria-hidden="true" /> : null}
-                  {sport.availability === "supported" ? "Open supported MLB views" : isUnavailable ? "Not selectable" : "Preview status only"}
+                  {sport.availability === "supported" ? "Open supported MLB views" : isUnavailable ? "Not selectable" : "Status-only preview"}
                 </span>
               </button>
             );

@@ -1,8 +1,10 @@
-# NBA scoreboard adapter foundation (blocked)
+# NBA scoreboard adapter foundation (provider-limited)
 
-This is a **read-only, experimental foundation only**. The adapter is explicitly
-`unavailable` and is not registered or wired into the UI. It never calls NBA.com,
-never falls back to MLB/ESPN/mock data, and never presents fixture data as live.
+This is a **read-only, experimental foundation only**. The historical NBA.com
+candidate remains provider-limited, while the separate ESPN current-scoreboard
+adapter is the current experimental implementation. Neither path is wired into
+the UI or presented as a live playable sport. No path falls back to MLB/mock data,
+and fixture data is never presented as live.
 
 ## Candidate provider endpoint
 
@@ -24,7 +26,7 @@ The endpoint was probed once with a read-only `GET`, a 15-second timeout,
 - A separate `stats.nba.com/stats/scoreboardv3?GameDate=09%2F08%2F2026&LeagueID=00`
   probe timed out. It is not used by the implementation.
 
-Therefore provider access is **blocked/unavailable**, not supported. The 403 does
+Therefore the NBA.com candidate is **provider-limited**, not supported. The 403 does
 not prove that the endpoint always requires authentication or a particular
 header set; it only records the observed result from this network/client.
 
@@ -49,5 +51,7 @@ header set; it only records the observed result from this network/client.
 - `normalizeNbaGame` and `normalizeNbaScoreboard` are pure and return shared
   `NormalizedGame`/`NormalizedTeam` contracts.
 - `runNbaNormalizationChecks` is deterministic and makes no network request.
-- `NbaReadOnlyAdapter` exposes `availability: 'unavailable'`, all capabilities
-  disabled, validates a requested date, and then throws `NbaUnavailableError`.
+- The registry exposes NBA as `experimental` with all UI capabilities disabled.
+- The ESPN adapter exposes only a current-scoreboard foundation; date queries are
+  strictly validated and then rejected because date behavior is unverified.
+- NBA remains status-only in the panel and is not a live playable sport.

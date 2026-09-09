@@ -26,7 +26,9 @@ claim that NFL, NBA, or NHL data is available.
 
 The current `mlbAdapter` is a supported registry descriptor for the existing MLB
 service layer; it intentionally does not duplicate that layer. NFL, NBA, and NHL
-have planned entries with every capability disabled and no data methods.
+have experimental registry entries with every UI capability disabled. NBA also has
+an ESPN current-scoreboard adapter foundation, but it is not UI-wired and its date
+query behavior is unverified; the registry entry remains status-only.
 
 ## Phased provider strategy
 
@@ -47,4 +49,6 @@ have planned entries with every capability disabled and no data methods.
    replacement changes an adapter, not the domain contracts or UI. Prefer
    explicit stale/error states over synthetic fallback data.
 
-No NFL, NBA, or NHL provider integration is included in this slice.
+No NFL or NHL provider data is mounted in the UI. NBA's ESPN adapter is an
+experimental current-scoreboard foundation only; it is not a live playable sport,
+and no date-query support is claimed.
