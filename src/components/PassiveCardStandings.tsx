@@ -172,6 +172,10 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
                                     <img
                                       src={team.team.logoUrl}
                                       alt=""
+                                      width={20}
+                                      height={20}
+                                      loading="lazy"
+                                      decoding="async"
                                       className="w-5 h-5 object-contain shrink-0"
                                       onError={(e) => { (e.target as HTMLElement).style.display = "none"; }}
                                     />

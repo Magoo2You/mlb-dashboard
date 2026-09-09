@@ -301,7 +301,7 @@ export const PassiveScreen: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
           {/* MLB Logo - Using user's custom transparent PNG */}
-            <img src="/assets/mlblogo.png" alt="MLB Logo" className="w-8 h-auto shrink-0 object-contain" />
+            <img src="/assets/mlblogo.png" alt="MLB Logo" width={32} height={32} decoding="async" className="w-8 h-auto shrink-0 object-contain" />
             <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
               Todd's <span className="text-amber-400">MLB Gameday</span>
             </h1>

@@ -98,6 +98,10 @@ export const PassiveCardNewsAndViews: React.FC<PassiveCardNewsAndViewsProps> = (
                     <img
                       src={art.imageUrl}
                       alt=""
+                      width={56}
+                      height={56}
+                      loading="lazy"
+                      decoding="async"
                       className="w-14 h-14 rounded-lg object-cover bg-slate-900 border border-slate-800 shrink-0"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = "none";
@@ -151,6 +155,10 @@ export const PassiveCardNewsAndViews: React.FC<PassiveCardNewsAndViewsProps> = (
                     <img
                       src={player.headshotUrl}
                       alt=""
+                      width={36}
+                      height={36}
+                      loading="lazy"
+                      decoding="async"
                       className="w-9 h-9 rounded-lg object-cover bg-slate-900 border border-amber-500/30 shrink-0"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = "none";
@@ -199,6 +207,10 @@ export const PassiveCardNewsAndViews: React.FC<PassiveCardNewsAndViewsProps> = (
                     <img
                       src={player.headshotUrl}
                       alt=""
+                      width={36}
+                      height={36}
+                      loading="lazy"
+                      decoding="async"
                       className="w-9 h-9 rounded-lg object-cover bg-slate-900 border border-emerald-500/30 shrink-0"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = "none";

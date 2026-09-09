@@ -73,7 +73,6 @@ input:focus-visible {
 .animate-marquee {
   display: inline-flex;
   animation: marquee 220s linear infinite;
-  will-change: transform;
 }
 
 .animate-marquee:hover {

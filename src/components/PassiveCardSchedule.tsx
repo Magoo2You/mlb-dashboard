@@ -232,7 +232,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             game.teams?.away?.isWinner ? "bg-amber-500/10 border-amber-500/30" : "bg-slate-900 border-slate-800"
                           }`}>
                             <div className="flex items-center gap-2 min-w-0">
-                              <img src={game.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain shrink-0" />
+                              <img src={game.teams?.away?.team?.logoUrl} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain shrink-0" />
                               <span className="font-bold text-xs sm:text-sm text-white truncate">{game.teams?.away?.team?.abbreviation}</span>
                             </div>
                             <span className={`font-mono font-black text-sm ${game.teams?.away?.isWinner ? "text-amber-400" : "text-white"}`}>
@@ -245,7 +245,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             game.teams?.home?.isWinner ? "bg-amber-500/10 border-amber-500/30" : "bg-slate-900 border-slate-800"
                           }`}>
                             <div className="flex items-center gap-2 min-w-0">
-                              <img src={game.teams?.home?.team?.logoUrl} alt="" className="w-5 h-5 object-contain shrink-0" />
+                              <img src={game.teams?.home?.team?.logoUrl} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain shrink-0" />
                               <span className="font-bold text-xs sm:text-sm text-white truncate">{game.teams?.home?.team?.abbreviation}</span>
                             </div>
                             <span className={`font-mono font-black text-sm ${game.teams?.home?.isWinner ? "text-amber-400" : "text-white"}`}>
@@ -359,7 +359,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
                             {hitter.headshotUrl ? (
-                              <img src={hitter.headshotUrl} alt={hitter.name} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-amber-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                              <img src={hitter.headshotUrl} alt={hitter.name} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-amber-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
                             ) : (
                               <div className="w-7 h-7 rounded-lg bg-slate-900 border border-amber-500/40 flex items-center justify-center font-bold text-amber-400 font-mono text-xs shrink-0">
                                 #{idx + 1}
@@ -406,7 +406,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
                             {item.headshotUrl ? (
-                              <img src={item.headshotUrl} alt={item.title} className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                              <img src={item.headshotUrl} alt={item.title} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
                             ) : (
                               <div className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0">
                                 ⚾
