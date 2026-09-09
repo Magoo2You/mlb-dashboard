@@ -54,7 +54,7 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
   ];
 
   const currentDivisions = activeTab === 0 ? alDivisions : nlDivisions;
-  const currentWildcard = activeTab === 0 ? alWildcardTeams : nlWildcardTeams;
+  const currentWildcard: typeof alWildcardTeams = [];
   const leagueName = activeTab === 0 ? "American League" : "National League";
   const leagueBadgeColor = activeTab === 0 ? "text-red-400 bg-red-500/10 border-red-500/30" : "text-blue-400 bg-blue-500/10 border-blue-500/30";
 
@@ -207,34 +207,7 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
                 </span>
               </div>
 
-              <div className="grid grid-cols-5 gap-3">
-                {currentWildcard.map((wcTeam, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-2.5 rounded-xl border flex flex-col justify-between font-mono ${
-                      idx < 3
-                        ? "bg-slate-950 border-emerald-500/40 ring-1 ring-emerald-500/20"
-                        : "bg-slate-950/60 border-slate-800"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className={`font-black px-2 py-0.5 rounded text-[10px] ${
-                        idx < 3 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-slate-800 text-slate-400"
-                      }`}>
-                        {wcTeam.status}
-                      </span>
-                      <span className="text-amber-400 font-black">{wcTeam.wcgb}</span>
-                    </div>
-
-                    <p className="text-sm font-bold text-white font-sans truncate py-0.5">{wcTeam.name}</p>
-
-                    <div className="flex items-center justify-between text-xs text-slate-400 mt-1">
-                      <span className="font-semibold text-slate-300">{wcTeam.wins}-{wcTeam.losses}</span>
-                      <span className="text-emerald-400 font-black">{wcTeam.pct}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="py-4 text-center text-xs text-slate-500">Official wildcard data is not available from the current standings feed.</div>
             </div>
           </motion.div>
         </AnimatePresence>
