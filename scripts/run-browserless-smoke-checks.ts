@@ -53,7 +53,17 @@ function runScrollOwnershipChecks(): void {
   const readSource = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), 'utf8');
   const interactiveDashboard = readSource('src/components/InteractiveDashboard.tsx');
   const sportsPanel = readSource('src/components/SportsPanel.tsx');
+  const statcastComponent = readSource('src/components/StatcastLeaderboard.tsx');
+  const serverSource = readSource('server.ts');
   const indexCss = readSource('src/index.css');
+
+  assert.match(statcastComponent, /role="tablist"/);
+  assert.match(statcastComponent, /id: "hitting"/);
+  assert.match(statcastComponent, /id: "pitching"/);
+  assert.match(statcastComponent, /id: "fielding"/);
+  assert.match(serverSource, /statGroup=\$\{statGroup\}&statType=season/);
+  assert.match(serverSource, /makeUrl\(fieldingCategories, "fielding"\)/);
+  assert.match(serverSource, /transformStatcastLeaderGroups\(fieldingData\.leagueLeaders \|\| \[\], "fielding", season\)/);
 
   assert.match(interactiveDashboard, /dashboard-interactive-shell min-h-screen min-w-0 bg-slate-950/);
   assert.doesNotMatch(interactiveDashboard, /dashboard-interactive-shell[^"`]*overflow-y-(?:auto|scroll)/);

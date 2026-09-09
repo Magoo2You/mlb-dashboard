@@ -570,15 +570,18 @@ app.get("/api/statcast-leaders", async (req, res) => {
     if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
     const hittingCategories = "homeRuns,battingAverage,runsBattedIn,onBasePlusSlugging,stolenBases";
     const pitchingCategories = "earnedRunAverage,strikeouts,wins,walksAndHitsPerInningPitched,saves";
+    const fieldingCategories = "fieldingPercentage,putOuts,assists,errors";
     const makeUrl = (categories: string, statGroup: string) =>
       `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${categories}&season=${season}&limit=10&hydrate=person,team&statGroup=${statGroup}&statType=season`;
-    const [hittingData, pitchingData] = await Promise.all([
+    const [hittingData, pitchingData, fieldingData] = await Promise.all([
       fetchMLB(makeUrl(hittingCategories, "hitting")),
       fetchMLB(makeUrl(pitchingCategories, "pitching")),
+      fetchMLB(makeUrl(fieldingCategories, "fielding")),
     ]);
     const formattedCategories = {
-      ...transformStatcastLeaderGroups(hittingData.leagueLeaders || [], "hitting"),
-      ...transformStatcastLeaderGroups(pitchingData.leagueLeaders || [], "pitching"),
+      ...transformStatcastLeaderGroups(hittingData.leagueLeaders || [], "hitting", season),
+      ...transformStatcastLeaderGroups(pitchingData.leagueLeaders || [], "pitching", season),
+      ...transformStatcastLeaderGroups(fieldingData.leagueLeaders || [], "fielding", season),
     };
 
     res.json({ season, categories: formattedCategories });
