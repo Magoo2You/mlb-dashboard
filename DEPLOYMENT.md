@@ -22,7 +22,7 @@ Fill in the form:
 |-------|-------|
 | **Name** | `mlb-dashboard` (or any name you prefer) |
 | **Region** | Any (US-East recommended) |
-| **Branch** | `master` |
+| **Branch** | `ChatGPT2026Version` (or another explicitly verified release branch) |
 | **Root directory** | *(leave blank)* |
 | **Build command** | `npm install && npm run build` |
 | **Start command** | `node dist/server.cjs` |
@@ -84,4 +84,4 @@ Your app is ready when:
 
 ---
 
-**📌 Remember**: Render auto-deploys on every push to `master` branch!
+**📌 Remember**: Render auto-deploys on pushes to the branch configured for this service. Confirm that setting is `ChatGPT2026Version` (or the explicitly selected release branch); do not assume `master` is current.

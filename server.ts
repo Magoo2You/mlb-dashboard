@@ -15,6 +15,25 @@ const PORT = Number.parseInt(process.env.PORT || "3000", 10) || 3000;
 // Keep API request bodies small; the UI sends only compact JSON payloads.
 app.use(express.json({ limit: "32kb" }));
 
+// Keep the production browser boundary explicit without adding a runtime
+// dependency. These headers are deliberately applied only to production
+// responses so Vite's development HMR and injected scripts remain usable.
+if (process.env.NODE_ENV === "production") {
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; " +
+        "script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; " +
+        "media-src 'self' https:; connect-src 'self' https://statsapi.mlb.com https://www.mlb.com " +
+        "https://api-web.nhle.com https://site.api.espn.com",
+    );
+    next();
+  });
+}
+
 const INVALID_INPUT = "Invalid request parameters";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -1178,6 +1197,9 @@ async function startServer() {
       next();
     });
     app.use(express.static(distPath));
+    app.use("/api", (_req, res) => {
+      res.status(404).json({ error: "Not found" });
+    });
     // Express 5 requires a named wildcard; `{*splat}` also matches `/`.
     app.get("/{*splat}", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
