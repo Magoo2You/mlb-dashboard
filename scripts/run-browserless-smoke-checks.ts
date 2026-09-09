@@ -5,6 +5,7 @@ import {
   getAdjacentDashboardMode,
   getModeAfterSportSelection,
 } from '../src/domain/dashboard-navigation';
+import {AppErrorBoundary, ErrorBoundaryFallback} from '../src/components/AppErrorBoundary';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -29,6 +30,18 @@ async function runNavigationChecks(): Promise<void> {
   assert.equal(getAdjacentDashboardMode('wallboard', -1), 'sports');
   assert.equal(getModeAfterSportSelection('sports', 'mlb'), 'wallboard');
   assert.equal(getModeAfterSportSelection('sports', 'nba'), 'sports');
+}
+
+function runErrorBoundaryChecks(): void {
+  assert.deepEqual(AppErrorBoundary.getDerivedStateFromError(), {hasError: true});
+  const fallback = ErrorBoundaryFallback({onReset: () => undefined});
+  assert.equal(fallback.type, 'main');
+  assert.equal(fallback.props.children.type, 'section');
+  assert.equal(fallback.props.children.props.role, 'alert');
+  assert.equal(fallback.props.children.props.children[0].props.children, 'The dashboard needs a restart');
+  assert.equal(fallback.props.children.props.children[2].props.children, 'Try again');
+  assert.match(JSON.stringify(fallback), /No dashboard data or technical details were exposed/);
+  assert.doesNotMatch(JSON.stringify(fallback), /stack|Error:|secret|token/i);
 }
 
 async function runApiChecks(): Promise<void> {
@@ -87,5 +100,7 @@ async function runApiChecks(): Promise<void> {
 
 await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
+runErrorBoundaryChecks();
+console.log('PASS error boundary fallback contract');
 await runApiChecks();
 console.log('PASS API error/empty handling and game-detail request contract');

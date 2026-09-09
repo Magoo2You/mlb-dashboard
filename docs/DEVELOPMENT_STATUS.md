@@ -32,6 +32,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Request coalescing | Client JSON requests coalesce identical concurrent endpoints and preserve errors; server MLB upstream fetches coalesce identical in-flight URLs and always discard failed promises. |
 | Polling/cache alignment | Passive Who's Hot refresh runs at the verified ten-minute server TTL; ticker polling is 30 seconds in both Header and passive mode, matching its server cache TTL. |
 | Who's Hot refresh lock | Concurrent cache misses for the same validated query share one bounded-cache refresh; the existing 32-key/ten-minute freshness and eviction behavior remain unchanged. |
+| Render recovery | The application is wrapped in an accessible error boundary that catches render and lazy-load failures, exposes only a generic recovery message, and offers a reload-based “Try again” action. The wallboard remains the default when no error occurs. |
 
 ## Provider status
 
@@ -48,6 +49,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - Server upstream coalescing is process-local and does not coordinate across multiple server processes/instances. Who's Hot cache remains process-local, bounded to 32 keys, and expires after ten minutes.
 - The fixture suite does not verify provider availability or semantics for optional `scoringPlays` hydration, `liveData.plays.currentPlay`, pitch/hit `pitchData`, box-score player maps, or decision fields. These remain provider-integration concerns and require separately captured responses.
 - No full browser/device visual test runner is installed; responsive layout, focus behavior, lazy view mounting, and rendered error/empty states still require a real browser or desktop preview. Browserless smoke checks cover pure navigation state and mocked fetch contracts only.
+- The error-boundary fallback contract is checked deterministically without a DOM; full DOM interaction, including activating the recovery button and observing a browser reload, remains browser-tested.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.
 - MLB transformer coverage now includes deterministic schedule/live-feed fixtures; live provider variation beyond the covered fields remains unverified.
 - Experimental sports adapters are not yet exposed as live dashboards.
