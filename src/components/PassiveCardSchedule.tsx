@@ -10,7 +10,10 @@ interface PassiveCardScheduleProps {
   onSelectGame?: (gamePk: number) => void;
   gameFeed: DetailedGameFeed | null;
   loadingSchedule: boolean;
+  scheduleError?: string | null;
+  onRetrySchedule?: () => void;
   loadingGame: boolean;
+  gameError?: string | null;
   newsArticles?: MLBNewsArticle[];
   hotData?: any;
   loadingNews?: boolean;
@@ -23,7 +26,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   onSelectGame,
   gameFeed,
   loadingSchedule,
+  scheduleError,
+  onRetrySchedule,
   loadingGame,
+  gameError,
   newsArticles = [],
   hotData,
   loadingNews = false,
@@ -150,13 +156,24 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
           {/* 2 Games Slate Display */}
           <div className="mt-2.5 relative overflow-hidden">
-            {loadingSchedule && games.length === 0 ? (
-              <div className="py-6 flex items-center justify-center text-slate-400">
-                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span className="text-sm font-semibold">Loading MLB Slate...</span>
+            {scheduleError && (
+              <div className="mb-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-200" role="status">
+                {games.length > 0 ? `STALE DATA: ${scheduleError}` : scheduleError}
+                <button type="button" onClick={onRetrySchedule} className="ml-3 font-bold underline hover:text-white">Retry</button>
               </div>
-            ) : (
-              <AnimatePresence mode="wait">
+            )}
+            {loadingSchedule && games.length === 0 ? (
+                <div className="py-6 flex items-center justify-center text-slate-400">
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span className="text-sm font-semibold">Loading MLB Slate...</span>
+                </div>
+              ) : games.length === 0 ? (
+                <div className="py-6 text-center text-slate-400" role="status">
+                  <p className="text-sm font-semibold">No games scheduled today.</p>
+                  <p className="mt-1 text-xs text-slate-500">This may be an official off-day.</p>
+                </div>
+              ) : (
+                <AnimatePresence mode="wait">
                 <motion.div
                   key={pageIndex}
                   initial={{ opacity: 0, y: 10 }}
@@ -334,11 +351,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   className="h-full flex flex-col min-h-0"
                 >
                   <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
-                    {(currentHotSlice.length > 0 ? currentHotSlice : [
-                      { personId: 1, name: "Shohei Ohtani", team: "LAD", position: "DH", ops: "1.185", opsSurge: "+0.210", hotReason: "Huge 2-wk surge: +.210 OPS vs season avg • 5 HR, 14 RBI" },
-                      { personId: 2, name: "Aaron Judge", team: "NYY", position: "OF", ops: "1.120", opsSurge: "+0.185", hotReason: "Power spike: +.185 OPS over season avg • 6 HR in L10G" },
-                      { personId: 3, name: "Juan Soto", team: "NYM", position: "OF", ops: "1.085", opsSurge: "+0.165", hotReason: "On-base surge: .485 OBP & +.165 OPS jump in past 14 days" }
-                    ]).map((hitter: any, idx: number) => (
+                    {hotHittersList.length === 0 && (
+                      <div className="flex h-full items-center justify-center text-center text-xs text-slate-500" role="status">No official hot-hitter data is available.</div>
+                    )}
+                    {currentHotSlice.map((hitter: any, idx: number) => (
                       <div key={hitter.personId || idx} className="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
@@ -425,6 +441,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
       {/* Right 7 Columns: Featured Live Game Feed, Pitch Tracker & Contextual Matchup / Final Summary Cards */}
       <div className="col-span-7 flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full">
+        {gameError && (
+          <div className="mb-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-200" role="status">
+            {gameError}
+            <button type="button" onClick={onRetrySchedule} className="ml-3 font-bold underline hover:text-white">Retry</button>
+          </div>
+        )}
         {loadingGame && !gameFeed ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
             <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
@@ -569,18 +591,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             {liveBatter?.fullName || "Batter"}
                           </h4>
                           <p className="text-xs font-mono text-amber-400 font-bold">
-                            Today: {liveBatter?.todayStats?.summary || "1-3, HR, 2 RBI"}
+                            Today: {liveBatter?.todayStats?.summary || "Unavailable"}
                           </p>
                         </div>
                       </div>
 
                       <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 grid grid-cols-3 gap-1.5 text-center font-mono text-xs">
-                        <div><span className="text-slate-400 block text-[9px] font-bold">AVG</span><span className="text-white font-bold">{liveBatter?.seasonStats?.avg || ".288"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">OBP</span><span className="text-white font-bold">{liveBatter?.seasonStats?.obp || ".365"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">SLG</span><span className="text-white font-bold">{liveBatter?.seasonStats?.slg || ".540"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">OPS</span><span className="text-amber-400 font-black">{liveBatter?.seasonStats?.ops || ".905"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">HR</span><span className="text-white font-bold">{liveBatter?.seasonStats?.hr || 24}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">RBI</span><span className="text-white font-bold">{liveBatter?.seasonStats?.rbi || 72}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">AVG</span><span className="text-white font-bold">{liveBatter?.seasonStats?.avg || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">OBP</span><span className="text-white font-bold">{liveBatter?.seasonStats?.obp || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">SLG</span><span className="text-white font-bold">{liveBatter?.seasonStats?.slg || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">OPS</span><span className="text-amber-400 font-black">{liveBatter?.seasonStats?.ops || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">HR</span><span className="text-white font-bold">{liveBatter?.seasonStats?.hr ?? "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">RBI</span><span className="text-white font-bold">{liveBatter?.seasonStats?.rbi ?? "—"}</span></div>
                       </div>
                     </div>
 
@@ -591,7 +613,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <Zap className="w-3.5 h-3.5 text-red-400" /> PITCHING
                         </span>
                         <span className="text-xs font-mono text-slate-300 font-bold">
-                          {String(livePitcher?.pitchHand?.code || livePitcher?.pitchHand?.description || livePitcher?.pitchHand || "RHP")}
+                          {String(livePitcher?.pitchHand?.code || livePitcher?.pitchHand?.description || livePitcher?.pitchHand || "—")}
                         </span>
                       </div>
 
@@ -606,18 +628,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             {livePitcher?.fullName || "Pitcher"}
                           </h4>
                           <p className="text-xs font-mono text-slate-300">
-                            Pitches: <span className="text-amber-400 font-bold">{livePitcher?.pitchCount || 74}</span>
+                            Pitches: <span className="text-amber-400 font-bold">{livePitcher?.pitchCount ?? "—"}</span>
                           </p>
                         </div>
                       </div>
 
                       <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 grid grid-cols-3 gap-1.5 text-center font-mono text-xs">
-                        <div><span className="text-slate-400 block text-[9px] font-bold">ERA</span><span className="text-emerald-400 font-bold">{livePitcher?.seasonStats?.era || "3.12"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">WHIP</span><span className="text-white font-bold">{livePitcher?.seasonStats?.whip || "1.08"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">W-L</span><span className="text-white font-bold">{livePitcher?.seasonStats?.wins || 11}-{livePitcher?.seasonStats?.losses || 4}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">IP</span><span className="text-white font-bold">{livePitcher?.todayStats?.ip || "5.1"}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">K</span><span className="text-amber-400 font-black">{livePitcher?.todayStats?.strikeouts || 8}</span></div>
-                        <div><span className="text-slate-400 block text-[9px] font-bold">H/R</span><span className="text-white font-bold">{livePitcher?.todayStats?.hits || 4}/{livePitcher?.todayStats?.runs || 2}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">ERA</span><span className="text-emerald-400 font-bold">{livePitcher?.seasonStats?.era || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">WHIP</span><span className="text-white font-bold">{livePitcher?.seasonStats?.whip || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">W-L</span><span className="text-white font-bold">{livePitcher?.seasonStats?.wins ?? "—"}-{livePitcher?.seasonStats?.losses ?? "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">IP</span><span className="text-white font-bold">{livePitcher?.todayStats?.ip || "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">K</span><span className="text-amber-400 font-black">{livePitcher?.todayStats?.strikeouts ?? "—"}</span></div>
+                        <div><span className="text-slate-400 block text-[9px] font-bold">H/R</span><span className="text-white font-bold">{livePitcher?.todayStats?.hits ?? "—"}/{livePitcher?.todayStats?.runs ?? "—"}</span></div>
                       </div>
                     </div>
                   </>
@@ -878,8 +900,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
           </div>
         ) : (
           <div className="h-full flex items-center justify-center text-slate-400 font-semibold text-sm">
-            Select a game from the slate on the left to view detailed live match feed.
-          </div>
+                      {games.length === 0 ? "No game detail is available because there are no scheduled games today." : "Select a game from the slate on the left to view detailed live match feed."}
+                    </div>
         )}
       </div>
     </div>

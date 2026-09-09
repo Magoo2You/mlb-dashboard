@@ -27,6 +27,7 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
   const [currentDate, setCurrentDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [games, setGames] = useState<ScheduledGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
 
@@ -34,6 +35,9 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
     setLoading(true);
     try {
       setGames(await fetchSchedule(currentDate));
+      setScheduleError(null);
+    } catch (error) {
+      setScheduleError("The official schedule is unavailable. Retry to check again.");
     } finally {
       setLoading(false);
     }
@@ -80,6 +84,11 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
             <DateNavigator currentDate={currentDate} onDateChange={setCurrentDate} totalGamesCount={games.length} liveGamesCount={liveGamesCount} />
             {loading ? (
               <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-10 text-center text-slate-400">Loading the official MLB schedule…</div>
+            ) : scheduleError ? (
+              <div className="rounded-2xl border border-amber-700/60 bg-amber-950/40 p-10 text-center text-amber-200" role="alert">
+                <p>{scheduleError}</p>
+                <button type="button" onClick={() => void loadSchedule()} className="mt-3 font-bold underline hover:text-white">Retry</button>
+              </div>
             ) : (
               <ScheduleGrid games={games} selectedGamePk={selectedGamePk} onSelectGame={setSelectedGamePk} onSelectPlayer={setSelectedPlayerId} />
             )}

@@ -6,9 +6,11 @@ import { motion, AnimatePresence } from "motion/react";
 interface PassiveCardStandingsProps {
   standings: DivisionStanding[];
   loading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
-export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, loading }) => {
+export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, loading, error, onRetry }) => {
   // Tab 0: American League + Wildcard, Tab 1: National League + Wildcard
   const [activeTab, setActiveTab] = useState<number>(0);
 
@@ -100,10 +102,21 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
         </div>
       </div>
 
+      {error && (
+        <div className="mb-3 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-200" role="status">
+          {standings.length > 0 ? `STALE DATA: ${error}` : error}
+          <button type="button" onClick={onRetry} className="ml-3 font-bold underline hover:text-white">Retry</button>
+        </div>
+      )}
+
       {loading && standings.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-slate-400 space-y-2">
           <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mr-3"></div>
           <span>Loading League Standings...</span>
+        </div>
+      ) : standings.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center text-slate-400" role="status">
+          <p>No official standings are available yet.</p>
         </div>
       ) : (
         <AnimatePresence mode="wait">

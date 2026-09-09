@@ -34,6 +34,11 @@ export const PassiveScreen: React.FC = () => {
     statcastHitters: [],
   });
   const [tickerItems, setTickerItems] = useState<TickerItem[]>([]);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [standingsError, setStandingsError] = useState<string | null>(null);
+  const [gameError, setGameError] = useState<string | null>(null);
+  const [tickerError, setTickerError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Loading States
   const [loadingSchedule, setLoadingSchedule] = useState<boolean>(true);
@@ -130,38 +135,14 @@ export const PassiveScreen: React.FC = () => {
     const loadScheduleData = async () => {
       try {
         const todayStr = new Date().toISOString().split("T")[0];
-        const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-        const [todayGames, yesterdayGames] = await Promise.all([
-          fetchSchedule(todayStr).catch(() => []),
-          fetchSchedule(yesterdayStr).catch(() => []),
-        ]);
+        const todayGames = await fetchSchedule(todayStr);
 
         if (!isMounted) return;
 
-        const todayStarted = todayGames.some(
-          (g) =>
-            g.status.abstractGameState === "Live" ||
-            g.status.detailedState === "In Progress" ||
-            g.status.abstractGameState === "Final" ||
-            g.status.detailedState === "Final"
-        );
-
-        let combinedGames: ScheduledGame[] = [];
-
-        if (!todayStarted && yesterdayGames.length > 0) {
-          // Until first game of today starts, show today's scheduled AND yesterday's completed games
-          const gameMap = new Map<number, ScheduledGame>();
-          todayGames.forEach((g) => gameMap.set(g.gamePk, g));
-          yesterdayGames.forEach((g) => {
-            if (!gameMap.has(g.gamePk)) gameMap.set(g.gamePk, g);
-          });
-          combinedGames = Array.from(gameMap.values());
-        } else {
-          combinedGames = todayGames.length > 0 ? todayGames : yesterdayGames;
-        }
+        const combinedGames: ScheduledGame[] = todayGames;
 
         setScheduleGames(combinedGames);
+        setScheduleError(null);
         setLoadingSchedule(false);
 
         // Maintain valid selectedGamePk
@@ -176,6 +157,10 @@ export const PassiveScreen: React.FC = () => {
         });
       } catch (e) {
         console.error("Error loading schedule data:", e);
+        if (isMounted) {
+          setScheduleError("The official schedule is unavailable. Retry to check again.");
+          setLoadingSchedule(false);
+        }
       }
     };
 
@@ -184,10 +169,15 @@ export const PassiveScreen: React.FC = () => {
         const data = await fetchStandings("2026");
         if (isMounted) {
           setStandings(data);
+          setStandingsError(null);
           setLoadingStandings(false);
         }
       } catch (e) {
         console.error("Error loading standings:", e);
+        if (isMounted) {
+          setStandingsError("Official standings are unavailable. Retry to check again.");
+          setLoadingStandings(false);
+        }
       }
     };
 
@@ -220,9 +210,13 @@ export const PassiveScreen: React.FC = () => {
         const items = await fetchTicker();
         // Filter out video highlights per user prompt
         const filtered = items.filter((it) => it.type !== "highlight" && it.category !== "VIDEO HIGHLIGHT");
-        if (isMounted) setTickerItems(filtered);
+        if (isMounted) {
+          setTickerItems(filtered);
+          setTickerError(null);
+        }
       } catch (e) {
         console.error("Error loading ticker:", e);
+        if (isMounted) setTickerError("Ticker unavailable");
       }
     };
 
@@ -245,7 +239,7 @@ export const PassiveScreen: React.FC = () => {
       clearInterval(scheduleInterval);
       clearInterval(slowInterval);
     };
-  }, []);
+  }, [retryNonce]);
 
   // Fetch Game Detail whenever selectedGamePk changes
   useEffect(() => {
@@ -253,17 +247,22 @@ export const PassiveScreen: React.FC = () => {
 
     let isMounted = true;
     setLoadingGame(true);
+    setGameError(null);
 
     fetchGameDetail(selectedGamePk)
       .then((feed) => {
         if (isMounted) {
           setGameFeed(feed);
+          setGameError(null);
           setLoadingGame(false);
         }
       })
       .catch((e) => {
-        console.warn("Failed to fetch game detail, fallback active:", e);
-        if (isMounted) setLoadingGame(false);
+        console.warn("Failed to fetch game detail:", e);
+        if (isMounted) {
+          setGameError("Live game detail is unavailable; showing the last available game state.");
+          setLoadingGame(false);
+        }
       });
 
     // Fast polling for live game updates
@@ -272,7 +271,9 @@ export const PassiveScreen: React.FC = () => {
         .then((feed) => {
           if (isMounted) setGameFeed(feed);
         })
-        .catch(() => {});
+        .catch(() => {
+          if (isMounted) setGameError("Live game detail is temporarily unavailable; retrying automatically.");
+        });
     }, 5000);
 
     return () => {
@@ -280,6 +281,8 @@ export const PassiveScreen: React.FC = () => {
       clearInterval(liveInterval);
     };
   }, [selectedGamePk]);
+
+  const retryData = () => setRetryNonce((nonce) => nonce + 1);
 
   const slideTitles = [
     { label: "1. SCOREBOARD & GAME FEED", icon: Activity, color: "text-blue-400" },
@@ -383,12 +386,15 @@ export const PassiveScreen: React.FC = () => {
               className="w-full h-full absolute inset-0"
             >
               <PassiveCardSchedule
-                games={scheduleGames}
-                selectedGamePk={selectedGamePk}
-                onSelectGame={(pk) => setSelectedGamePk(pk)}
-                gameFeed={gameFeed}
-                loadingSchedule={loadingSchedule}
-                loadingGame={loadingGame}
+                    games={scheduleGames}
+                    selectedGamePk={selectedGamePk}
+                    onSelectGame={(pk) => setSelectedGamePk(pk)}
+                    gameFeed={gameFeed}
+                    loadingSchedule={loadingSchedule}
+                    scheduleError={scheduleError}
+                    onRetrySchedule={retryData}
+                    loadingGame={loadingGame}
+                    gameError={gameError}
                 newsArticles={newsArticles}
                 hotData={hotData}
                 loadingNews={loadingNews}
@@ -406,7 +412,7 @@ export const PassiveScreen: React.FC = () => {
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               className="w-full h-full absolute inset-0"
             >
-              <PassiveCardStandings standings={standings} loading={loadingStandings} />
+              <PassiveCardStandings standings={standings} loading={loadingStandings} error={standingsError} onRetry={retryData} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -430,7 +436,7 @@ export const PassiveScreen: React.FC = () => {
               ))
             ) : (
               <span className="text-slate-400">
-                Updating 2026 Major League Baseball Scores, Pitching Matchups & Statcast Metrics...
+                {tickerError || "No current ticker items are available."}
               </span>
             )}
           </div>
