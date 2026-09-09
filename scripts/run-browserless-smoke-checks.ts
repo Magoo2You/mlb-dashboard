@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { fetchGameDetail, fetchSchedule, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
+import { fetchGameDetail, fetchSchedule, fetchNflScoreboard, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
 import {
   DASHBOARD_MODES,
   getAdjacentDashboardMode,
@@ -7,6 +7,7 @@ import {
 } from '../src/domain/dashboard-navigation';
 import {AppErrorBoundary, ErrorBoundaryFallback} from '../src/components/AppErrorBoundary';
 import { isNhlScheduleResponse, isNormalizedNhlSchedule } from '../src/sports/nhl/nhl-route-contract';
+import { isNflScoreboardRouteResponse } from '../src/sports/nfl/nfl-route-contract';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -75,6 +76,17 @@ async function runApiChecks(): Promise<void> {
   });
 
   await withMockFetch(async (input) => {
+    assert.equal(String(input), '/api/sports/nfl/scoreboard');
+    return jsonResponse({ sport: 'nfl', experimental: true, games: [] });
+  }, async () => {
+    assert.deepEqual(await fetchNflScoreboard(), []);
+  });
+
+  await withMockFetch(async () => jsonResponse({ sport: 'nfl', experimental: true, games: [{ sport: 'mlb' }] }), async () => {
+    await assert.rejects(fetchNflScoreboard(), (error: unknown) => error instanceof ApiRequestError && error.status === 502);
+  });
+
+  await withMockFetch(async (input) => {
     assert.equal(String(input), '/api/sports/nhl/schedule?date=2026-04-05');
     return jsonResponse({ sport: 'nhl', experimental: true, date: '2026-04-05', games: [] });
   }, async () => {
@@ -120,8 +132,15 @@ async function runNhlRouteContractChecks(): Promise<void> {
   assert.equal(isNormalizedNhlSchedule([{ sport: 'mlb', id: '1' }]), false);
 }
 
+function runNflRouteContractChecks(): void {
+  assert.equal(isNflScoreboardRouteResponse({ sport: 'nfl', experimental: true, games: [] }), true);
+  assert.equal(isNflScoreboardRouteResponse({ sport: 'nfl', experimental: true, games: [{ sport: 'mlb' }] }), false);
+}
+
 await runNhlRouteContractChecks();
 console.log('PASS NHL route/normalization contract');
+runNflRouteContractChecks();
+console.log('PASS NFL route/normalization contract');
 await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
 runErrorBoundaryChecks();

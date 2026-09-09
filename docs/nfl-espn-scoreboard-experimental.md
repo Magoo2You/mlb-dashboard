@@ -1,9 +1,11 @@
 # NFL ESPN scoreboard adapter (experimental)
 
 This repository contains a **read-only, experimental NFL adapter foundation**.
-It is intentionally not registered in `src/domain/sport-registry.ts` and is not
-wired into the UI. It never falls back to mock, MLB, or synthetic data: provider
-errors are surfaced and malformed provider records are omitted from normalization.
+It is intentionally not a supported dashboard. SportsPanel exposes only a small,
+clearly labeled current-scoreboard preview through a same-origin server route.
+It never falls back to mock, MLB, or synthetic data: provider errors are surfaced
+as a generic unavailable state and malformed provider records are omitted from
+normalization.
 
 ## Provider surface
 
@@ -23,6 +25,9 @@ errors are surfaced and malformed provider records are omitted from normalizatio
   non-2xx HTTP responses, and invalid JSON as `NflApiError` instances.
 - Normalizes ESPN events into the shared `NormalizedGame` contract where event
   ID, time, both home/away teams, and team names are present.
+- Exposes `GET /api/sports/nfl/scoreboard` with no query parameters; unknown or
+  date query parameters are rejected. The route validates the normalized response
+  before returning `{ sport, experimental, games }`.
 - Maps `pre`, `in`, and completed/`post` status values to shared scheduled/live/final
   states; explicitly maps postponed/canceled status names when ESPN supplies them.
 - Exposes only read methods (`getScoreboard` and date-based `getSchedule`).
@@ -40,5 +45,8 @@ errors are surfaced and malformed provider records are omitted from normalizatio
 - The shared contract has only generic game states and scores; it does not preserve
   all NFL-specific status detail, possession, quarter, drive, odds, broadcasts,
   injuries, or competition metadata.
-- This adapter remains unavailable to the UI and registry pending review and
-  provider verification. It is not a claim of production support.
+- Only current scoreboard games are exposed. Standings, rosters, drives, and
+  play-by-play are intentionally not implemented or exposed.
+- The preview is not a claim of production support: ESPN access is public and
+  currently returned HTTP 200 with a recognizable scoreboard shape, but the
+  undocumented schema, availability, rate limits, and terms remain unguaranteed.

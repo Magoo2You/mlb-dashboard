@@ -8,7 +8,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 
 - Working branch: `ChatGPT2026Version`
 - Protected baseline: `main` remains unchanged
-- Latest verified checkpoint: MLB transformer fixture coverage (this branch)
+- Latest verified checkpoint: experimental NFL current-scoreboard preview (this branch)
 - Changes are committed and pushed only after tests, lint, build, and relevant smoke checks pass.
 - Scratch probes, credentials, caches, generated media, and temporary runtime files remain outside production commits.
 
@@ -38,7 +38,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 
 - **MLB StatsAPI/RSS:** active production path; real schedule and game-feed data were smoke-tested.
 - **NHL Web API:** experimental same-origin schedule preview; browser user-agent access worked, plain requests returned `403`; standings and play-by-play remain unavailable.
-- **NFL ESPN scoreboard:** experimental adapter; public endpoint worked during verification; undocumented schema/rate limits; not UI-wired.
+- **NFL ESPN scoreboard:** experimental same-origin current-scoreboard preview; public endpoint returned HTTP 200 during verification and normalized route checks pass. Undocumented schema/rate limits remain; standings, rosters, drives, and play-by-play are not exposed.
 - **NBA ESPN scoreboard:** experimental adapter; current scoreboard worked during verification; date queries are unverified; not UI-wired.
 - **NBA.com endpoints:** documented as blocked/unstable in the experimental provider notes.
 - **Gemini:** removed because it was not actively used. No replacement AI provider is assumed.
@@ -52,7 +52,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - The error-boundary fallback contract is checked deterministically without a DOM; full DOM interaction, including activating the recovery button and observing a browser reload, remains browser-tested.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.
 - MLB transformer coverage now includes deterministic schedule/live-feed fixtures; live provider variation beyond the covered fields remains unverified.
-- Experimental sports adapters are not yet exposed as live dashboards.
+- Experimental sports remain clearly labeled and limited to verified read-only preview contracts; NFL exposes current scoreboard only.
 - The production build is code-split, but the main application chunk remains substantial and should be monitored.
 - Legacy copies and explicit demo fixtures remain for rollback/experimental purposes and must not be mistaken for the active production path.
 

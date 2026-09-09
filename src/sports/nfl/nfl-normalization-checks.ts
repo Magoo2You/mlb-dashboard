@@ -1,5 +1,6 @@
 import { validateNflDate } from './nfl-api';
 import { normalizeNflGame, normalizeNflScoreboard } from './nfl-normalize';
+import { isNflScoreboardRouteResponse, isNormalizedNflScoreboard } from './nfl-route-contract';
 
 const fixtureEvent = {
   id: '401000001',
@@ -34,5 +35,12 @@ export const runNflNormalizationChecks = (): void => {
   }
   if (normalizeNflScoreboard({ events: [fixtureEvent] }).length !== 1) {
     throw new Error('NFL scoreboard normalization regressed');
+  }
+  const games = normalizeNflScoreboard({ events: [fixtureEvent] });
+  if (!isNormalizedNflScoreboard(games) || !isNflScoreboardRouteResponse({ sport: 'nfl', experimental: true, games })) {
+    throw new Error('NFL route response validation regressed');
+  }
+  if (isNflScoreboardRouteResponse({ sport: 'nfl', experimental: true, games: [{ ...games[0], competitors: [] }] })) {
+    throw new Error('NFL malformed route response was accepted');
   }
 };

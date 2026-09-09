@@ -1,6 +1,8 @@
 import { transformGameLiveFeed, transformScheduleGame } from "./src/sports/mlb/mlb-transformers";
 import { nhlReadOnlyAdapter } from "./src/sports/nhl/nhl-adapter";
 import { isNormalizedNhlSchedule } from "./src/sports/nhl/nhl-route-contract";
+import { nflReadOnlyAdapter } from "./src/sports/nfl/nfl-adapter";
+import { isNormalizedNflScoreboard } from "./src/sports/nfl/nfl-route-contract";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -115,6 +117,20 @@ app.get("/api/sports/nhl/schedule", async (req, res) => {
   } catch (error) {
     logServerError("Error fetching experimental NHL schedule:", error);
     return res.status(503).json({ error: "NHL schedule unavailable" });
+  }
+});
+
+// Experimental NFL current scoreboard. This route intentionally accepts no query
+// parameters so it cannot be mistaken for a verified date-schedule contract.
+app.get("/api/sports/nfl/scoreboard", async (req, res) => {
+  if (Object.keys(req.query).length > 0) return res.status(400).json({ error: INVALID_INPUT });
+  try {
+    const games = await nflReadOnlyAdapter.getScoreboard();
+    if (!isNormalizedNflScoreboard(games)) return res.status(503).json({ error: "NFL scoreboard unavailable" });
+    return res.json({ sport: "nfl", experimental: true, games });
+  } catch (error) {
+    logServerError("Error fetching experimental NFL scoreboard:", error);
+    return res.status(503).json({ error: "NFL scoreboard unavailable" });
   }
 });
 

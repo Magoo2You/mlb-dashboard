@@ -68,7 +68,7 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     displayName: 'National Football League',
     availability: 'experimental',
     statusLabel: 'Experimental preview',
-    statusDescription: 'A read-only adapter is being evaluated. No NFL data is shown in this shell yet.',
+    statusDescription: 'Experimental read-only current scoreboard preview only. Provider availability and schema are checked at request time.',
     adapter: experimentalAdapter('nfl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },

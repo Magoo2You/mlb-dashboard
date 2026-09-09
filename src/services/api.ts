@@ -3,6 +3,7 @@ import { MOCK_SCHEDULE_GAMES, MOCK_DETAILED_GAME } from "./mockData";
 import { CURRENT_SEASON } from "../utils/season";
 import type { NormalizedGame } from "../domain/sports";
 import { isNormalizedNhlSchedule } from "../sports/nhl/nhl-route-contract";
+import { isNflScoreboardRouteResponse } from "../sports/nfl/nfl-route-contract";
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -60,6 +61,15 @@ export async function fetchNhlSchedule(dateStr: string): Promise<NormalizedGame[
   const data = await requestJson<{ sport?: string; experimental?: boolean; date?: string; games?: NormalizedGame[] }>(`/api/sports/nhl/schedule?date=${dateStr}`);
   if (data.sport !== 'nhl' || data.experimental !== true || data.date !== dateStr || !isNormalizedNhlSchedule(data.games)) {
     throw new ApiRequestError('NHL schedule response was invalid', `/api/sports/nhl/schedule?date=${dateStr}`, 502);
+  }
+  return data.games;
+}
+
+export async function fetchNflScoreboard(): Promise<NormalizedGame[]> {
+  const endpoint = "/api/sports/nfl/scoreboard";
+  const data = await requestJson<unknown>(endpoint);
+  if (!isNflScoreboardRouteResponse(data)) {
+    throw new ApiRequestError("NFL scoreboard response was invalid", endpoint, 502);
   }
   return data.games;
 }
