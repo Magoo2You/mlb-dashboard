@@ -4,6 +4,7 @@ import { sportRegistry } from "../domain/sport-registry";
 import type { SportId } from "../domain/sports";
 import { NhlSchedulePreview } from './NhlSchedulePreview';
 import { NflScoreboardPreview } from './NflScoreboardPreview';
+import { NbaScoreboardPreview } from './NbaScoreboardPreview';
 
 interface SportsPanelProps {
   onSelectSport: (sport: SportId) => void;
@@ -105,6 +106,7 @@ export const SportsPanel: React.FC<SportsPanelProps> = ({ onSelectSport, onRetur
               ) : null}
               {selected.id === 'nhl' ? <NhlSchedulePreview /> : null}
               {selected.id === 'nfl' ? <NflScoreboardPreview /> : null}
+              {selected.id === 'nba' ? <NbaScoreboardPreview /> : null}
             </div>
           </div>
         </section>

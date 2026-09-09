@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { fetchGameDetail, fetchSchedule, fetchNflScoreboard, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
+import { fetchGameDetail, fetchSchedule, fetchNflScoreboard, fetchNbaScoreboard, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
 import {
   DASHBOARD_MODES,
   getAdjacentDashboardMode,
@@ -8,6 +8,7 @@ import {
 import {AppErrorBoundary, ErrorBoundaryFallback} from '../src/components/AppErrorBoundary';
 import { isNhlScheduleResponse, isNormalizedNhlSchedule } from '../src/sports/nhl/nhl-route-contract';
 import { isNflScoreboardRouteResponse } from '../src/sports/nfl/nfl-route-contract';
+import { isEspnNbaScoreboardRouteResponse } from '../src/sports/nba/espn/espn-route-contract';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -87,6 +88,21 @@ async function runApiChecks(): Promise<void> {
   });
 
   await withMockFetch(async (input) => {
+    assert.equal(String(input), '/api/sports/nba/scoreboard');
+    return jsonResponse({ sport: 'nba', experimental: true, games: [] });
+  }, async () => {
+    assert.deepEqual(await fetchNbaScoreboard(), []);
+  });
+
+  await withMockFetch(async () => jsonResponse({ sport: 'nba', experimental: true, games: [{ sport: 'nfl' }] }), async () => {
+    await assert.rejects(fetchNbaScoreboard(), (error: unknown) => error instanceof ApiRequestError && error.status === 502);
+  });
+
+  await withMockFetch(async () => jsonResponse({ error: 'unavailable' }, false, 503), async () => {
+    await assert.rejects(fetchNbaScoreboard(), (error: unknown) => error instanceof ApiRequestError && error.status === 503);
+  });
+
+  await withMockFetch(async (input) => {
     assert.equal(String(input), '/api/sports/nhl/schedule?date=2026-04-05');
     return jsonResponse({ sport: 'nhl', experimental: true, date: '2026-04-05', games: [] });
   }, async () => {
@@ -137,10 +153,18 @@ function runNflRouteContractChecks(): void {
   assert.equal(isNflScoreboardRouteResponse({ sport: 'nfl', experimental: true, games: [{ sport: 'mlb' }] }), false);
 }
 
+function runNbaRouteContractChecks(): void {
+  assert.equal(isEspnNbaScoreboardRouteResponse({ sport: 'nba', experimental: true, games: [] }), true);
+  assert.equal(isEspnNbaScoreboardRouteResponse({ sport: 'nba', experimental: true, games: [{ sport: 'nfl' }] }), false);
+  assert.equal(isEspnNbaScoreboardRouteResponse({ sport: 'nba', experimental: true, games: [{ sport: 'nba', id: '1', scheduledAt: '2026-04-01T00:00:00Z', state: 'scheduled', competitors: [{ side: 'away', team: { id: 'a', sport: 'nba', name: 'Away' } }, { side: 'home', team: { id: 'h', sport: 'nba', name: 'Home' } }] }] }), true);
+}
+
 await runNhlRouteContractChecks();
 console.log('PASS NHL route/normalization contract');
 runNflRouteContractChecks();
-console.log('PASS NFL route/normalization contract');
+console.log('PASS NFL route contract');
+runNbaRouteContractChecks();
+console.log('PASS NBA route contract');
 await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
 runErrorBoundaryChecks();

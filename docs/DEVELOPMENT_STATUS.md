@@ -39,7 +39,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - **MLB StatsAPI/RSS:** active production path; real schedule and game-feed data were smoke-tested.
 - **NHL Web API:** experimental same-origin schedule preview; browser user-agent access worked, plain requests returned `403`; standings and play-by-play remain unavailable.
 - **NFL ESPN scoreboard:** experimental same-origin current-scoreboard preview; public endpoint returned HTTP 200 during verification and normalized route checks pass. Undocumented schema/rate limits remain; standings, rosters, drives, and play-by-play are not exposed.
-- **NBA ESPN scoreboard:** experimental adapter; current scoreboard worked during verification; date queries are unverified; not UI-wired.
+- **NBA ESPN scoreboard:** experimental same-origin current-scoreboard preview; the provider returned HTTP 200 during verification, and route/normalization/browserless checks pass. Date navigation, standings, leaders, and play-by-play are not exposed; undocumented schema/rate limits remain.
 - **NBA.com endpoints:** documented as blocked/unstable in the experimental provider notes.
 - **Gemini:** removed because it was not actively used. No replacement AI provider is assumed.
 

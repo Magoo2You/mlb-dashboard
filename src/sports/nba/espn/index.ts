@@ -8,4 +8,5 @@ export {
   validateEspnNbaDate,
 } from './espn-api';
 export { normalizeEspnNbaGame, normalizeEspnNbaScoreboard, normalizeEspnNbaTeam } from './espn-normalize';
+export { isEspnNbaScoreboardRouteResponse, isNormalizedEspnNbaScoreboard } from './espn-route-contract';
 export type * from './espn-types';

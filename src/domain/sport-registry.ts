@@ -77,7 +77,7 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     displayName: 'National Basketball Association',
     availability: 'experimental',
     statusLabel: 'Experimental · provider-limited',
-    statusDescription: 'An ESPN current-scoreboard adapter exists, but it is not UI-wired; date queries are unverified, so NBA is not playable here.',
+    statusDescription: 'Experimental read-only current scoreboard preview only. Provider availability and schema are checked at request time; date navigation, standings, leaders, and play-by-play are not exposed.',
     adapter: experimentalAdapter('nba'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },

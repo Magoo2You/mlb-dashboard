@@ -4,6 +4,7 @@ import { CURRENT_SEASON } from "../utils/season";
 import type { NormalizedGame } from "../domain/sports";
 import { isNormalizedNhlSchedule } from "../sports/nhl/nhl-route-contract";
 import { isNflScoreboardRouteResponse } from "../sports/nfl/nfl-route-contract";
+import { isEspnNbaScoreboardRouteResponse } from "../sports/nba/espn/espn-route-contract";
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -70,6 +71,15 @@ export async function fetchNflScoreboard(): Promise<NormalizedGame[]> {
   const data = await requestJson<unknown>(endpoint);
   if (!isNflScoreboardRouteResponse(data)) {
     throw new ApiRequestError("NFL scoreboard response was invalid", endpoint, 502);
+  }
+  return data.games;
+}
+
+export async function fetchNbaScoreboard(): Promise<NormalizedGame[]> {
+  const endpoint = "/api/sports/nba/scoreboard";
+  const data = await requestJson<unknown>(endpoint);
+  if (!isEspnNbaScoreboardRouteResponse(data)) {
+    throw new ApiRequestError("NBA scoreboard response was invalid", endpoint, 502);
   }
   return data.games;
 }

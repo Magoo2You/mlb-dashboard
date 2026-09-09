@@ -3,6 +3,8 @@ import { nhlReadOnlyAdapter } from "./src/sports/nhl/nhl-adapter";
 import { isNormalizedNhlSchedule } from "./src/sports/nhl/nhl-route-contract";
 import { nflReadOnlyAdapter } from "./src/sports/nfl/nfl-adapter";
 import { isNormalizedNflScoreboard } from "./src/sports/nfl/nfl-route-contract";
+import { espnNbaScoreboardAdapter } from "./src/sports/nba/espn";
+import { isEspnNbaScoreboardRouteResponse } from "./src/sports/nba/espn";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -131,6 +133,21 @@ app.get("/api/sports/nfl/scoreboard", async (req, res) => {
   } catch (error) {
     logServerError("Error fetching experimental NFL scoreboard:", error);
     return res.status(503).json({ error: "NFL scoreboard unavailable" });
+  }
+});
+
+// Experimental NBA current scoreboard. Date navigation and all query parameters
+// remain unsupported because ESPN date semantics are not verified.
+app.get("/api/sports/nba/scoreboard", async (req, res) => {
+  if (Object.keys(req.query).length > 0) return res.status(400).json({ error: INVALID_INPUT });
+  try {
+    const games = await espnNbaScoreboardAdapter.getScoreboard();
+    const payload = { sport: "nba" as const, experimental: true as const, games };
+    if (!isEspnNbaScoreboardRouteResponse(payload)) return res.status(503).json({ error: "NBA scoreboard unavailable" });
+    return res.json(payload);
+  } catch (error) {
+    logServerError("Error fetching experimental NBA scoreboard:", error);
+    return res.status(503).json({ error: "NBA scoreboard unavailable" });
   }
 });
 
