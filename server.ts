@@ -1600,7 +1600,8 @@ async function startServer() {
       next();
     });
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    // Express 5 requires a named wildcard; `{*splat}` also matches `/`.
+    app.get("/{*splat}", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
