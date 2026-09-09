@@ -86,7 +86,7 @@ export const sportRegistry: Readonly<Record<SportId, SportRegistryEntry>> = {
     displayName: 'National Hockey League',
     availability: 'experimental',
     statusLabel: 'Experimental preview',
-    statusDescription: 'A read-only adapter is being evaluated. No NHL data is shown in this shell yet.',
+    statusDescription: 'Experimental read-only schedule preview only. Provider availability is checked at request time; NHL is not a supported dashboard.',
     adapter: experimentalAdapter('nhl'),
     capabilities: UNAVAILABLE_CAPABILITIES,
   },

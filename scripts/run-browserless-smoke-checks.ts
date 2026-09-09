@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { fetchGameDetail, fetchSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
+import { fetchGameDetail, fetchSchedule, fetchNhlSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
 import {
   DASHBOARD_MODES,
   getAdjacentDashboardMode,
   getModeAfterSportSelection,
 } from '../src/domain/dashboard-navigation';
 import {AppErrorBoundary, ErrorBoundaryFallback} from '../src/components/AppErrorBoundary';
+import { isNhlScheduleResponse, isNormalizedNhlSchedule } from '../src/sports/nhl/nhl-route-contract';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -73,6 +74,17 @@ async function runApiChecks(): Promise<void> {
     );
   });
 
+  await withMockFetch(async (input) => {
+    assert.equal(String(input), '/api/sports/nhl/schedule?date=2026-04-05');
+    return jsonResponse({ sport: 'nhl', experimental: true, date: '2026-04-05', games: [] });
+  }, async () => {
+    assert.deepEqual(await fetchNhlSchedule('2026-04-05'), []);
+  });
+
+  await withMockFetch(async () => jsonResponse({ sport: 'nhl', experimental: true, date: '2026-04-05', games: [{ sport: 'mlb' }] }), async () => {
+    await assert.rejects(fetchNhlSchedule('2026-04-05'), (error: unknown) => error instanceof ApiRequestError && error.status === 502);
+  });
+
   await withMockFetch(async (input, init) => {
     assert.equal(String(input), '/api/game/12345');
     assert.equal(init, undefined);
@@ -98,6 +110,18 @@ async function runApiChecks(): Promise<void> {
   });
 }
 
+async function runNhlRouteContractChecks(): Promise<void> {
+  assert.equal(isNhlScheduleResponse({ gameWeek: [] }), true);
+  assert.equal(isNhlScheduleResponse({ gameWeek: [{ date: '2026-04-01', games: [] }] }), true);
+  assert.equal(isNhlScheduleResponse({ gameWeek: [{ games: [] }] }), false);
+  assert.equal(isNhlScheduleResponse({}), false);
+  assert.equal(isNormalizedNhlSchedule([]), true);
+  assert.equal(isNormalizedNhlSchedule([{ sport: 'nhl', id: '1', scheduledAt: '2026-04-01T00:00:00Z', state: 'scheduled', competitors: [{ side: 'away', team: { id: 'a', sport: 'nhl', name: 'Away' } }, { side: 'home', team: { id: 'h', sport: 'nhl', name: 'Home' } }] }]), true);
+  assert.equal(isNormalizedNhlSchedule([{ sport: 'mlb', id: '1' }]), false);
+}
+
+await runNhlRouteContractChecks();
+console.log('PASS NHL route/normalization contract');
 await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
 runErrorBoundaryChecks();

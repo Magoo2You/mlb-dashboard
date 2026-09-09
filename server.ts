@@ -1,4 +1,6 @@
 import { transformGameLiveFeed, transformScheduleGame } from "./src/sports/mlb/mlb-transformers";
+import { nhlReadOnlyAdapter } from "./src/sports/nhl/nhl-adapter";
+import { isNormalizedNhlSchedule } from "./src/sports/nhl/nhl-route-contract";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -97,6 +99,22 @@ app.get("/api/schedule", async (req, res) => {
   } catch (error: any) {
     logServerError("Error fetching schedule:", error);
     res.status(500).json({ error: "Failed to fetch MLB schedule" });
+  }
+});
+
+// Experimental NHL schedule preview. It never substitutes mock or MLB data.
+app.get("/api/sports/nhl/schedule", async (req, res) => {
+  const requestedDate = singleQueryValue(req.query.date);
+  const date = requestedDate || new Date().toISOString().split("T")[0];
+  if (!validDate(date)) return res.status(400).json({ error: INVALID_INPUT });
+
+  try {
+    const games = await nhlReadOnlyAdapter.getSchedule(date);
+    if (!isNormalizedNhlSchedule(games)) return res.status(503).json({ error: "NHL schedule unavailable" });
+    return res.json({ sport: "nhl", experimental: true, date, games });
+  } catch (error) {
+    logServerError("Error fetching experimental NHL schedule:", error);
+    return res.status(503).json({ error: "NHL schedule unavailable" });
   }
 });
 

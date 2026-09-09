@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Check, CircleAlert, FlaskConical, ShieldCheck } from "lucide-react";
 import { sportRegistry } from "../domain/sport-registry";
 import type { SportId } from "../domain/sports";
+import { NhlSchedulePreview } from './NhlSchedulePreview';
 
 interface SportsPanelProps {
   onSelectSport: (sport: SportId) => void;
@@ -98,9 +99,10 @@ export const SportsPanel: React.FC<SportsPanelProps> = ({ onSelectSport, onRetur
             <div>
               <h2 id="sport-status-heading" className="font-bold text-white">{selected.displayName}: {selected.statusLabel}</h2>
               <p className="mt-1 text-sm leading-6 text-slate-400">{selected.statusDescription}</p>
-              {selected.availability !== "supported" ? (
+              {selected.availability !== "supported" && selected.id !== 'nhl' ? (
                 <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">No provider data is mounted from this panel, so it cannot display fake or partial game data.</p>
               ) : null}
+              {selected.id === 'nhl' ? <NhlSchedulePreview /> : null}
             </div>
           </div>
         </section>

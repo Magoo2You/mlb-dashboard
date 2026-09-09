@@ -1,9 +1,8 @@
 # NHL Web API adapter (experimental)
 
-This repository contains a **read-only, experimental adapter foundation** for the
-NHL Web API. It is not registered in the sport registry and is unavailable in the
-UI until an explicit UI integration and verification pass is completed. It never
-falls back to MLB data or mock content.
+This repository contains a **read-only, experimental adapter foundation** for the NHL Web API. It is represented in the sport registry as **experimental** and is available only
+through the explicitly labeled schedule preview. It never falls back to MLB data
+or mock content.
 
 ## Provider surface
 
@@ -25,13 +24,18 @@ provider errors as errors.
 - The adapter validates real `YYYY-MM-DD` calendar dates, applies a 10-second
   abort timeout, reports non-2xx/invalid JSON/network failures, and normalizes
   only schedule games and standings fields that map to the shared sport contracts.
-- Malformed provider records are omitted rather than synthesized. No caching,
-  retries, authentication, persistence, live-score polling, or UI wiring is
-  included.
+- Malformed provider payloads are rejected and malformed records are omitted
+  rather than synthesized. The same-origin `/api/sports/nhl/schedule?date=YYYY-MM-DD`
+  route uses the adapter, a browser-compatible user-agent, a bounded timeout,
+  and generic 400/503 responses. The UI shows only validated normalized games,
+  with loading, error, and empty/unavailable states.
+- No standings, play-by-play, caching, retries, authentication, persistence, or
+  live-score polling is exposed.
 - NHL-specific standings semantics do not map perfectly to the generic contract;
   overtime losses are represented in the shared `ties` field as the closest
   available field and should not be presented as baseball-style ties.
 
 Deterministic normalization checks live in
-`src/sports/nhl/nhl-normalization-checks.ts`. The build does not call the
-provider.
+`src/sports/nhl/nhl-normalization-checks.ts`. The build does not call the provider. Local route smoke checks should use the
+same-origin boundary; direct browser calls to the NHL host are intentionally not
+part of the application contract.

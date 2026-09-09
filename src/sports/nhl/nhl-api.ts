@@ -44,7 +44,11 @@ const requestJson = async <T>(
   try {
     const response = await fetcher(url, {
       method: 'GET',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        // api-web.nhle.com currently rejects plain/default fetch clients.
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36',
+      },
       signal: controller.signal,
     });
     return await ensureResponseJson<T>(response, url);

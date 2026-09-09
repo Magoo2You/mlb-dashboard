@@ -1,6 +1,8 @@
 import { ScheduledGame, DetailedGameFeed, PlayerProfile, DivisionStanding, TickerItem, MLBNewsArticle, GameHighlight } from "../types";
 import { MOCK_SCHEDULE_GAMES, MOCK_DETAILED_GAME } from "./mockData";
 import { CURRENT_SEASON } from "../utils/season";
+import type { NormalizedGame } from "../domain/sports";
+import { isNormalizedNhlSchedule } from "../sports/nhl/nhl-route-contract";
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -52,6 +54,14 @@ export async function fetchSchedule(dateStr: string, forceDemo = false): Promise
 
   const data = await requestJson<{ games?: ScheduledGame[] }>(`/api/schedule?date=${dateStr}`);
   return Array.isArray(data.games) ? data.games : [];
+}
+
+export async function fetchNhlSchedule(dateStr: string): Promise<NormalizedGame[]> {
+  const data = await requestJson<{ sport?: string; experimental?: boolean; date?: string; games?: NormalizedGame[] }>(`/api/sports/nhl/schedule?date=${dateStr}`);
+  if (data.sport !== 'nhl' || data.experimental !== true || data.date !== dateStr || !isNormalizedNhlSchedule(data.games)) {
+    throw new ApiRequestError('NHL schedule response was invalid', `/api/sports/nhl/schedule?date=${dateStr}`, 502);
+  }
+  return data.games;
 }
 
 export async function fetchGameDetail(gamePk: number, forceDemo = false): Promise<DetailedGameFeed> {

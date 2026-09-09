@@ -37,7 +37,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 ## Provider status
 
 - **MLB StatsAPI/RSS:** active production path; real schedule and game-feed data were smoke-tested.
-- **NHL Web API:** experimental adapter; browser user-agent access worked, plain requests returned `403`; not UI-wired.
+- **NHL Web API:** experimental same-origin schedule preview; browser user-agent access worked, plain requests returned `403`; standings and play-by-play remain unavailable.
 - **NFL ESPN scoreboard:** experimental adapter; public endpoint worked during verification; undocumented schema/rate limits; not UI-wired.
 - **NBA ESPN scoreboard:** experimental adapter; current scoreboard worked during verification; date queries are unverified; not UI-wired.
 - **NBA.com endpoints:** documented as blocked/unstable in the experimental provider notes.
