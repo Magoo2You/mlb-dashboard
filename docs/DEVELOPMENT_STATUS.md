@@ -25,7 +25,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Accessibility | Reachable controls have keyboard semantics, labels, focus styling, modal focus management, and non-nested schedule interactions. |
 | Performance | Interactive views are code-split; initial JavaScript is below the prior 500 kB warning threshold. |
 | Multi-sport foundation | Shared contracts and experimental NHL, NFL, and NBA provider adapters exist without false live claims. |
-| Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks. |
+| Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks plus browserless navigation, API error/empty handling, and game-detail request-contract smoke checks. |
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Game detail | Schedule selections can open validated MLB live-feed details with loading, retry, empty, and return states. |
 
@@ -40,7 +40,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 
 ## Known limitations
 
-- No full browser/device visual test runner is installed; responsive and accessibility work uses production previews, source checks, and deterministic smoke checks.
+- No full browser/device visual test runner is installed; responsive layout, focus behavior, lazy view mounting, and rendered error/empty states still require a real browser or desktop preview. Browserless smoke checks cover pure navigation state and mocked fetch contracts only.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.
 - MLB transformer coverage is not yet equivalent to the adapter normalization coverage; scoring/live-feed fixture coverage remains queued.
 - Experimental sports adapters are not yet exposed as live dashboards.

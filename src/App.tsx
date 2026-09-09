@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useRef, useState } from "react";
 import { BarChart3, CalendarDays, CircleDot, Flame, MonitorPlay, Trophy, Zap } from "lucide-react";
-import type { DashboardMode } from "./components/InteractiveDashboard";
+import type { DashboardMode } from "./domain/dashboard-navigation";
+import { getAdjacentDashboardMode, getModeAfterSportSelection } from "./domain/dashboard-navigation";
 import { PassiveScreen } from "./components/PassiveScreen";
 
 const InteractiveDashboard = lazy(() => import("./components/InteractiveDashboard").then(({ InteractiveDashboard: dashboard }) => ({ default: dashboard })));
@@ -29,13 +30,13 @@ export default function App() {
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const selectMode = (nextMode: DashboardMode) => setMode(nextMode);
-  const selectSport = (sport: SportId) => {
-    if (sport === "mlb") setMode("wallboard");
-  };
+  const selectSport = (sport: SportId) => setMode(getModeAfterSportSelection(mode, sport));
   const moveFocus = (index: number) => {
-    const nextIndex = (index + modes.length) % modes.length;
+    const currentIndex = modes.findIndex((item) => item.id === mode);
+    const nextMode = getAdjacentDashboardMode(mode, index - currentIndex);
+    const nextIndex = modes.findIndex((item) => item.id === nextMode);
     tabRefs.current[nextIndex]?.focus();
-    selectMode(modes[nextIndex].id);
+    selectMode(nextMode);
   };
 
   return (
