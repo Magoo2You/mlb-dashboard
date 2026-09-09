@@ -3,42 +3,42 @@ import { analyzeHitterEvidence, analyzePitcherEvidence } from "../src/sports/mlb
 
 const span = { startDate: "2026-04-01", endDate: "2026-04-14" };
 
-const surge = analyzeHitterEvidence({
-  ...span, sampleSize: 10, atBats: 38, hits: 14, homeRuns: 4, rbi: 10,
-  baseOnBalls: 5, hitByPitch: 0, sacFlies: 1, totalBases: 32, stolenBases: 1,
-  baseline: { ops: 0.72, avg: 0.25, slg: 0.4, obp: 0.32 },
+const power = analyzeHitterEvidence({
+  ...span, sampleSize: 10, atBats: 38, hits: 14, homeRuns: 4, rbi: 10, runs: 12,
+  strikeouts: 8, baseOnBalls: 5, hitByPitch: 0, sacFlies: 1, totalBases: 32, stolenBases: 3,
+  baseline: { ops: 0.72, avg: 0.25, slg: 0.4, obp: 0.32, homeRuns: 10, rbi: 30, runs: 25, stolenBases: 2, totalBases: 90, gamesPlayed: 80, plateAppearances: 300 },
 });
-assert.ok(surge.why.includes("OPS") && surge.why.includes("10 games") && surge.why.includes("2026-04-01 to 2026-04-14"));
-assert.match(surge.why, /recent surge/i);
-assert.notEqual(surge.why, surge.statHighlights);
+assert.match(power.primaryReason, /HR|RBI|runs|stolen bases|total bases/i);
+assert.match(power.primaryReason, /per-game|per-PA|10 games/);
+assert.doesNotMatch(power.primaryReason, /surge|breakout/i);
+assert.ok(power.statHighlights.includes("HR") && power.statHighlights.includes("RBI") && power.statHighlights.includes("R"));
 
-const sustained = analyzeHitterEvidence({
-  ...span, sampleSize: 12, atBats: 45, hits: 14, homeRuns: 1, rbi: 6,
-  baseOnBalls: 7, hitByPitch: 1, sacFlies: 1, totalBases: 23, stolenBases: 0,
-  baseline: { ops: 0.82, avg: 0.30, slg: 0.48, obp: 0.34 },
-});
-assert.match(sustained.why, /sustained production/i);
-assert.match(sustained.why, /12 games/);
-assert.notEqual(sustained.why, surge.why);
-
-const discipline = analyzeHitterEvidence({
-  ...span, sampleSize: 8, atBats: 30, hits: 9, homeRuns: 0, rbi: 4,
-  baseOnBalls: 10, hitByPitch: 0, sacFlies: 0, totalBases: 14, stolenBases: 0,
+const rateContext = analyzeHitterEvidence({
+  ...span, sampleSize: 8, atBats: 30, hits: 9, homeRuns: 0, rbi: 4, runs: 3,
+  strikeouts: 7, baseOnBalls: 10, hitByPitch: 0, sacFlies: 0, totalBases: 14, stolenBases: 0,
   baseline: { ops: 0.88, avg: 0.27, slg: 0.40, obp: 0.30, baseOnBalls: 8, plateAppearances: 40 },
 });
-assert.match(discipline.why, /plate.?discipline|on-base/i);
-assert.match(discipline.statHighlights, /BB/);
+assert.match(rateContext.primaryReason, /Current-window production|No supported baseline change|plate-discipline/i);
+assert.doesNotMatch(rateContext.primaryReason, /HR|RBI|runs|stolen bases|total bases.*trend/i);
+
+const noBaseline = analyzeHitterEvidence({
+  ...span, sampleSize: 8, atBats: 30, hits: 9, homeRuns: 4, rbi: 12, runs: 10,
+  strikeouts: 3, baseOnBalls: 2, hitByPitch: 0, sacFlies: 0, totalBases: 24, stolenBases: 2,
+});
+assert.match(noBaseline.primaryReason, /Current-window production|No supported baseline change/i);
+assert.doesNotMatch(noBaseline.primaryReason, /HR trend|RBI trend|runs trend|stolen-base trend|total-base trend/i);
 
 const pitcher = analyzePitcherEvidence({
-  ...span, sampleSize: 4, inningsPitched: 20, earnedRuns: 3, strikeouts: 24, walks: 4, hits: 12,
-  baseline: { era: 4.2, whip: 1.35 },
+  ...span, sampleSize: 4, inningsPitched: 20, earnedRuns: 3, strikeouts: 24, walks: 4, hits: 12, homeRuns: 1,
+  baseline: { era: 4.2, whip: 1.35, strikeouts: 80, walks: 30, hits: 90, homeRuns: 12, inningsPitched: 75 },
 });
-assert.match(pitcher.why, /pitching trend|ERA|WHIP/i);
-assert.ok(pitcher.why.includes("4 games") && pitcher.why.includes("2026-04-01 to 2026-04-14"));
-assert.doesNotMatch(pitcher.why, /OPS|AVG|slugging/i);
+assert.match(pitcher.primaryReason, /K\/9|BB\/9|H\/9|HR\/9|ERA|WHIP|innings/i);
+assert.match(pitcher.primaryReason, /4 games|20\.0 IP/);
+assert.doesNotMatch(pitcher.primaryReason, /dominant|ace surge|breakout/i);
+assert.match(pitcher.statHighlights, /K\/9|BB\/9|H\/9|HR\/9/);
 
 const insufficient = analyzeHitterEvidence({
-  ...span, sampleSize: 1, atBats: 2, hits: 1, homeRuns: 0, rbi: 0,
+  ...span, sampleSize: 1, atBats: 2, hits: 1, homeRuns: 0, rbi: 0, runs: 0, strikeouts: 1,
   baseOnBalls: 0, hitByPitch: 0, sacFlies: 0, totalBases: 1, stolenBases: 0,
 });
 assert.equal(insufficient.insufficientData, true);

@@ -43,6 +43,20 @@ function singleQueryValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function parseInningsPitched(value: unknown): number | undefined {
+  if (typeof value !== "string" && typeof value !== "number") return undefined;
+  const [wholePart, outsPart] = String(value).split(".");
+  const whole = Number.parseInt(wholePart, 10);
+  if (!Number.isFinite(whole)) return undefined;
+  const outs = outsPart === "1" ? 1 / 3 : outsPart === "2" ? 2 / 3 : 0;
+  return whole + outs;
+}
+
+function optionalStatNumber(value: unknown): number | undefined {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 function validDate(value: unknown): value is string {
   if (typeof value !== "string" || !DATE_PATTERN.test(value)) return false;
   const date = new Date(`${value}T00:00:00Z`);
@@ -730,6 +744,8 @@ app.get("/api/whos-hot", async (req, res) => {
       const h = recentLog.reduce((acc: number, g: any) => acc + (g.stat.hits || 0), 0);
       const hr = recentLog.reduce((acc: number, g: any) => acc + (g.stat.homeRuns || 0), 0);
       const rbi = recentLog.reduce((acc: number, g: any) => acc + (g.stat.rbi || 0), 0);
+      const runs = recentLog.reduce((acc: number, g: any) => acc + (g.stat.runs || 0), 0);
+      const strikeouts = recentLog.reduce((acc: number, g: any) => acc + (g.stat.strikeOuts || 0), 0);
       const bb = recentLog.reduce((acc: number, g: any) => acc + (g.stat.baseOnBalls || 0), 0);
       const hbp = recentLog.reduce((acc: number, g: any) => acc + (g.stat.hitByPitch || 0), 0);
       const sf = recentLog.reduce((acc: number, g: any) => acc + (g.stat.sacFlies || 0), 0);
@@ -751,6 +767,7 @@ app.get("/api/whos-hot", async (req, res) => {
       const seasonObp = Number.isFinite(Number.parseFloat(seasonStat?.obp)) ? Number.parseFloat(seasonStat.obp) : undefined;
       const seasonBb = Number.isFinite(Number(seasonStat?.baseOnBalls)) ? Number(seasonStat.baseOnBalls) : undefined;
       const seasonPa = Number.isFinite(Number(seasonStat?.plateAppearances)) ? Number(seasonStat.plateAppearances) : undefined;
+      const seasonGames = Number.isFinite(Number(seasonStat?.gamesPlayed)) ? Number(seasonStat.gamesPlayed) : undefined;
       const opsSurge = seasonOps === undefined ? undefined : opsNum - seasonOps;
       const avgSurge = seasonAvg === undefined ? undefined : avgNum - seasonAvg;
 
@@ -772,12 +789,14 @@ app.get("/api/whos-hot", async (req, res) => {
         hits: h,
         homeRuns: hr,
         rbi,
+        runs,
+        strikeouts,
         baseOnBalls: bb,
         hitByPitch: hbp,
         sacFlies: sf,
         totalBases: tb,
         stolenBases: sb,
-        baseline: { ops: seasonOps, avg: seasonAvg, slg: seasonSlg, obp: seasonObp, baseOnBalls: seasonBb, plateAppearances: seasonPa },
+        baseline: { ops: seasonOps, avg: seasonAvg, slg: seasonSlg, obp: seasonObp, baseOnBalls: seasonBb, plateAppearances: seasonPa, homeRuns: optionalStatNumber(seasonStat?.homeRuns), rbi: optionalStatNumber(seasonStat?.rbi), runs: optionalStatNumber(seasonStat?.runs), stolenBases: optionalStatNumber(seasonStat?.stolenBases), totalBases: optionalStatNumber(seasonStat?.totalBases), gamesPlayed: seasonGames },
       });
       const hotReason = analysis.why;
       const breakoutNotes = analysis.statHighlights;
@@ -791,6 +810,7 @@ app.get("/api/whos-hot", async (req, res) => {
         avg: formattedAvg,
         hr,
         rbi,
+        runs,
         ops: formattedOps,
         slg: slgNum.toFixed(3).replace(/^0/, ""),
         obp: obpNum.toFixed(3).replace(/^0/, ""),
@@ -810,16 +830,11 @@ app.get("/api/whos-hot", async (req, res) => {
         hotReason,
         primaryReason: analysis.primaryReason,
         statHighlights: analysis.statHighlights,
+        trendMetric: analysis.trendMetric,
+        trendValue: analysis.trendValue,
         hotStreak,
         breakoutNotes,
-        surgeRating:
-          opsSurge === undefined
-            ? "CURRENT WINDOW"
-            : opsSurge > 0.3
-            ? "MAX BREAKOUT"
-            : opsSurge > 0.15
-            ? "ELITE SURGE"
-            : "POWER SPIKE",
+        surgeRating: analysis.primaryReason.startsWith("Recent improvement") ? "Recent improvement" : analysis.primaryReason.startsWith("Sustained") ? "Sustained performance" : "No supported baseline change",
         headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${personId}/headshot/silo/current`,
       });
     });
@@ -876,12 +891,14 @@ app.get("/api/whos-hot", async (req, res) => {
         so = 0,
         bb = 0,
         h = 0,
+        hr = 0,
         wins = 0;
       recentStarts.forEach((g: any) => {
         er += g.stat.earnedRuns || 0;
         so += g.stat.strikeOuts || 0;
         bb += g.stat.baseOnBalls || 0;
         h += g.stat.hits || 0;
+        hr += g.stat.homeRuns || 0;
         if (g.stat.isWin) wins++;
 
         const ipStr = g.stat.inningsPitched || "0";
@@ -900,6 +917,7 @@ app.get("/api/whos-hot", async (req, res) => {
 
       const seasonEraVal = Number.isFinite(Number.parseFloat(seasonStat?.era)) ? Number.parseFloat(seasonStat.era) : undefined;
       const seasonWhipVal = Number.isFinite(Number.parseFloat(seasonStat?.whip)) ? Number.parseFloat(seasonStat.whip) : undefined;
+      const seasonIpVal = parseInningsPitched(seasonStat?.inningsPitched);
 
       const eraDiff = seasonEraVal === undefined ? undefined : seasonEraVal - recentEraVal;
       const whipDiff = seasonWhipVal === undefined ? undefined : seasonWhipVal - recentWhipVal;
@@ -921,7 +939,8 @@ app.get("/api/whos-hot", async (req, res) => {
         strikeouts: so,
         walks: bb,
         hits: h,
-        baseline: { era: seasonEraVal, whip: seasonWhipVal },
+        homeRuns: hr,
+        baseline: { era: seasonEraVal, whip: seasonWhipVal, strikeouts: optionalStatNumber(seasonStat?.strikeOuts), walks: optionalStatNumber(seasonStat?.baseOnBalls), hits: optionalStatNumber(seasonStat?.hits), homeRuns: optionalStatNumber(seasonStat?.homeRuns), inningsPitched: seasonIpVal },
       });
 
       processedPitchers.push({
@@ -950,23 +969,18 @@ app.get("/api/whos-hot", async (req, res) => {
         breakoutNotes: analysis.why,
         primaryReason: analysis.primaryReason,
         statHighlights: analysis.statHighlights,
-        surgeRating:
-          eraDiff === undefined
-            ? "CURRENT WINDOW"
-            : eraDiff > 1.5
-            ? "DOMINANT SURGE"
-            : eraDiff > 0.75
-            ? "ACE SURGE"
-            : "PITCHING TREND",
+        trendMetric: analysis.trendMetric,
+        trendValue: analysis.trendValue,
+        surgeRating: analysis.primaryReason.startsWith("Recent run prevention") ? "Recent run prevention" : analysis.primaryReason.startsWith("Sustained") ? "Sustained performance" : "No supported baseline change",
         headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${personId}/headshot/silo/current`,
       });
     });
 
     const aggregateHitters = [...processedHitters].sort((a, b) => b.opsVal - a.opsVal).slice(0, 6);
-    const surgeHitters = [...processedHitters].sort((a, b) => b.opsSurgeVal - a.opsSurgeVal).slice(0, 6);
+    const surgeHitters = [...processedHitters].sort((a, b) => (b.trendValue ?? -Infinity) - (a.trendValue ?? -Infinity)).slice(0, 6);
 
     const aggregatePitchers = [...processedPitchers].sort((a, b) => a.eraVal - b.eraVal).slice(0, 6);
-    const surgePitchers = [...processedPitchers].sort((a, b) => b.eraDiffVal - a.eraDiffVal).slice(0, 6);
+    const surgePitchers = [...processedPitchers].sort((a, b) => (b.trendValue ?? -Infinity) - (a.trendValue ?? -Infinity)).slice(0, 6);
 
     const result = {
       timeframe,

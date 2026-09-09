@@ -658,7 +658,7 @@ export const GameView: React.FC<GameViewProps> = ({
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center">
                   <span className="text-[10px] text-slate-400 font-semibold block">EXIT VELO</span>
                   <span className="text-base font-black text-emerald-400 font-mono">
-                    {latestPlay?.statcast?.exitVelocityMph ? `${latestPlay.statcast.exitVelocityMph} mph` : "114.2 mph"}
+                    {latestPlay?.statcast?.exitVelocityMph != null ? `${latestPlay.statcast.exitVelocityMph} mph` : "Unavailable"}
                   </span>
                 </div>
               </div>

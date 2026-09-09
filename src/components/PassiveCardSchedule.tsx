@@ -398,7 +398,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         {/* Detailed Hot Reason Explanation - Compact 2-line layout */}
                         <div className="bg-amber-950/40 border border-amber-900/50 rounded px-1.5 py-0.5 text-[10px] text-amber-300 font-medium flex items-center gap-1.5 min-w-0 mt-0.5">
                           <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                          <span className="line-clamp-2 leading-tight">{hitter.hotReason || hitter.breakoutNotes || hitter.hotStreak || "Huge 2-week breakout over season baseline"}</span>
+                          <span className="line-clamp-2 leading-tight">{hitter.hotReason || hitter.breakoutNotes || hitter.hotStreak || "No supported baseline change"}</span>
                         </div>
                       </div>
                     ))}
