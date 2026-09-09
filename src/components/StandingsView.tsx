@@ -190,8 +190,8 @@ export const StandingsView: React.FC = () => {
                   </h3>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs font-mono">
+                <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
+                  <table className="min-w-[760px] w-full text-left text-xs font-mono">
                     <thead>
                       <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                         <th className="py-2 font-sans font-bold text-slate-400">TEAM</th>
@@ -260,8 +260,8 @@ export const StandingsView: React.FC = () => {
                 </div>
 
                 {/* Wild Card Contenders Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs font-mono">
+                <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
+                  <table className="min-w-[760px] w-full text-left text-xs font-mono">
                     <thead>
                       <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                         <th className="py-2 font-sans font-bold text-slate-400">WILD CARD CONTENDER</th>
@@ -417,8 +417,8 @@ export const StandingsView: React.FC = () => {
                     </h3>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs font-mono">
+                  <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
+                    <table className="min-w-[760px] w-full text-left text-xs font-mono">
                       <thead>
                         <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                           <th className="py-2 font-sans font-bold text-slate-400">TEAM</th>

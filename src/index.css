@@ -1,5 +1,57 @@
 @import "tailwindcss";
 
+/* Keep the broadcast canvas intentionally clipped; interactive shells own scrolling. */
+.dashboard-shell--wallboard {
+  overflow: hidden;
+}
+
+.dashboard-shell--schedule,
+.dashboard-shell--standings,
+.dashboard-shell--statcast,
+.dashboard-shell--hot,
+.dashboard-shell--sports {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.dashboard-panel--interactive,
+.dashboard-interactive-shell {
+  min-width: 0;
+}
+
+.dashboard-interactive-shell {
+  overscroll-behavior-y: contain;
+}
+
+.responsive-table-wrap {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.responsive-table-wrap::after {
+  content: attr(data-scroll-hint);
+  position: sticky;
+  right: 0;
+  float: right;
+  margin: -1.75rem 0.5rem 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid rgb(71 85 105 / 0.8);
+  border-radius: 0.5rem;
+  background: rgb(15 23 42 / 0.94);
+  color: #cbd5e1;
+  font: 600 0.6875rem/1.2 ui-sans-serif, system-ui, sans-serif;
+  pointer-events: none;
+}
+
+@media (min-width: 48rem) {
+  .responsive-table-wrap::after {
+    display: none;
+  }
+}
+
 .focus-ring:focus-visible,
 button:focus-visible,
 [role="button"]:focus-visible,

@@ -117,7 +117,7 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
   };
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
+    <div className="dashboard-interactive-shell min-h-screen min-w-0 overflow-y-auto bg-slate-950 px-4 pb-12 pt-20 text-slate-100 sm:px-6">
       <header className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-amber-400">Interactive MLB dashboard</p>
@@ -127,7 +127,7 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
         <button type="button" onClick={onReturnToWallboard} className="focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-bold text-slate-200 hover:border-amber-500 hover:text-white"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Return to wallboard</button>
       </header>
 
-      <main className="mx-auto mt-6 max-w-7xl" aria-live="polite">
+      <main className="mx-auto mt-6 min-w-0 max-w-7xl" aria-live="polite">
         <Suspense fallback={<ViewLoading />}>
           {mode === "schedule" && (
             <>

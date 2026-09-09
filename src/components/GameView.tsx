@@ -93,19 +93,21 @@ export const GameView: React.FC<GameViewProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex max-w-full overflow-x-auto bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
             <button
+              type="button"
               onClick={() => setActiveTab("live")}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
+              className={`focus-ring shrink-0 px-3 py-1.5 rounded-lg transition-colors ${
                 activeTab === "live" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
               }`}
             >
               Live Field & Pitch Tracker
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("boxscore")}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
+              className={`focus-ring shrink-0 px-3 py-1.5 rounded-lg transition-colors ${
                 activeTab === "boxscore" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -114,8 +116,9 @@ export const GameView: React.FC<GameViewProps> = ({
           </div>
 
           <button
+            type="button"
             onClick={onRefreshGame}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+            className="focus-ring shrink-0 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
             title="Refresh Live Feed"
           >
             <RefreshCw className={`w-4 h-4 ${isAutoRefresh ? "animate-spin text-blue-400" : ""}`} />
@@ -124,7 +127,7 @@ export const GameView: React.FC<GameViewProps> = ({
       </div>
 
       {/* Main Live Board: Score Linescore */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 overflow-x-auto shadow-inner">
+      <div className="responsive-table-wrap bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-inner" data-scroll-hint="Scroll horizontally to see all innings">
         <div className="min-w-[600px]">
           <table className="w-full text-center text-xs font-mono">
             <thead>
@@ -774,8 +777,8 @@ export const GameView: React.FC<GameViewProps> = ({
           {/* Away Batting */}
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">{awayTeam.name} Batting Lineup</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
+            <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all batting columns">
+              <table className="min-w-[620px] w-full text-left text-xs font-mono">
                 <thead>
                   <tr className="text-slate-500 border-b border-slate-800">
                     <th className="py-2">PLAYER</th>
@@ -815,8 +818,8 @@ export const GameView: React.FC<GameViewProps> = ({
           {/* Home Batting */}
           <div className="space-y-2 pt-4 border-t border-slate-800">
             <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">{homeTeam.name} Batting Lineup</h4>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
+            <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all batting columns">
+              <table className="min-w-[620px] w-full text-left text-xs font-mono">
                 <thead>
                   <tr className="text-slate-500 border-b border-slate-800">
                     <th className="py-2">PLAYER</th>

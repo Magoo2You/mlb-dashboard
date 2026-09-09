@@ -39,7 +39,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-950 font-sans">
+    <div className={`dashboard-shell dashboard-shell--${mode} relative min-h-screen bg-slate-950 font-sans`}>
       <nav className="fixed right-2 top-2 z-[60] max-w-[calc(100vw-1rem)] rounded-2xl border border-slate-700/80 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur" aria-label="Dashboard modes">
         <div className="mb-1 hidden items-center gap-1 px-2 text-[10px] font-black uppercase tracking-widest text-slate-500 sm:flex">
           <BarChart3 className="h-3 w-3" aria-hidden="true" /> Views
@@ -78,17 +78,17 @@ export default function App() {
       </nav>
 
       {mode === "wallboard" ? (
-        <section id="dashboard-panel" role="tabpanel" aria-label="Passive wallboard">
+        <section id="dashboard-panel" role="tabpanel" aria-label="Passive wallboard" className="dashboard-panel--wallboard">
           <PassiveScreen />
         </section>
       ) : mode === "sports" ? (
-        <section id="dashboard-panel" role="tabpanel" aria-labelledby="sports-tab">
+        <section id="dashboard-panel" role="tabpanel" aria-labelledby="sports-tab" className="dashboard-panel--interactive">
           <Suspense fallback={<InteractiveLoading label="Loading sports status…" />}>
             <SportsPanel onSelectSport={selectSport} onReturnToWallboard={() => selectMode("wallboard")} />
           </Suspense>
         </section>
       ) : (
-        <section id="dashboard-panel" role="tabpanel" aria-labelledby={`${mode}-tab`}>
+        <section id="dashboard-panel" role="tabpanel" aria-labelledby={`${mode}-tab`} className="dashboard-panel--interactive">
           <Suspense fallback={<InteractiveLoading />}>
             <InteractiveDashboard mode={mode} onReturnToWallboard={() => selectMode("wallboard")} />
           </Suspense>

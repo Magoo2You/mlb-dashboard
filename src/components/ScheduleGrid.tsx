@@ -93,14 +93,14 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
   return (
     <div className="space-y-4 mb-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
           <span>Scheduled Scoreboard ({games.length})</span>
         </h3>
         <span className="text-xs text-slate-500">Click any game for real-time play-by-play & pitch tracker</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {sortedGames.map((game) => {
           const isSelected = game.gamePk === selectedGamePk;
           const isLive = game.status.abstractGameState === "Live" || game.status.detailedState === "In Progress";
@@ -112,7 +112,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
           return (
             <div
               key={game.gamePk}
-              className={`group relative rounded-2xl p-4 transition-all cursor-pointer border ${
+              className={`group relative min-w-0 rounded-2xl p-4 transition-all cursor-pointer border ${
                 isSelected
                   ? "bg-slate-800/90 border-blue-500 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500/20"
                   : "bg-slate-900/80 border-slate-800 hover:border-slate-700 hover:bg-slate-850"
@@ -125,9 +125,9 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                 onClick={() => onSelectGame(game.gamePk)}
                 className="absolute inset-0 z-0 rounded-2xl focus-ring"
               />
-              <div className="relative z-10 pointer-events-none">
+              <div className="relative z-10 min-w-0 pointer-events-none">
               {/* Header Status & Broadcast */}
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2 mb-3">
                 <div className="flex items-center gap-2">
                   {isLive ? (
                     <div className="flex items-center gap-2">
