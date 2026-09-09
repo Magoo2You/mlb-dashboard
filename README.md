@@ -18,7 +18,10 @@ The Statcast view uses season-scoped MLB StatsAPI leaderboards with separate `st
 
 Interactive views use a separate responsive shell: narrow screens and browser zoom can scroll vertically without changing the passive wallboard's fixed broadcast canvas. Schedule cards collapse to one column on small widths; standings, inning linescores, and box-score tables retain readable columns in horizontal scrollers with a visible narrow-screen scroll hint. Very wide tables remain horizontally scrollable on desktop; their dense column sets are not converted to card layouts.
 
-## Sports status panel
+## Who's Hot data contract
+
+The Who's Hot view reads the live `/api/whos-hot` route only. Its **WHY** explanation is deterministic and provider-backed: hitter cards use recent game-log AB/H/HR/RBI/BB/HBP/SF/total bases/SB plus available season OPS/AVG/SLG/OBP and BB/PA baselines; pitcher cards use IP/ER/SO/BB/H plus available season ERA/WHIP baselines. Each explanation includes its game sample and date span. Missing baselines are shown as unavailable rather than filled with defaults, and the commentary describes observed statistical associations—not causes or unsupported Statcast metrics. `primaryReason`/`hotReason` carry WHY and `statHighlights`/`breakoutNotes` carry separate evidence;
+
 
 The discoverable **Sports** view is a status-only selector built from `src/domain/sport-registry.ts`. MLB remains the only supported live sport and selecting MLB returns to the default wallboard. NFL is labeled **Experimental preview** and shows only validated current scoreboard data through a same-origin route, with loading/error/empty states; standings, rosters, drives, and play-by-play are not exposed. NHL remains an experimental schedule preview. NBA is labeled **Experimental · provider-limited** and shows only validated current ESPN scoreboard data through a same-origin route, with loading/error/empty states; date navigation, standings, leaders, and play-by-play are not exposed. The panel uses native buttons, visible focus rings, arrow/Home/End navigation in the surrounding tablist, and explanatory status text so incomplete coverage is never presented as supported live data.
 

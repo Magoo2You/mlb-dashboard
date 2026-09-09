@@ -372,9 +372,10 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                           </div>
 
                           {/* Hot Streak Pill */}
-                          <div className="bg-amber-950/40 border border-amber-900/50 rounded-lg p-2 text-[11px] text-amber-300 font-medium flex items-start gap-1.5">
-                            <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                            <span className="line-clamp-2 leading-tight">{player.hotReason || player.hotStreak}</span>
+                          <div className="bg-amber-950/40 border border-amber-900/50 rounded-lg p-2 text-[11px] text-amber-300 font-medium space-y-1.5">
+                            <div className="text-[10px] uppercase tracking-wide text-amber-400 font-black">Why this player is hot</div>
+                            <p className="leading-tight">{player.hotReason || player.hotStreak}</p>
+                            {player.breakoutNotes && player.breakoutNotes !== player.hotReason && <p className="text-[10px] text-amber-200/70">Evidence: {player.breakoutNotes}</p>}
                           </div>
                         </div>
 
@@ -455,9 +456,10 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                           </div>
 
                           {/* Hot Streak Pill */}
-                          <div className="bg-indigo-950/40 border border-indigo-900/50 rounded-lg p-2 text-[11px] text-indigo-300 font-medium flex items-center gap-1.5">
-                            <Zap className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-                            <span className="truncate">{player.hotStreak}</span>
+                          <div className="bg-indigo-950/40 border border-indigo-900/50 rounded-lg p-2 text-[11px] text-indigo-300 font-medium space-y-1.5">
+                            <div className="text-[10px] uppercase tracking-wide text-indigo-400 font-black">Why this pitcher is hot</div>
+                            <p className="leading-tight">{player.breakoutNotes || player.hotStreak}</p>
+                            {player.hotStreak && player.breakoutNotes && <p className="text-[10px] text-indigo-200/70">Evidence: {player.hotStreak}</p>}
                           </div>
                         </div>
 
@@ -528,6 +530,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                                 </h5>
                                 <span className="text-xs font-bold text-slate-400">({player.team} • {player.position})</span>
                               </div>
+                              <p className="text-[10px] uppercase tracking-wide text-amber-400 font-black">Why this hitter is hot</p>
                               <p className="text-xs text-amber-300/90 font-medium">{player.hotReason || player.breakoutNotes}</p>
                             </div>
                           </div>
@@ -633,6 +636,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
                                 </h5>
                                 <span className="text-xs font-bold text-slate-400">({player.team} • {player.position})</span>
                               </div>
+                              <p className="text-[10px] uppercase tracking-wide text-indigo-400 font-black">Why this pitcher is hot</p>
                               <p className="text-xs text-slate-400">{player.breakoutNotes}</p>
                             </div>
                           </div>

@@ -742,56 +742,43 @@ app.get("/api/whos-hot", async (req, res) => {
       const slgNum = tb / ab;
       const opsNum = obpNum + slgNum;
 
-      const seasonOps = parseFloat(seasonStat?.ops || "0.750");
-      const seasonAvg = parseFloat(seasonStat?.avg || "0.250");
-      const opsSurge = opsNum - seasonOps;
-      const avgSurge = avgNum - seasonAvg;
+      const seasonOps = Number.isFinite(Number.parseFloat(seasonStat?.ops)) ? Number.parseFloat(seasonStat.ops) : undefined;
+      const seasonAvg = Number.isFinite(Number.parseFloat(seasonStat?.avg)) ? Number.parseFloat(seasonStat.avg) : undefined;
+      const seasonSlg = Number.isFinite(Number.parseFloat(seasonStat?.slg)) ? Number.parseFloat(seasonStat.slg) : undefined;
+      const seasonObp = Number.isFinite(Number.parseFloat(seasonStat?.obp)) ? Number.parseFloat(seasonStat.obp) : undefined;
+      const seasonBb = Number.isFinite(Number(seasonStat?.baseOnBalls)) ? Number(seasonStat.baseOnBalls) : undefined;
+      const seasonPa = Number.isFinite(Number(seasonStat?.plateAppearances)) ? Number(seasonStat.plateAppearances) : undefined;
+      const opsSurge = seasonOps === undefined ? undefined : opsNum - seasonOps;
+      const avgSurge = seasonAvg === undefined ? undefined : avgNum - seasonAvg;
 
       const formattedAvg = avgNum.toFixed(3).replace(/^0/, "");
       const formattedOps = opsNum.toFixed(3);
-      const formattedSeasonOps = seasonOps.toFixed(3);
-      const formattedSeasonAvg = seasonAvg.toFixed(3).replace(/^0/, "");
+      const formattedSeasonOps = seasonOps === undefined ? undefined : seasonOps.toFixed(3);
+      const formattedSeasonAvg = seasonAvg === undefined ? undefined : seasonAvg.toFixed(3).replace(/^0/, "");
 
       let heatLevel = 3;
       if (opsNum >= 1.2) heatLevel = 5;
       else if (opsNum >= 1.0) heatLevel = 4;
 
-      const dateSpanLabel =
-        startDate && endDate
-          ? `${startDate} to ${endDate}`
-          : `Past ${numDays} Days`;
-
-      // Construct detailed dynamic explanation for why hitter is hot
-      const opsSurgeFormatted = (opsSurge >= 0 ? "+" : "") + opsSurge.toFixed(3);
-      const avgSurgeFormatted = (avgSurge >= 0 ? "+" : "") + avgSurge.toFixed(3);
-
-      let primaryReason = "";
-      if (opsSurge >= 0.250) {
-        primaryReason = `Huge 2-week breakout: ${opsSurgeFormatted} OPS vs season baseline (${formattedOps} vs ${formattedSeasonOps})`;
-      } else if (opsSurge >= 0.120) {
-        primaryReason = `Major 14D surge: ${opsSurgeFormatted} OPS jump over season avg`;
-      } else if (avgSurge >= 0.080) {
-        primaryReason = `Contact spike: ${formattedAvg} AVG (${avgSurgeFormatted} above season avg)`;
-      } else if (opsSurge > 0) {
-        primaryReason = `Hot stretch: ${opsSurgeFormatted} OPS vs season baseline`;
-      } else {
-        primaryReason = `Sustained streak: ${formattedOps} OPS over last ${recentLog.length} games`;
-      }
-
-      let statHighlights = "";
-      if (hr >= 3) {
-        statHighlights = `${hr} HRs, ${rbi} RBIs, .${Math.round(slgNum * 1000)} SLG`;
-      } else if (hr >= 1) {
-        statHighlights = `${hr} HR, ${rbi} RBI with .${Math.round(obpNum * 1000)} OBP`;
-      } else if (sb >= 3) {
-        statHighlights = `${formattedAvg} AVG & ${sb} SB in last ${recentLog.length} games`;
-      } else {
-        statHighlights = `${h} hits in ${ab} ABs (${formattedAvg} AVG)`;
-      }
-
-      const hotReason = `${primaryReason} • ${statHighlights}`;
-      const breakoutNotes = `${primaryReason} • ${statHighlights}`;
-      const hotStreak = `${formattedOps} OPS (${opsSurgeFormatted} vs season baseline) • ${hr} HR, ${rbi} RBI`;
+      const dateSpanLabel = startDate && endDate ? `${startDate} to ${endDate}` : `Past ${numDays} Days`;
+      const analysis = analyzeHitterEvidence({
+        startDate: startDate || recentLog[recentLog.length - 1]?.date || "unknown",
+        endDate: endDate || recentLog[0]?.date || "unknown",
+        sampleSize: recentLog.length,
+        atBats: ab,
+        hits: h,
+        homeRuns: hr,
+        rbi,
+        baseOnBalls: bb,
+        hitByPitch: hbp,
+        sacFlies: sf,
+        totalBases: tb,
+        stolenBases: sb,
+        baseline: { ops: seasonOps, avg: seasonAvg, slg: seasonSlg, obp: seasonObp, baseOnBalls: seasonBb, plateAppearances: seasonPa },
+      });
+      const hotReason = analysis.why;
+      const breakoutNotes = analysis.statHighlights;
+      const hotStreak = `${formattedOps} OPS${opsSurge === undefined ? "" : ` (${opsSurge >= 0 ? "+" : ""}${opsSurge.toFixed(3)} vs season baseline)`} • ${hr} HR, ${rbi} RBI`;
 
       processedHitters.push({
         personId,
@@ -810,22 +797,26 @@ app.get("/api/whos-hot", async (req, res) => {
         recentSpan: `${dateSpanLabel} (${recentLog.length} Games)`,
         recentOps: formattedOps,
         baselineOps: formattedSeasonOps,
-        opsSurge: opsSurgeFormatted,
+        opsSurge: opsSurge === undefined ? undefined : (opsSurge >= 0 ? "+" : "") + opsSurge.toFixed(3),
         recentAvg: formattedAvg,
         baselineAvg: formattedSeasonAvg,
-        avgSurge: avgSurgeFormatted,
-        opsSurgeVal: opsSurge,
+        avgSurge: avgSurge === undefined ? undefined : (avgSurge >= 0 ? "+" : "") + avgSurge.toFixed(3),
+        opsSurgeVal: opsSurge ?? 0,
         opsVal: opsNum,
         heatLevel,
         hotReason,
+        primaryReason: analysis.primaryReason,
+        statHighlights: analysis.statHighlights,
         hotStreak,
         breakoutNotes,
         surgeRating:
-          opsSurge > 0.3
-            ? "🔥 MAX BREAKOUT"
+          opsSurge === undefined
+            ? "CURRENT WINDOW"
+            : opsSurge > 0.3
+            ? "MAX BREAKOUT"
             : opsSurge > 0.15
-            ? "⚡ ELITE SURGE"
-            : "🔥 POWER SPIKE",
+            ? "ELITE SURGE"
+            : "POWER SPIKE",
         headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${personId}/headshot/silo/current`,
       });
     });
@@ -904,11 +895,11 @@ app.get("/api/whos-hot", async (req, res) => {
       const recentWhipVal = (bb + h) / ipNum;
       const kPer9Val = (so * 9) / ipNum;
 
-      const seasonEraVal = parseFloat(seasonStat?.era || "3.50");
-      const seasonWhipVal = parseFloat(seasonStat?.whip || "1.20");
+      const seasonEraVal = Number.isFinite(Number.parseFloat(seasonStat?.era)) ? Number.parseFloat(seasonStat.era) : undefined;
+      const seasonWhipVal = Number.isFinite(Number.parseFloat(seasonStat?.whip)) ? Number.parseFloat(seasonStat.whip) : undefined;
 
-      const eraDiff = seasonEraVal - recentEraVal;
-      const whipDiff = seasonWhipVal - recentWhipVal;
+      const eraDiff = seasonEraVal === undefined ? undefined : seasonEraVal - recentEraVal;
+      const whipDiff = seasonWhipVal === undefined ? undefined : seasonWhipVal - recentWhipVal;
 
       let heatLevel = 3;
       if (recentEraVal <= 1.5) heatLevel = 5;
@@ -918,6 +909,17 @@ app.get("/api/whos-hot", async (req, res) => {
         startDate && endDate
           ? `${startDate} to ${endDate}`
           : `Past ${numDays} Days`;
+      const analysis = analyzePitcherEvidence({
+        startDate: startDate || recentStarts[recentStarts.length - 1]?.date || "unknown",
+        endDate: endDate || recentStarts[0]?.date || "unknown",
+        sampleSize: recentStarts.length,
+        inningsPitched: ipNum,
+        earnedRuns: er,
+        strikeouts: so,
+        walks: bb,
+        hits: h,
+        baseline: { era: seasonEraVal, whip: seasonWhipVal },
+      });
 
       processedPitchers.push({
         personId,
@@ -933,22 +935,26 @@ app.get("/api/whos-hot", async (req, res) => {
         lastGameDate: recentStarts[0]?.date,
         recentSpan: `${dateSpanLabel} (${recentStarts.length} Games)`,
         recentEra: recentEraVal.toFixed(2),
-        baselineEra: seasonEraVal.toFixed(2),
-        eraImprovement: (eraDiff >= 0 ? "-" : "+") + Math.abs(eraDiff).toFixed(2) + " ERA",
+        baselineEra: seasonEraVal?.toFixed(2),
+        eraImprovement: eraDiff === undefined ? undefined : (eraDiff >= 0 ? "-" : "+") + Math.abs(eraDiff).toFixed(2) + " ERA",
         recentWhip: recentWhipVal.toFixed(2),
-        baselineWhip: seasonWhipVal.toFixed(2),
-        whipImprovement: (whipDiff >= 0 ? "-" : "+") + Math.abs(whipDiff).toFixed(2) + " WHIP",
-        eraDiffVal: eraDiff,
+        baselineWhip: seasonWhipVal?.toFixed(2),
+        whipImprovement: whipDiff === undefined ? undefined : (whipDiff >= 0 ? "-" : "+") + Math.abs(whipDiff).toFixed(2) + " WHIP",
+        eraDiffVal: eraDiff ?? 0,
         eraVal: recentEraVal,
         heatLevel,
-        hotStreak: `${er} ER, ${so} Ks in ${ipNum.toFixed(1)} IP (${recentStarts.length} games)`,
-        breakoutNotes: `Span ERA ${recentEraVal.toFixed(2)} vs Season Baseline ${seasonEraVal.toFixed(2)} (${eraDiff >= 0 ? "-" : "+"}${Math.abs(eraDiff).toFixed(2)} ERA)`,
+        hotStreak: analysis.statHighlights,
+        breakoutNotes: analysis.why,
+        primaryReason: analysis.primaryReason,
+        statHighlights: analysis.statHighlights,
         surgeRating:
-          eraDiff > 1.5
-            ? "🔥 DOMINANT SURGE"
+          eraDiff === undefined
+            ? "CURRENT WINDOW"
+            : eraDiff > 1.5
+            ? "DOMINANT SURGE"
             : eraDiff > 0.75
-            ? "⚡ ACE SURGE"
-            : "🎯 BREAKTHROUGH",
+            ? "ACE SURGE"
+            : "PITCHING TREND",
         headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${personId}/headshot/silo/current`,
       });
     });
