@@ -47,8 +47,8 @@ export const Header: React.FC<HeaderProps> = React.memo(({
     loadTicker();
 
     if (!isAutoRefresh) return;
-    // Decoupled ticker polling: poll every 60 seconds (prevents ticker animation resets)
-    const interval = setInterval(loadTicker, 60000);
+    // Match the server's 30-second ticker cache TTL without resetting the marquee too often.
+    const interval = setInterval(loadTicker, 30000);
     return () => {
       isMounted = false;
       clearInterval(interval);

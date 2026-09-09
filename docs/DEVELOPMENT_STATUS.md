@@ -29,6 +29,9 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | MLB transformer coverage | Captured-shape fixtures cover schedule score fallback from `linescore.teams`, scoring-play text/inning mapping, live status and linescore mappings, reverse chronological plays, scoring-play filtering, RBI, and per-play `about.awayScore`/`about.homeScore`. |
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Game detail | Schedule selections can open validated MLB live-feed details with loading, retry, empty, and return states. |
+| Request coalescing | Client JSON requests coalesce identical concurrent endpoints and preserve errors; server MLB upstream fetches coalesce identical in-flight URLs and always discard failed promises. |
+| Polling/cache alignment | Passive Who's Hot refresh runs at the verified ten-minute server TTL; ticker polling is 30 seconds in both Header and passive mode, matching its server cache TTL. |
+| Who's Hot refresh lock | Concurrent cache misses for the same validated query share one bounded-cache refresh; the existing 32-key/ten-minute freshness and eviction behavior remain unchanged. |
 
 ## Provider status
 
@@ -41,7 +44,8 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 
 ## Known limitations
 
-- MLB transformer fixtures are deterministic representations of the response shape consumed by the current server; they do not contact StatsAPI.
+- Identical concurrent requests are coalesced only while in flight; the client does not add a response cache, so freshness semantics and explicit retry/error behavior are unchanged.
+- Server upstream coalescing is process-local and does not coordinate across multiple server processes/instances. Who's Hot cache remains process-local, bounded to 32 keys, and expires after ten minutes.
 - The fixture suite does not verify provider availability or semantics for optional `scoringPlays` hydration, `liveData.plays.currentPlay`, pitch/hit `pitchData`, box-score player maps, or decision fields. These remain provider-integration concerns and require separately captured responses.
 - No full browser/device visual test runner is installed; responsive layout, focus behavior, lazy view mounting, and rendered error/empty states still require a real browser or desktop preview. Browserless smoke checks cover pure navigation state and mocked fetch contracts only.
 - Dense standings and box-score tables remain horizontally scrollable on narrow screens.

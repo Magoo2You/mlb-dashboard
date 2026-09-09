@@ -14,22 +14,36 @@ export class ApiRequestError extends Error {
   }
 }
 
+const inFlightRequests = new Map<string, Promise<unknown>>();
+
 async function requestJson<T>(endpoint: string): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(endpoint);
-  } catch (error) {
-    throw new ApiRequestError(error instanceof Error ? error.message : "Network request failed", endpoint, 0);
-  }
+  const existing = inFlightRequests.get(endpoint);
+  if (existing) return existing as Promise<T>;
 
-  if (!res.ok) {
-    throw new ApiRequestError(`API request failed (${res.status})`, endpoint, res.status);
-  }
+  const request = (async () => {
+    let res: Response;
+    try {
+      res = await fetch(endpoint);
+    } catch (error) {
+      throw new ApiRequestError(error instanceof Error ? error.message : "Network request failed", endpoint, 0);
+    }
 
+    if (!res.ok) {
+      throw new ApiRequestError(`API request failed (${res.status})`, endpoint, res.status);
+    }
+
+    try {
+      return (await res.json()) as T;
+    } catch {
+      throw new ApiRequestError("API returned invalid JSON", endpoint, res.status);
+    }
+  })();
+
+  inFlightRequests.set(endpoint, request);
   try {
-    return (await res.json()) as T;
-  } catch {
-    throw new ApiRequestError("API returned invalid JSON", endpoint, res.status);
+    return await request as T;
+  } finally {
+    inFlightRequests.delete(endpoint);
   }
 }
 

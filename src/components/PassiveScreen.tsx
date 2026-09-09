@@ -231,14 +231,17 @@ export const PassiveScreen: React.FC = () => {
     const slowInterval = setInterval(() => {
       loadStandingsData();
       loadNewsData();
-      loadWhosHotData();
       loadTickerData();
     }, 30000);
+    // Match the server's ten-minute Who's Hot cache TTL; request coalescing still
+    // protects overlapping mounts and retries without serving stale client data.
+    const whosHotInterval = setInterval(loadWhosHotData, 10 * 60 * 1000);
 
     return () => {
       isMounted = false;
       clearInterval(scheduleInterval);
       clearInterval(slowInterval);
+      clearInterval(whosHotInterval);
     };
   }, [retryNonce]);
 

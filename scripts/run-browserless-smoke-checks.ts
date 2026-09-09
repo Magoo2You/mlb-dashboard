@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { fetchGameDetail, fetchSchedule, ApiRequestError } from '../src/services/api';
+import { fetchGameDetail, fetchSchedule, fetchWhosHot, ApiRequestError } from '../src/services/api';
 import {
   DASHBOARD_MODES,
   getAdjacentDashboardMode,
@@ -66,6 +66,22 @@ async function runApiChecks(): Promise<void> {
     return jsonResponse({ gamePk: 12345 });
   }, async () => {
     assert.deepEqual(await fetchGameDetail(12345), { gamePk: 12345 });
+  });
+
+  let whosHotRequests = 0;
+  await withMockFetch(async (input) => {
+    assert.equal(String(input), '/api/whos-hot?timeframe=14&season=2026');
+    whosHotRequests += 1;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    return jsonResponse({ timeframe: '14', aggregateHitters: [], aggregatePitchers: [], surgeHitters: [], surgePitchers: [] });
+  }, async () => {
+    const first = fetchWhosHot({ timeframe: '14', season: '2026' });
+    const second = fetchWhosHot({ timeframe: '14', season: '2026' });
+    assert.deepEqual(await Promise.all([first, second]), [
+      { timeframe: '14', aggregateHitters: [], aggregatePitchers: [], surgeHitters: [], surgePitchers: [] },
+      { timeframe: '14', aggregateHitters: [], aggregatePitchers: [], surgeHitters: [], surgePitchers: [] },
+    ]);
+    assert.equal(whosHotRequests, 1);
   });
 }
 

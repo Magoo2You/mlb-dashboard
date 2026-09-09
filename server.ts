@@ -42,19 +42,34 @@ function genericRequestError(error: any, _req: express.Request, res: express.Res
   return res.status(500).json({ error: "Internal server error" });
 }
 
-// Fetch helper with timeout
+const upstreamInFlight = new Map<string, Promise<any>>();
+
+// Coalesce concurrent requests for the same immutable-in-flight MLB URL. Errors
+// still resolve to null as before, and failed requests are never retained.
 async function fetchMLB(url: string) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 8000);
+  const existing = upstreamInFlight.get(url);
+  if (existing) return existing;
+
+  const request = (async () => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      return null;
+    } finally {
+      clearTimeout(id);
+    }
+  })();
+
+  upstreamInFlight.set(url, request);
   try {
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (err) {
-    clearTimeout(id);
-    return null;
-}
+    return await request;
+  } finally {
+    upstreamInFlight.delete(url);
+  }
 }
 
 // --- API ENDPOINTS ---
@@ -516,6 +531,7 @@ app.get("/api/statcast-leaders", async (req, res) => {
 const whosHotCache = new Map<string, { timestamp: number; data: any }>();
 const WHOSE_HOT_CACHE_TTL = 10 * 60 * 1000;
 const WHOSE_HOT_CACHE_MAX = 32;
+const whosHotInFlight = new Map<string, Promise<any>>();
 
 app.get("/api/whos-hot", async (req, res) => {
   try {
@@ -551,6 +567,10 @@ app.get("/api/whos-hot", async (req, res) => {
       return res.json(cached.data);
     }
 
+    const existingRefresh = whosHotInFlight.get(cacheKey);
+    if (existingRefresh) return res.json(await existingRefresh);
+
+    const refresh = (async () => {
     // Fetch top leaders across hitting & pitching categories to get active player pool
     const leadersUrl = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=homeRuns,battingAverage,onBasePlusSlugging,runsBattedIn,stolenBases,earnedRunAverage,strikeouts,wins,whip,saves&season=${season}&limit=25&hydrate=person,team`;
     const leadersData = await fetchMLB(leadersUrl).catch(() => ({ leagueLeaders: [] }));
@@ -894,7 +914,14 @@ app.get("/api/whos-hot", async (req, res) => {
       if (oldestKey) whosHotCache.delete(oldestKey);
     }
     whosHotCache.set(cacheKey, { timestamp: Date.now(), data: result });
-    res.json(result);
+    return result;
+    })();
+    whosHotInFlight.set(cacheKey, refresh);
+    try {
+      return res.json(await refresh);
+    } finally {
+      whosHotInFlight.delete(cacheKey);
+    }
   } catch (err: any) {
     console.error("Error in whos-hot endpoint:", err);
     res.status(500).json({ error: "Failed to calculate hot streaks" });
