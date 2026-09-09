@@ -1,8 +1,18 @@
-import React, { useRef, useState } from "react";
+import React, { lazy, Suspense, useRef, useState } from "react";
 import { BarChart3, CalendarDays, CircleDot, Flame, MonitorPlay, Trophy, Zap } from "lucide-react";
-import { InteractiveDashboard, DashboardMode } from "./components/InteractiveDashboard";
+import type { DashboardMode } from "./components/InteractiveDashboard";
 import { PassiveScreen } from "./components/PassiveScreen";
-import { SportsPanel } from "./components/SportsPanel";
+
+const InteractiveDashboard = lazy(() => import("./components/InteractiveDashboard").then(({ InteractiveDashboard: dashboard }) => ({ default: dashboard })));
+const SportsPanel = lazy(() => import("./components/SportsPanel").then(({ SportsPanel: panel }) => ({ default: panel })));
+
+function InteractiveLoading({ label = "Loading dashboard view…" }: { label?: string }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 pt-20 text-center text-slate-300" role="status" aria-live="polite">
+      <p>{label}</p>
+    </div>
+  );
+}
 import type { SportId } from "./domain/sports";
 
 const modes: { id: DashboardMode; label: string; description: string; icon: typeof MonitorPlay }[] = [
@@ -73,11 +83,15 @@ export default function App() {
         </section>
       ) : mode === "sports" ? (
         <section id="dashboard-panel" role="tabpanel" aria-labelledby="sports-tab">
-          <SportsPanel onSelectSport={selectSport} onReturnToWallboard={() => selectMode("wallboard")} />
+          <Suspense fallback={<InteractiveLoading label="Loading sports status…" />}>
+            <SportsPanel onSelectSport={selectSport} onReturnToWallboard={() => selectMode("wallboard")} />
+          </Suspense>
         </section>
       ) : (
         <section id="dashboard-panel" role="tabpanel" aria-labelledby={`${mode}-tab`}>
-          <InteractiveDashboard mode={mode} onReturnToWallboard={() => selectMode("wallboard")} />
+          <Suspense fallback={<InteractiveLoading />}>
+            <InteractiveDashboard mode={mode} onReturnToWallboard={() => selectMode("wallboard")} />
+          </Suspense>
         </section>
       )}
     </div>

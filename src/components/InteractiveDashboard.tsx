@@ -1,13 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CalendarDays, Flame, Trophy, Zap } from "lucide-react";
 import { fetchSchedule } from "../services/api";
 import { ScheduledGame } from "../types";
-import { DateNavigator } from "./DateNavigator";
-import { PlayerModal } from "./PlayerModal";
-import { ScheduleGrid } from "./ScheduleGrid";
-import { StandingsView } from "./StandingsView";
-import { StatcastLeaderboard } from "./StatcastLeaderboard";
-import { WhosHotView } from "./WhosHotView";
+
+const DateNavigator = lazy(() => import("./DateNavigator").then(({ DateNavigator: component }) => ({ default: component })));
+const PlayerModal = lazy(() => import("./PlayerModal").then(({ PlayerModal: component }) => ({ default: component })));
+const ScheduleGrid = lazy(() => import("./ScheduleGrid").then(({ ScheduleGrid: component }) => ({ default: component })));
+const StandingsView = lazy(() => import("./StandingsView").then(({ StandingsView: component }) => ({ default: component })));
+const StatcastLeaderboard = lazy(() => import("./StatcastLeaderboard").then(({ StatcastLeaderboard: component }) => ({ default: component })));
+const WhosHotView = lazy(() => import("./WhosHotView").then(({ WhosHotView: component }) => ({ default: component })));
+
+function ViewLoading() {
+  return <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-10 text-center text-slate-400" role="status" aria-live="polite">Loading this MLB view…</div>;
+}
 
 export type DashboardMode = "wallboard" | "schedule" | "standings" | "statcast" | "hot" | "sports";
 
@@ -79,28 +84,34 @@ export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode
       </header>
 
       <main className="mx-auto mt-6 max-w-7xl" aria-live="polite">
-        {mode === "schedule" && (
-          <>
-            <DateNavigator currentDate={currentDate} onDateChange={setCurrentDate} totalGamesCount={games.length} liveGamesCount={liveGamesCount} />
-            {loading ? (
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-10 text-center text-slate-400">Loading the official MLB schedule…</div>
-            ) : scheduleError ? (
-              <div className="rounded-2xl border border-amber-700/60 bg-amber-950/40 p-10 text-center text-amber-200" role="alert">
-                <p>{scheduleError}</p>
-                <button type="button" onClick={() => void loadSchedule()} className="mt-3 font-bold underline hover:text-white">Retry</button>
-              </div>
-            ) : (
-              <ScheduleGrid games={games} selectedGamePk={selectedGamePk} onSelectGame={setSelectedGamePk} onSelectPlayer={setSelectedPlayerId} />
-            )}
-            <p className="mt-4 text-xs text-slate-500">Schedule cards select a game and expose decision-player profiles when the official feed provides valid player IDs. Full GameView play-by-play remains disconnected from this shell until its refresh contract is wired.</p>
-          </>
-        )}
-        {mode === "standings" && <StandingsView />}
-        {mode === "statcast" && <StatcastLeaderboard onSelectPlayer={setSelectedPlayerId} />}
-        {mode === "hot" && <WhosHotView onSelectPlayer={setSelectedPlayerId} />}
+        <Suspense fallback={<ViewLoading />}>
+          {mode === "schedule" && (
+            <>
+              <DateNavigator currentDate={currentDate} onDateChange={setCurrentDate} totalGamesCount={games.length} liveGamesCount={liveGamesCount} />
+              {loading ? (
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-10 text-center text-slate-400" role="status" aria-live="polite">Loading the official MLB schedule…</div>
+              ) : scheduleError ? (
+                <div className="rounded-2xl border border-amber-700/60 bg-amber-950/40 p-10 text-center text-amber-200" role="alert">
+                  <p>{scheduleError}</p>
+                  <button type="button" onClick={() => void loadSchedule()} className="mt-3 font-bold underline hover:text-white">Retry</button>
+                </div>
+              ) : (
+                <ScheduleGrid games={games} selectedGamePk={selectedGamePk} onSelectGame={setSelectedGamePk} onSelectPlayer={setSelectedPlayerId} />
+              )}
+              <p className="mt-4 text-xs text-slate-500">Schedule cards select a game and expose decision-player profiles when the official feed provides valid player IDs. Full GameView play-by-play remains disconnected from this shell until its refresh contract is wired.</p>
+            </>
+          )}
+          {mode === "standings" && <StandingsView />}
+          {mode === "statcast" && <StatcastLeaderboard onSelectPlayer={setSelectedPlayerId} />}
+          {mode === "hot" && <WhosHotView onSelectPlayer={setSelectedPlayerId} />}
+        </Suspense>
       </main>
 
-      <PlayerModal personId={selectedPlayerId} onClose={() => setSelectedPlayerId(null)} />
+      {selectedPlayerId !== null && (
+        <Suspense fallback={null}>
+          <PlayerModal personId={selectedPlayerId} onClose={() => setSelectedPlayerId(null)} />
+        </Suspense>
+      )}
     </div>
   );
 };
