@@ -12,7 +12,7 @@ View your app in AI Studio: https://ai.studio/apps/c2a823e5-77fb-474b-ae2b-e055e
 
 The passive wallboard remains the default view. The fixed **Views** tablist provides keyboard-accessible access to Schedule, Standings, Statcast, and Who's Hot; use Left/Right (or Up/Down), Home, and End to move between tabs. Every interactive view includes a **Return to wallboard** control.
 
-The Schedule view reuses the existing date navigator and schedule cards and opens player profiles when the feed contains valid decision-player IDs. The existing `GameView` component is intentionally not mounted yet because its auto-refresh and refresh-callback contract is not connected to the shell; schedule selection is retained without claiming full play-by-play support. The current API helpers may return their existing mock fallback when an endpoint fails or returns no data; the shell does not relabel that fallback as live.
+The Schedule view reuses the existing date navigator and schedule cards and opens player profiles when the feed contains valid decision-player IDs. Select a game and use its **Open game feed** action to load the detailed `GameView`; it provides loading, retryable error, empty play-by-play, and return-to-schedule states. The view is mounted only after the API response satisfies the typed detail-feed contract, and no mock fallback is presented as live data.
 
 ## Sports status panel
 

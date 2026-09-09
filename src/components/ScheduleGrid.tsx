@@ -6,6 +6,7 @@ interface ScheduleGridProps {
   games: ScheduledGame[];
   selectedGamePk: number | null;
   onSelectGame: (gamePk: number) => void;
+  onOpenGame: (gamePk: number) => void;
   onSelectPlayer: (personId: number) => void;
 }
 
@@ -66,6 +67,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
   games,
   selectedGamePk,
   onSelectGame,
+  onOpenGame,
   onSelectPlayer,
 }) => {
   if (games.length === 0) {
@@ -318,10 +320,18 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
                   </div>
                 )}
 
-                <div className="flex items-center gap-1 text-blue-400 font-semibold group-hover:translate-x-0.5 transition-transform">
-                  <span>{isSelected ? "Active View" : "View Live"}</span>
-                  <ExternalLink className="w-3 h-3" />
-                </div>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpenGame(game.gamePk);
+                  }}
+                  className="pointer-events-auto inline-flex items-center gap-1 text-blue-400 font-semibold hover:text-white hover:underline focus-ring"
+                  aria-label={`Open detailed game feed for ${away.team.name} at ${home.team.name}`}
+                >
+                  <span>{isSelected ? "Open game feed" : "Select game for details"}</span>
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                </button>
               </div>
 
               {/* Individual Game Play-by-Play Vertical Ticker */}
