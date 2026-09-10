@@ -33,6 +33,9 @@ const fieldingCategories = new Set([
   'doublePlays',
   'triplePlays',
   'rangeFactorPerGame',
+  'caughtStealing',
+  'passedBalls',
+  'catchersInterference',
 ]);
 
 export type StatcastTab = 'hitting' | 'pitching' | 'fielding';
@@ -54,6 +57,9 @@ export const STATCAST_CATEGORY_CONFIG = {
   doublePlays: { tab: 'fielding', label: 'Double Plays', description: 'Completed double plays; opportunity and position context apply', unit: 'DP', color: 'text-cyan-400', providerCategory: 'doublePlays', sortDirection: 'desc' },
   triplePlays: { tab: 'fielding', label: 'Triple Plays', description: 'Completed triple plays; rare event total, not a general fielding quality measure', unit: 'TP', color: 'text-violet-400', providerCategory: 'triplePlays', sortDirection: 'desc' },
   rangeFactorPerGame: { tab: 'fielding', label: 'Range Factor / Game', description: 'Putouts plus assists per game; compare within position and opportunity', unit: 'RF/G', color: 'text-emerald-400', providerCategory: 'rangeFactorPerGame', sortDirection: 'desc' },
+  caughtStealing: { tab: 'fielding', label: 'Caught Stealing', description: 'Catcher defensive total; opportunity and pitching staff context apply', unit: 'CS', color: 'text-blue-400', providerCategory: 'caughtStealing', sortDirection: 'desc' },
+  passedBalls: { tab: 'fielding', label: 'Passed Balls', description: 'Catcher defensive event total; lower is generally preferable, but opportunity context applies', unit: 'PB', color: 'text-rose-300', providerCategory: 'passedBalls', sortDirection: 'asc' },
+  catchersInterference: { tab: 'fielding', label: 'Catcher Interference', description: 'Catcher defensive event total; lower is generally preferable', unit: 'CI', color: 'text-rose-400', providerCategory: 'catchersInterference', sortDirection: 'asc' },
 } as const satisfies Record<string, { tab: StatcastTab; label: string; description: string; unit: string; color: string; providerCategory: string; sortDirection: StatcastSortDirection }>;
 
 const categoryByTab: Record<StatcastTab, Set<string>> = {

@@ -19,6 +19,9 @@ const capturedFieldingGroups = [
   { leaderCategory: 'doublePlays', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '120', season: '2025', person: { id: 17, fullName: 'Example Fielder' } }] },
   { leaderCategory: 'triplePlays', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '1', season: '2025', person: { id: 18, fullName: 'Example Fielder' } }] },
   { leaderCategory: 'rangeFactorPerGame', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '9.72', season: '2025', person: { id: 19, fullName: 'Example Fielder' } }] },
+  { leaderCategory: 'caughtStealing', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '23', season: '2025', person: { id: 20, fullName: 'Example Catcher' } }] },
+  { leaderCategory: 'passedBalls', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '9', season: '2025', person: { id: 21, fullName: 'Example Catcher' } }] },
+  { leaderCategory: 'catchersInterference', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '5', season: '2025', person: { id: 22, fullName: 'Example Catcher' } }] },
 ];
 
 const capturedPitchingGroups = [
@@ -46,12 +49,15 @@ export function runStatcastTransformerChecks(): void {
   assert.deepEqual(Object.keys(pitching).sort(), ['earnedRunAverage', 'strikeouts', 'saves', 'whip', 'wins'].sort());
 
   const fielding = transformStatcastLeaderGroups(capturedFieldingGroups, 'fielding' as any, '2025');
-  assert.deepEqual(Object.keys(fielding).sort(), ['assists', 'doublePlays', 'putOuts', 'rangeFactorPerGame', 'triplePlays'].sort());
+  assert.deepEqual(Object.keys(fielding).sort(), ['assists', 'caughtStealing', 'catchersInterference', 'doublePlays', 'passedBalls', 'putOuts', 'rangeFactorPerGame', 'triplePlays'].sort());
   assert.equal(fielding.putOuts[0].providerCategory, 'putOuts');
   assert.equal(fielding.putOuts[0].season, '2025');
   assert.equal(fielding.doublePlays[0].value, '120');
   assert.equal(fielding.triplePlays[0].value, '1');
   assert.equal(fielding.rangeFactorPerGame[0].value, '9.72');
+  assert.equal(fielding.caughtStealing[0].value, '23');
+  assert.equal(fielding.passedBalls[0].value, '9');
+  assert.equal(fielding.catchersInterference[0].value, '5');
   assert.equal(fielding.errors, undefined);
   assert.equal(fielding.fieldingPercentage, undefined);
   assert.equal(fielding.stolenBases, undefined);
