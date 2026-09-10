@@ -35,6 +35,19 @@ for (const [index, item] of BASEBALL_LORE_ITEMS.entries()) {
 }
 
 const verifiedItems = BASEBALL_LORE_ITEMS.filter((item) => item.verificationStatus === "verified");
+const EXPECTED_NEW_VERIFIED_IDS = [
+  "record-dimaggio-56-game-streak",
+  "game-mlb-1919-51-minute-nine-innings",
+  "game-al-1984-baines-25-inning-walkoff",
+  "postseason-2022-world-series-combined-nohitter",
+  "all-star-2023-same-surname-homers",
+  "record-ohtani-first-50-50-season",
+  "record-ohtani-first-3hr-2sb-game",
+  "record-ohtani-fastest-40-40-126-games"
+];
+for (const id of EXPECTED_NEW_VERIFIED_IDS) {
+  assert(verifiedItems.some((item) => item.id === id), `new production lore item ${id} is missing`);
+}
 const sequenceA = createLoreSequence(BASEBALL_LORE_ITEMS, 20260909);
 const sequenceB = createLoreSequence(BASEBALL_LORE_ITEMS, 20260909);
 assert(sequenceA.map((item) => item.id).join(",") === sequenceB.map((item) => item.id).join(","), "seeded lore rotation is not stable");

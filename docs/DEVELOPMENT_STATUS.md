@@ -29,7 +29,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Automated checks | `npm test` runs deterministic NHL/NFL/NBA/ESPN-NBA normalization checks, browserless navigation/API contract checks, and MLB schedule/live-feed transformer fixture checks. |
 | MLB transformer coverage | Captured-shape fixtures cover schedule score fallback from `linescore.teams`, scoring-play text/inning mapping, live status and linescore mappings, reverse chronological plays, scoring-play filtering, RBI, and per-play `about.awayScore`/`about.homeScore`. |
 | Statcast leaderboard integrity | Season-scoped hitting, pitching, and fielding requests use explicit `statGroup` values and `statType=season`. Captured fixtures reject cross-scope duplicates, preserve verified provider categories, map WHIP from `walksAndHitsPerInningPitched`, and map fielding `putOuts` without confusing catcher stolen-bases-allowed with hitting stolen bases. |
-| Trivia/lore provenance | Active lore inventory: 67 retained entries; 12 verified, 55 reviewed-unverified, 67 unique IDs, 0 missing/invalid HTTPS URLs. Verified IDs are listed below; retained legacy claims remain explicitly unverified, including the contradicted Pedro Martínez item. |
+| Trivia/lore provenance | Active lore inventory: 75 retained entries; 20 verified, 55 reviewed-unverified, 75 unique IDs, 0 missing/invalid HTTPS URLs. Verified IDs are listed below; retained legacy claims remain explicitly unverified, including the contradicted Pedro Martínez item. The latest production batch adds eight source-reviewed records spanning MLB, AL, World Series, All-Star, and single-game scopes. |
 | Trivia/lore rotation | Passive wallboard rotation filters to verified entries only, uses a deterministic seeded shuffle, covers the full verified pool before reshuffling, prevents the prior pool's final item from opening the next pool, and renders no lore cards when the verified pool is empty. |
 | Historical player profiles | Separate schema added at `src/data/historical-player-profiles.ts`; no pilot is presented yet because image usage rights and image provenance were not verified. |
 | Lore image pilot | Two verified local assets are active: Cy Young (`public/assets/lore/cy-young-commons-18463908.jpg`, Commons page ID 18463908, LOC `ppmsca.18460`) and Walter Johnson (`public/assets/lore/walter-johnson-commons-67430005.jpg`, Commons page ID 67430005, LOC LCCN `2016873232` / `hec.24261`). Both are recorded as public domain/no-known-restrictions candidates with creator, collection, source record, rights advisory, attribution, and retrieval date metadata. |
@@ -48,6 +48,14 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - `record-walter-johnson-417` — https://baseballhall.org/hall-of-famers/johnson-walter
 - `record-tris-speaker-450-assists` — https://baseballhall.org/hall-of-famers/speaker-tris
 - `record-maddux-355-wins` — https://baseballhall.org/hall-of-famers/maddux-greg
+- `record-dimaggio-56-game-streak` — https://www.mlb.com/news/joe-dimaggio-56-game-hitting-streak
+- `game-mlb-1919-51-minute-nine-innings` — https://www.mlb.com/news/longest-games-in-baseball-history-c275773542
+- `game-al-1984-baines-25-inning-walkoff` — https://baseballhall.org/discover/inside-pitch/baines-blast-ends-longest-game-in-AL-history
+- `postseason-2022-world-series-combined-nohitter` — https://www.mlb.com/news/astros-no-hit-phillies-in-world-series-game-4
+- `all-star-2023-same-surname-homers` — https://www.mlb.com/news/2023-all-star-game-facts-and-figures
+- `record-ohtani-first-50-50-season` — https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals
+- `record-ohtani-first-3hr-2sb-game` — https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals
+- `record-ohtani-fastest-40-40-126-games` — https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals
 
 Sources were used for factual verification and file-level rights review. The repository copies only the two documented public-domain Commons derivatives; no MLB or Hall CDN image is used. Exact source records, rights text, and limitations are maintained in `LORE-IMAGE-RIGHTS-RESEARCH.md`; all other historical-player images remain deferred.
 

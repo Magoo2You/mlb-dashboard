@@ -745,6 +745,94 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     source: "https://baseballhall.org/hall-of-famers/maddux-greg",
     verificationStatus: "verified",
     provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography; the page supplies the exact 355-227 record and .610 winning percentage."
+  },
+  {
+    id: "record-dimaggio-56-game-streak",
+    title: "Joe DiMaggio's 56-Game Streak",
+    tag: "HITTING RECORD",
+    statBadge: "56 games",
+    fact: "Joe DiMaggio hit safely in 56 consecutive MLB games for the Yankees in 1941.",
+    whimsy: "Across the streak, he batted .408, hit 15 home runs, drove in 55 runs, and struck out five times.",
+    source: "https://www.mlb.com/news/joe-dimaggio-56-game-hitting-streak",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full historical account, which states the 56 consecutive games and supplies the .408 batting average, 15 home runs, 55 RBI, and five strikeouts across the streak."
+  },
+  {
+    id: "game-mlb-1919-51-minute-nine-innings",
+    title: "A 51-Minute Nine-Inning Game",
+    tag: "GAME RARITY",
+    statBadge: "51 minutes",
+    fact: "The New York Giants defeated the Phillies 6-1 in a 51-minute nine-inning game on September 29, 1919.",
+    whimsy: "The game at the Polo Grounds finished nine innings in under an hour near the end of the regular season.",
+    source: "https://www.mlb.com/news/longest-games-in-baseball-history-c275773542",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's historical games account, which records the Giants' 6-1 victory over the Phillies in 51 minutes on September 29, 1919. The entry describes a notable fast game and does not claim it is the sole shortest nine-inning game."
+  },
+  {
+    id: "game-al-1984-baines-25-inning-walkoff",
+    title: "Baines Ends a 25-Inning Marathon",
+    tag: "AMERICAN LEAGUE HISTORY",
+    statBadge: "25 innings",
+    fact: "Harold Baines ended the longest game in American League history with a home run in the 25th inning on May 9, 1984.",
+    whimsy: "His home run gave the White Sox a 7-6 win over Milwaukee after 753 pitches across two days.",
+    source: "https://baseballhall.org/discover/inside-pitch/baines-blast-ends-longest-game-in-AL-history",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which states that Baines hit the game-ending home run in the 25th inning for a 7-6 White Sox win and records the 753rd pitch."
+  },
+  {
+    id: "postseason-2022-world-series-combined-nohitter",
+    title: "The First Combined World Series No-Hitter",
+    tag: "WORLD SERIES HISTORY",
+    statBadge: "first combined no-no",
+    fact: "Houston pitchers combined to throw the first no-hitter in World Series history in Game 4 of the 2022 World Series.",
+    whimsy: "The Astros defeated the Phillies 5-0 at Citizens Bank Park to tie the Series at two games apiece.",
+    source: "https://www.mlb.com/news/astros-no-hit-phillies-in-world-series-game-4",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full Game 4 account, which calls Houston's performance the first combined no-hitter in World Series history and records the 5-0 result."
+  },
+  {
+    id: "all-star-2023-same-surname-homers",
+    title: "Two Díaz Homers in One All-Star Game",
+    tag: "ALL-STAR GAME FIRST",
+    statBadge: "first of its kind",
+    fact: "The 2023 MLB All-Star Game was the first in which two players with the same last name homered.",
+    whimsy: "The distinction concerns matching surnames, not a claim that the players were related.",
+    source: "https://www.mlb.com/news/2023-all-star-game-facts-and-figures",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's 2023 All-Star facts account, which states that the game marked the first time two players with the same last name homered in the same All-Star Game."
+  },
+  {
+    id: "record-ohtani-first-50-50-season",
+    title: "Shohei Ohtani's 50-50 Season",
+    tag: "POWER-SPEED RECORD",
+    statBadge: "50 HR · 50 SB",
+    fact: "Shohei Ohtani became the first MLB player to hit at least 50 home runs and steal at least 50 bases in one season.",
+    whimsy: "He reached the milestone during a 6-for-6 game with three home runs, two stolen bases, and 10 RBI on September 19, 2024.",
+    source: "https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full account of Ohtani's September 19, 2024 game, which states that he was the first player to reach 50 home runs and 50 stolen bases in one season and records the supporting game line."
+  },
+  {
+    id: "record-ohtani-first-3hr-2sb-game",
+    title: "Ohtani's Three-Homer, Two-Steal Game",
+    tag: "SINGLE-GAME RARITY",
+    statBadge: "3 HR · 2 SB",
+    fact: "Shohei Ohtani became the first MLB player to hit three home runs and steal two bases in one game.",
+    whimsy: "The Dodgers defeated the Marlins 20-4 in Miami on September 19, 2024, and Ohtani drove in 10 runs.",
+    source: "https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full account, which calls the three-homer, two-stolen-base combination the first in Major League history and records the 20-4 game and 10 RBI."
+  },
+  {
+    id: "record-ohtani-fastest-40-40-126-games",
+    title: "Ohtani's Fastest 40-40",
+    tag: "POWER-SPEED MILESTONE",
+    statBadge: "126 games",
+    fact: "Shohei Ohtani reached 40 home runs and 40 stolen bases in 126 games, the fastest 40-40 season recorded by MLB's account.",
+    whimsy: "He beat the previous mark by 21 games before becoming the inaugural member of MLB's 50-50 club.",
+    source: "https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full Ohtani milestone account, which states that he reached 40-40 in 126 games and beat the previous mark by 21 games."
   }
 ];
 
