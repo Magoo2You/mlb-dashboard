@@ -325,7 +325,7 @@ export const PassiveScreen: React.FC = () => {
   return (
     <div className="w-screen h-screen max-w-[1920px] max-h-[1080px] bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans relative">
       {/* TOP BROADCAST HEADER BAR */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg relative z-20">
+      <header className="h-36 bg-slate-900 border-b border-slate-800 px-6 pb-4 flex items-end justify-start gap-3 shrink-0 shadow-lg relative z-20">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export const PassiveScreen: React.FC = () => {
         </div>
 
         {/* Slide Stack Navigation Indicators */}
-        <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+        <div className="order-2 flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
           {slideTitles.map((slide, idx) => {
             const Icon = slide.icon;
             const isActive = activeSlideIndex === idx;
@@ -350,7 +350,7 @@ export const PassiveScreen: React.FC = () => {
                   setActiveSlideIndex(idx);
                   setProgress(0);
                 }}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold font-mono transition-all relative overflow-hidden ${
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold font-mono transition-all relative overflow-hidden ${
                   isActive
                     ? "bg-slate-800 text-white shadow-md border border-slate-700"
                     : "text-slate-500 hover:text-slate-300"
@@ -372,7 +372,7 @@ export const PassiveScreen: React.FC = () => {
         </div>
 
         {/* Clock */}
-        <div className="flex items-center gap-4 font-mono">
+        <div className="order-1 flex items-center gap-2 font-mono shrink-0">
           <button
             type="button"
             onClick={() => setIsPaused((paused) => !paused)}
@@ -386,12 +386,12 @@ export const PassiveScreen: React.FC = () => {
                   ? "Resume auto-rotation"
                   : "Pause auto-rotation"
             }
-            className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-1.5 text-sm font-bold text-slate-200 transition-colors hover:border-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-xs font-bold text-slate-200 transition-colors hover:border-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isAutoRotationPaused ? <Play className="h-4 w-4 text-amber-400" /> : <Pause className="h-4 w-4 text-amber-400" />}
             <span>{isAutoRotationPaused ? "Paused" : "Playing"}</span>
           </button>
-          <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800 text-slate-200 text-sm font-bold">
+          <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800 text-slate-200 text-xs font-bold">
             <Clock className="w-4 h-4 text-amber-400" />
             <span>{currentTime || "12:00:00 PM"}</span>
           </div>
