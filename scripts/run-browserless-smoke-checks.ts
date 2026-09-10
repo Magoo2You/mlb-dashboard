@@ -72,6 +72,11 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(standingsComponent, /<td className="py-3 font-sans font-bold text-white flex/);
   assert.match(standingsComponent, /min-w-\[760px\]/);
   assert.match(standingsComponent, /whitespace-nowrap/);
+  assert.match(standingsComponent, /fetchStandingsBundle/);
+  assert.match(standingsComponent, /team\.wildCardRank/);
+  assert.match(standingsComponent, /team\.wildCardGamesBehind/);
+  assert.match(serverSource, /standingsTypes=wildCard/);
+  assert.match(serverSource, /wildCardGamesBack \?\? tr\.wildCardGamesBehind/);
   assert.match(gameView, /lg:col-span-6 lg:self-start[\s\S]*flex flex-col/);
   assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
   assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);

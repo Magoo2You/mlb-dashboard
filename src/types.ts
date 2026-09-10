@@ -488,6 +488,15 @@ export interface DivisionStanding {
   teamRecords: StandingTeamRow[];
 }
 
+export interface WildCardStanding {
+  league: { id: number; name: string };
+  lastUpdated?: string;
+  teamRecords: Array<StandingTeamRow & {
+    wildCardRank?: string;
+    wildCardGamesBehind?: string;
+  }>;
+}
+
 export interface TickerItem {
   id: string;
   category: string;

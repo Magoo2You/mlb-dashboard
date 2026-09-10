@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { DivisionStanding, StandingTeamRow } from "../types";
-import { fetchStandings } from "../services/api";
+import { DivisionStanding, StandingTeamRow, WildCardStanding } from "../types";
+import { fetchStandingsBundle } from "../services/api";
 import { Trophy, Shield, Flame, CheckCircle2, Award } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
 
@@ -62,14 +62,16 @@ function computeLeagueWCMetrics(allTeams: StandingTeamRow[]) {
 
 export const StandingsView: React.FC = () => {
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
+  const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<"division" | "league" | "wildcard">("division");
   const [season, setSeason] = useState<string>(CURRENT_SEASON);
 
   useEffect(() => {
     setLoading(true);
-    fetchStandings(season).then((data) => {
-      setStandings(data);
+    fetchStandingsBundle(season).then((data) => {
+      setStandings(data.divisions);
+      setWildCardStandings(data.wildCardStandings);
       setLoading(false);
     });
   }, [season]);
@@ -314,6 +316,49 @@ export const StandingsView: React.FC = () => {
     );
   };
 
+  const renderProviderWildCardView = () => (
+    <div className="space-y-8">
+      {wildCardStandings.map((league) => (
+        <div key={league.league.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 className="text-base font-black text-white uppercase tracking-wider">{league.league.name} Wild Card Race</h3>
+              <p className="text-[11px] text-slate-400 font-sans">Official MLB Wild Card order and games-back values</p>
+            </div>
+            {league.lastUpdated && <span className="text-[10px] text-slate-500 font-mono">Updated {new Date(league.lastUpdated).toLocaleString()}</span>}
+          </div>
+          <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
+            <table className="min-w-[560px] w-full text-left text-xs font-mono">
+              <thead>
+                <tr className="text-slate-500 border-b border-slate-800/80">
+                  <th className="py-2 font-sans font-bold text-slate-400 whitespace-nowrap">WILD CARD TEAM</th>
+                  <th className="w-20 text-center whitespace-nowrap">WC RANK</th>
+                  <th className="w-12 text-center whitespace-nowrap">W</th>
+                  <th className="w-12 text-center whitespace-nowrap">L</th>
+                  <th className="w-16 text-center whitespace-nowrap">PCT</th>
+                  <th className="w-24 text-center whitespace-nowrap">WCGB</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {league.teamRecords.map((team) => (
+                  <tr key={team.team.id} className="hover:bg-slate-900">
+                    <td className="py-3 font-sans font-bold text-white whitespace-nowrap"><div className="flex items-center gap-3"><img src={team.team.logoUrl} alt={`${team.team.name} logo`} className="w-6 h-6 object-contain" /><span>{team.team.name}</span></div></td>
+                    <td className="text-center font-black text-emerald-400 whitespace-nowrap">{team.wildCardRank || "—"}</td>
+                    <td className="text-center font-bold text-white whitespace-nowrap">{team.wins}</td>
+                    <td className="text-center text-slate-400 whitespace-nowrap">{team.losses}</td>
+                    <td className="text-center font-bold text-amber-400 whitespace-nowrap">{team.pct}</td>
+                    <td className="text-center font-bold text-emerald-400 whitespace-nowrap">{team.wildCardGamesBehind || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+      {wildCardStandings.length === 0 && <p className="text-sm text-slate-500 italic">The official Wild Card standings are unavailable for this season.</p>}
+    </div>
+  );
+
   return (
     <div className="space-y-6 bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
       {/* Header Controls */}
@@ -452,7 +497,7 @@ export const StandingsView: React.FC = () => {
         </div>
       ) : (
         <div id="standings-panel" role="tabpanel" aria-label={viewMode === "league" ? "Standings by league" : "Wild card standings"} tabIndex={0}>
-          {renderLeagueOrWildCardView()}
+          {viewMode === "wildcard" ? renderProviderWildCardView() : renderLeagueOrWildCardView()}
         </div>
       )}
     </div>

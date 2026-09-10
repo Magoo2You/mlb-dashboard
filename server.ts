@@ -234,14 +234,52 @@ app.get("/api/player/:personId", async (req, res) => {
 });
 
 // 4. Standings endpoint
+function formatStandingTeam(tr: any) {
+  return {
+    team: {
+      id: tr.team.id,
+      name: tr.team.name,
+      teamName: tr.team.teamName,
+      abbreviation: tr.team.abbreviation,
+      shortName: tr.team.shortName,
+      logoUrl: `https://www.mlbstatic.com/team-logos/${tr.team.id}.svg`,
+    },
+    divisionRank: tr.divisionRank,
+    leagueRank: tr.leagueRank,
+    sportRank: tr.sportRank,
+    gamesPlayed: tr.gamesPlayed,
+    wins: tr.wins,
+    losses: tr.losses,
+    pct: tr.winningPercentage,
+    gamesBehind: tr.gamesBehind,
+    wildCardGamesBehind: tr.wildCardGamesBack ?? tr.wildCardGamesBehind ?? "-",
+    wildCardRank: tr.wildCardRank,
+    streak: tr.streak,
+    runsScored: tr.runsScored,
+    runsAllowed: tr.runsAllowed,
+    runDifferential: tr.runDifferential,
+    homeRecord: tr.records?.splitRecords?.find((s: any) => s.type === "home")
+      ? `${tr.records.splitRecords.find((s: any) => s.type === "home").wins}-${tr.records.splitRecords.find((s: any) => s.type === "home").losses}`
+      : "-",
+    awayRecord: tr.records?.splitRecords?.find((s: any) => s.type === "away")
+      ? `${tr.records.splitRecords.find((s: any) => s.type === "away").wins}-${tr.records.splitRecords.find((s: any) => s.type === "away").losses}`
+      : "-",
+    lastTen: tr.records?.splitRecords?.find((s: any) => s.type === "lastTen")
+      ? `${tr.records.splitRecords.find((s: any) => s.type === "lastTen").wins}-${tr.records.splitRecords.find((s: any) => s.type === "lastTen").losses}`
+      : "-",
+    clinchIndicator: tr.clinchIndicator,
+  };
+}
+
 app.get("/api/standings", async (req, res) => {
   try {
     const currentYear = new Date().getFullYear().toString();
     const requestedSeason = singleQueryValue(req.query.season);
     const season = requestedSeason || currentYear;
     if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
-    const url = `https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&hydrate=team,division&season=${season}&standingsTypes=regularSeason`;
-    const data = await fetchMLB(url);
+    const regularUrl = `https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&hydrate=team,division&season=${season}&standingsTypes=regularSeason`;
+    const wildCardUrl = `https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&hydrate=team,division&season=${season}&standingsTypes=wildCard`;
+    const [data, wildCardData] = await Promise.all([fetchMLB(regularUrl), fetchMLB(wildCardUrl)]);
 
     const records = data.records || [];
     const divisions = records.map((record: any) => ({
@@ -254,42 +292,19 @@ app.get("/api/standings", async (req, res) => {
         id: record.league?.id,
         name: record.league?.id === 103 ? "American League" : "National League",
       },
-      teamRecords: (record.teamRecords || []).map((tr: any) => ({
-        team: {
-          id: tr.team.id,
-          name: tr.team.name,
-          teamName: tr.team.teamName,
-          abbreviation: tr.team.abbreviation,
-          shortName: tr.team.shortName,
-          logoUrl: `https://www.mlbstatic.com/team-logos/${tr.team.id}.svg`,
-        },
-        divisionRank: tr.divisionRank,
-        leagueRank: tr.leagueRank,
-        sportRank: tr.sportRank,
-        gamesPlayed: tr.gamesPlayed,
-        wins: tr.wins,
-        losses: tr.losses,
-        pct: tr.winningPercentage,
-        gamesBehind: tr.gamesBehind,
-        wildCardGamesBehind: tr.wildCardGamesBehind || "-",
-        streak: tr.streak,
-        runsScored: tr.runsScored,
-        runsAllowed: tr.runsAllowed,
-        runDifferential: tr.runDifferential,
-        homeRecord: tr.records?.splitRecords?.find((s: any) => s.type === "home")
-          ? `${tr.records.splitRecords.find((s: any) => s.type === "home").wins}-${tr.records.splitRecords.find((s: any) => s.type === "home").losses}`
-          : "-",
-        awayRecord: tr.records?.splitRecords?.find((s: any) => s.type === "away")
-          ? `${tr.records.splitRecords.find((s: any) => s.type === "away").wins}-${tr.records.splitRecords.find((s: any) => s.type === "away").losses}`
-          : "-",
-        lastTen: tr.records?.splitRecords?.find((s: any) => s.type === "lastTen")
-          ? `${tr.records.splitRecords.find((s: any) => s.type === "lastTen").wins}-${tr.records.splitRecords.find((s: any) => s.type === "lastTen").losses}`
-          : "-",
-        clinchIndicator: tr.clinchIndicator,
-      })),
+      teamRecords: (record.teamRecords || []).map(formatStandingTeam),
     }));
 
-    res.json({ season, divisions });
+    const wildCardStandings = (wildCardData?.records || []).map((record: any) => ({
+      league: {
+        id: record.league?.id,
+        name: record.league?.id === 103 ? "American League" : "National League",
+      },
+      lastUpdated: record.lastUpdated,
+      teamRecords: (record.teamRecords || []).map(formatStandingTeam),
+    }));
+
+    res.json({ season, divisions, wildCardStandings });
   } catch (error: any) {
     logServerError("Error fetching standings:", error);
     res.status(500).json({ error: "Failed to fetch standings" });
