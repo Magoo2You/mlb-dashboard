@@ -421,10 +421,27 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                       <div key={item.id} className="bg-slate-950 p-2 rounded-xl border border-purple-900/40 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
-                            {item.headshotUrl ? (
-                              <img src={item.headshotUrl} alt={item.title} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0" onError={(e) => { (e.target as HTMLElement).style.display = "none"; }} />
+                            {item.image?.localPath || item.headshotUrl ? (
+                              <>
+                                <img
+                                  src={item.image?.localPath || item.headshotUrl}
+                                  alt={`${item.title} portrait`}
+                                  width={28}
+                                  height={28}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="w-7 h-7 rounded-lg object-cover bg-slate-900 border border-purple-500/40 shrink-0"
+                                  onError={(event) => {
+                                    event.currentTarget.hidden = true;
+                                    event.currentTarget.nextElementSibling?.removeAttribute("hidden");
+                                  }}
+                                />
+                                <div hidden className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0" aria-hidden="true">
+                                  ⚾
+                                </div>
+                              </>
                             ) : (
-                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0">
+                              <div className="w-7 h-7 rounded-lg bg-slate-900 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 font-mono text-xs shrink-0" aria-hidden="true">
                                 ⚾
                               </div>
                             )}

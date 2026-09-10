@@ -32,6 +32,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Trivia/lore provenance | Active lore inventory: 67 retained entries; 12 verified, 55 reviewed-unverified, 67 unique IDs, 0 missing/invalid HTTPS URLs. Verified IDs are listed below; retained legacy claims remain explicitly unverified, including the contradicted Pedro Martínez item. |
 | Trivia/lore rotation | Passive wallboard rotation filters to verified entries only, uses a deterministic seeded shuffle, covers the full verified pool before reshuffling, prevents the prior pool's final item from opening the next pool, and renders no lore cards when the verified pool is empty. |
 | Historical player profiles | Separate schema added at `src/data/historical-player-profiles.ts`; no pilot is presented yet because image usage rights and image provenance were not verified. |
+| Lore image pilot | Two verified local assets are active: Cy Young (`public/assets/lore/cy-young-commons-18463908.jpg`, Commons page ID 18463908, LOC `ppmsca.18460`) and Walter Johnson (`public/assets/lore/walter-johnson-commons-67430005.jpg`, Commons page ID 67430005, LOC LCCN `2016873232` / `hec.24261`). Both are recorded as public domain/no-known-restrictions candidates with creator, collection, source record, rights advisory, attribution, and retrieval date metadata. |
 
 ### Verified lore IDs and sources (evidence checked 2026-09-09)
 
@@ -48,7 +49,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - `record-tris-speaker-450-assists` — https://baseballhall.org/hall-of-famers/speaker-tris
 - `record-maddux-355-wins` — https://baseballhall.org/hall-of-famers/maddux-greg
 
-Sources were used for factual verification only. The repository does not copy source prose or images. Existing attribution/licensing notes remain applicable; no historical-player image is displayed until its source and usage rights are separately verified.
+Sources were used for factual verification and file-level rights review. The repository copies only the two documented public-domain Commons derivatives; no MLB or Hall CDN image is used. Exact source records, rights text, and limitations are maintained in `LORE-IMAGE-RIGHTS-RESEARCH.md`; all other historical-player images remain deferred.
 
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Interactive scroll ownership | The reported Schedule/Standings wheel-scroll symptom was traced to nested vertical overflow shells. Schedule, Standings, Statcast, Who's Hot, and Sports now leave vertical scrolling to the document; `.responsive-table-wrap` retains horizontal scrolling and wallboard clipping remains intentional. |

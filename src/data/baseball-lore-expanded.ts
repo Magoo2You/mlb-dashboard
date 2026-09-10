@@ -5,11 +5,24 @@
 
 export type LoreVerificationStatus = "reviewed-unverified" | "verified";
 
+export type LoreImageMetadata = {
+  localPath: string;
+  creator: string;
+  collection: string;
+  sourceRecordUrl: string;
+  license: string;
+  rightsAdvisory: string;
+  attribution: string;
+  retrievedAt: string;
+  verificationStatus: "verified";
+};
+
 export type LoreItem = {
   id: string;
   title: string;
   tag: string;
   headshotUrl?: string;
+  image?: LoreImageMetadata;
   statBadge: string;
   statColor?: string;
   fact: string;
@@ -621,7 +634,18 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     whimsy: "The Hall of Fame also credits him with 749 complete games and 7,356 innings pitched.",
     source: "https://baseballhall.org/hall-of-famers/young-cy",
     verificationStatus: "verified",
-    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player record, including 511 wins, 749 complete games, and 7,356 innings; the Hall page links Baseball-Reference for an independent statistical cross-check."
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player record, including 511 wins, 749 complete games, and 7,356 innings; the Hall page links Baseball-Reference for an independent statistical cross-check.",
+    image: {
+      localPath: "/assets/lore/cy-young-commons-18463908.jpg",
+      creator: "Bain News Service",
+      collection: "Library of Congress Prints and Photographs Division",
+      sourceRecordUrl: "https://commons.wikimedia.org/wiki/File:Cy_Young.jpg",
+      license: "Public domain",
+      rightsAdvisory: "Wikimedia Commons identifies the file as public domain; the source record is Library of Congress digital ID ppmsca.18460 and the LOC record states no known copyright restrictions.",
+      attribution: "Bain News Service; Library of Congress, Prints and Photographs Division, ppmsca.18460; via Wikimedia Commons.",
+      retrievedAt: "2026-09-10",
+      verificationStatus: "verified"
+    }
   },
   {
     id: "record-rickey-1406",
@@ -687,7 +711,18 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     whimsy: "He also authored 10 consecutive 20-win seasons for Washington.",
     source: "https://baseballhall.org/hall-of-famers/johnson-walter",
     verificationStatus: "verified",
-    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography, which states the 417 wins, 2.17 ERA, and 10 straight 20-win seasons; the Hall's 400-win history article was independently checked."
+    provenance: "Verified 2026-09-09 against the National Baseball Hall of Fame player biography, which states the 417 wins, 2.17 ERA, and 10 straight 20-win seasons; the Hall's 400-win history article was independently checked.",
+    image: {
+      localPath: "/assets/lore/walter-johnson-commons-67430005.jpg",
+      creator: "Harris & Ewing, photographer",
+      collection: "Library of Congress Harris & Ewing Collection",
+      sourceRecordUrl: "https://commons.wikimedia.org/wiki/File:Walter_Johnson_LCCN2016873232.jpg",
+      license: "Public domain",
+      rightsAdvisory: "Wikimedia Commons identifies the file as public domain (PD-Harris-Ewing/PD US no notice); the Library of Congress record 2016873232 states no known restrictions on publication.",
+      attribution: "Harris & Ewing, photographer; Library of Congress, Prints and Photographs Division, LCCN 2016873232; via Wikimedia Commons.",
+      retrievedAt: "2026-09-10",
+      verificationStatus: "verified"
+    }
   },
   {
     id: "record-tris-speaker-450-assists",

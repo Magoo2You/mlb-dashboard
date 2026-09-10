@@ -1,6 +1,15 @@
 # Lore & Curios image-rights research
 
-Research scope: the 12 `verificationStatus: "verified"` entries in `src/data/baseball-lore-expanded.ts`. No image files were downloaded or added. A visible image on MLB or Baseball Hall of Fame pages is not treated as reusable without an express license or permission.
+Research scope: the 12 `verificationStatus: "verified"` entries in `src/data/baseball-lore-expanded.ts`. The pilot downloaded only the two exact file-level-cleared Commons assets documented below. A visible image on MLB or Baseball Hall of Fame pages is not treated as reusable without an express license or permission.
+
+## Implemented local pilot
+
+| Lore ID | Local asset / exact file ID | Source record and rights finding | Attribution / limitation |
+|---|---|---|---|
+| `record-cy-young-511` | `public/assets/lore/cy-young-commons-18463908.jpg`; Commons `File:Cy Young.jpg` (page ID 18463908) | Source is LOC digital ID `ppmsca.18460`; Commons metadata identifies `LicenseShortName: Public domain`, `UsageTerms: Public domain`, `Copyrighted: False`, and `AttributionRequired: false`. | Bain News Service; Library of Congress Prints and Photographs Division, `ppmsca.18460`; via Wikimedia Commons. Commons file record: https://commons.wikimedia.org/wiki/File:Cy_Young.jpg. |
+| `record-walter-johnson-417` | `public/assets/lore/walter-johnson-commons-67430005.jpg`; Commons `File:Walter Johnson LCCN2016873232.jpg` (page ID 67430005) | Source is LOC LCCN `2016873232`, digital ID `hec.24261`; Commons metadata identifies `Public domain`, `PD-Harris-Ewing`, `PD US no notice`, `Copyrighted: False`, and `AttributionRequired: false`. LOC advisory: “No known restrictions on publication.” | Harris & Ewing, photographer; Library of Congress Prints and Photographs Division, LCCN `2016873232`; via Wikimedia Commons. Commons file record: https://commons.wikimedia.org/wiki/File:Walter_Johnson_LCCN2016873232.jpg. |
+
+Retrieval date for both assets: `2026-09-10` UTC. The checked-in files are resized/optimized derivatives of the exact Commons files (Cy Young 751×1064 JPEG; Walter Johnson 960×769 JPEG). The application serves only these local `/assets/lore/...` paths. Public-domain status is recorded as source metadata and a reuse finding, not a blanket statement about every LOC or Commons image. Other historical portraits remain deferred until an exact file record and rights advisory are verified.
 
 ## Findings
 

@@ -1,6 +1,8 @@
 import { BASEBALL_LORE_ITEMS, LoreItem } from "../src/data/baseball-lore-expanded";
 import { HISTORICAL_PLAYER_PROFILES } from "../src/data/historical-player-profiles";
 import { createLoreSequence, lorePage } from "../src/utils/lore-rotation";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 
 const REQUIRED_STRING_FIELDS = ["id", "title", "tag", "statBadge", "fact", "whimsy", "source", "provenance"] as const;
 const VALID_STATUSES = new Set(["reviewed-unverified", "verified"]);
@@ -49,6 +51,18 @@ for (const profile of HISTORICAL_PLAYER_PROFILES) {
   assert(profile.id.trim() && profile.name.trim() && profile.biography.trim(), `player profile ${profile.id} is incomplete`);
   assert(profile.sourceUrls.length > 0, `player profile ${profile.id} requires source URLs`);
   if (profile.image) assert(profile.image.url.startsWith("https://") && profile.image.rights.trim() && profile.image.provenance.trim(), `player profile ${profile.id} has incomplete image provenance`);
+}
+
+for (const item of BASEBALL_LORE_ITEMS) {
+  if (!item.image) continue;
+  const image = item.image;
+  assert(image.localPath.startsWith("/assets/"), `lore image ${item.id} must use a local public asset path`);
+  assert(existsSync(resolve(process.cwd(), "public", image.localPath.slice(1))), `lore image ${item.id} asset is missing`);
+  for (const field of ["creator", "collection", "sourceRecordUrl", "license", "rightsAdvisory", "attribution", "retrievedAt"] as const) {
+    assert(image[field].trim().length > 0, `lore image ${item.id} is missing ${field}`);
+  }
+  assert(image.sourceRecordUrl.startsWith("https://"), `lore image ${item.id} source record must be HTTPS`);
+  assert(image.verificationStatus === "verified", `lore image ${item.id} is not verified`);
 }
 
 console.log(`Lore validation passed: ${BASEBALL_LORE_ITEMS.length} active entries; ${counts.verified} verified; ${counts.unverified} reviewed-unverified; ${ids.size} unique IDs.`);
