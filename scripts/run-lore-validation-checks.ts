@@ -43,7 +43,11 @@ const EXPECTED_NEW_VERIFIED_IDS = [
   "all-star-2023-same-surname-homers",
   "record-ohtani-first-50-50-season",
   "record-ohtani-first-3hr-2sb-game",
-  "record-ohtani-fastest-40-40-126-games"
+  "record-ohtani-fastest-40-40-126-games",
+  "NGR-2020-MLB-RECOGNITION",
+  "record-clemens-first-20-strikeouts-nine-inning-game",
+  "gehrig-1932-16-total-bases",
+  "game-mlb-1920-26-innings"
 ];
 for (const id of EXPECTED_NEW_VERIFIED_IDS) {
   assert(verifiedItems.some((item) => item.id === id), `new production lore item ${id} is missing`);

@@ -1,6 +1,6 @@
 # Lore & Curios image-rights research
 
-Research scope: the 12 `verificationStatus: "verified"` entries in `src/data/baseball-lore-expanded.ts`. The pilot downloaded only the two exact file-level-cleared Commons assets documented below. A visible image on MLB or Baseball Hall of Fame pages is not treated as reusable without an express license or permission.
+Research scope: the 24 `verificationStatus: "verified"` entries in `src/data/baseball-lore-expanded.ts`. The image pilot currently has only two file-level-cleared local assets documented below. A visible image on MLB or Baseball Hall of Fame pages is not treated as reusable without an express license or permission.
 
 ## Implemented local pilot
 

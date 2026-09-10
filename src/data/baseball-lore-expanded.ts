@@ -833,6 +833,50 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     source: "https://www.mlb.com/news/shohei-ohtani-reaches-50-homers-50-steals",
     verificationStatus: "verified",
     provenance: "Verified 2026-09-10 against MLB's full Ohtani milestone account, which states that he reached 40-40 in 126 games and beat the previous mark by 21 games."
+  },
+  {
+    id: "NGR-2020-MLB-RECOGNITION",
+    title: "MLB Recognizes Seven Negro Leagues",
+    tag: "NEGRO LEAGUES HISTORY",
+    statBadge: "7 leagues · 1920–1948",
+    fact: "MLB granted Major League status to seven Negro Leagues that operated between 1920 and 1948, making their statistics and records part of Major League history.",
+    whimsy: "The recognition applies to the seven leagues and period described by MLB; it does not silently include every exhibition or independent game.",
+    source: "https://www.mlb.com/history/negro-leagues/history",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's full Negro Leagues history account, which specifies seven professional Negro Leagues operating between 1920 and 1948 and says their stats and records became part of Major League history."
+  },
+  {
+    id: "record-clemens-first-20-strikeouts-nine-inning-game",
+    title: "Clemens's First 20-Strikeout Nine-Inning Game",
+    tag: "PITCHING RECORD",
+    statBadge: "20 strikeouts",
+    fact: "Roger Clemens became the first pitcher to strike out 20 batters in a nine-inning Major League game.",
+    whimsy: "The nine-inning qualifier distinguishes the feat from longer games with more than 20 strikeouts.",
+    source: "https://www.mlb.com/news/pitchers-who-recorded-20-strikeouts-in-a-game",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's current 20-strikeout historical account, which explicitly says Clemens was the first pitcher to strike out 20 batters in a nine-inning game."
+  },
+  {
+    id: "gehrig-1932-16-total-bases",
+    title: "Lou Gehrig's Four-Homer Game",
+    tag: "SINGLE-GAME RARITY",
+    statBadge: "16 total bases",
+    fact: "Lou Gehrig recorded 16 total bases in his four-home-run game against the Philadelphia Athletics on June 3, 1932.",
+    whimsy: "The Hall of Fame says the 16-total-base mark was a Major League record at the time and has since been surpassed.",
+    source: "https://baseballhall.org/discover-more/stories/inside-pitch/lou-gehrig-hits-four-consecutive-home-runs",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which records Gehrig's four home runs against Philadelphia and identifies 16 total bases as a record at the time, since surpassed."
+  },
+  {
+    id: "game-mlb-1920-26-innings",
+    title: "MLB's Longest Game by Innings",
+    tag: "GAME RARITY",
+    statBadge: "26 innings",
+    fact: "The Brooklyn Robins and Boston Braves played 26 innings on May 1, 1920, the longest game by innings in Major League history.",
+    whimsy: "The game ended 1-1 after it was called because of darkness; this is an innings record, not an elapsed-time record.",
+    source: "https://sabr.org/gamesproj/game/may-1-1920-an-extreme-exercise-in-futility-braves-dodgers-play-26-innings-to-no-decision",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against SABR's detailed game record, which states that the game lasted 26 innings, ended 1-1, and was called because of darkness."
   }
 ];
 
