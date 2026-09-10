@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft, ChevronRight, Calendar, Sparkles } from "lucide-react";
+import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
 
 interface DateNavigatorProps {
   currentDate: string; // YYYY-MM-DD
@@ -23,19 +24,15 @@ export const DateNavigator: React.FC<DateNavigatorProps> = ({
   });
 
   const handlePrevDay = () => {
-    const prev = new Date(dateObj);
-    prev.setDate(prev.getDate() - 1);
-    onDateChange(prev.toISOString().split("T")[0]);
+    onDateChange(shiftLocalDate(currentDate, -1));
   };
 
   const handleNextDay = () => {
-    const next = new Date(dateObj);
-    next.setDate(next.getDate() + 1);
-    onDateChange(next.toISOString().split("T")[0]);
+    onDateChange(shiftLocalDate(currentDate, 1));
   };
 
   const handleToday = () => {
-    onDateChange(new Date().toISOString().split("T")[0]);
+    onDateChange(formatLocalDate());
   };
 
   return (

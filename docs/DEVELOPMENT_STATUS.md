@@ -54,6 +54,7 @@ Sources were used for factual verification and file-level rights review. The rep
 | Responsive layout | Interactive mode scrolls and adapts to narrow screens; wallboard clipping behavior is preserved. |
 | Interactive scroll ownership | The reported Schedule/Standings wheel-scroll symptom was traced to nested vertical overflow shells. Schedule, Standings, Statcast, Who's Hot, and Sports now leave vertical scrolling to the document; `.responsive-table-wrap` retains horizontal scrolling and wallboard clipping remains intentional. |
 | Scroll contract | Browserless source checks assert active interactive shells do not use nested vertical overflow, while responsive table wrappers retain `overflow-x: auto`. |
+| Schedule date semantics | Schedule dates use the local calendar date rather than UTC. The passive wallboard preserves the prior day's final scores until today's first game starts, then advances to the next available slate after today's games are complete. |
 | Game detail | Schedule selections can open validated MLB live-feed details with loading, retry, empty, and return states. |
 | Request coalescing | Client JSON requests coalesce identical concurrent endpoints and preserve errors; server MLB upstream fetches coalesce identical in-flight URLs and always discard failed promises. |
 | Polling/cache alignment | Passive Who's Hot refresh runs at the verified ten-minute server TTL; ticker polling is 30 seconds in both Header and passive mode, matching its server cache TTL. |

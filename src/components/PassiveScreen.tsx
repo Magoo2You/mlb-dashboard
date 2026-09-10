@@ -14,6 +14,7 @@ import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
 import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
+import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
 
 export const PassiveScreen: React.FC = () => {
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard & Live Feed, 1: Division Standings
@@ -135,12 +136,38 @@ export const PassiveScreen: React.FC = () => {
 
     const loadScheduleData = async () => {
       try {
-        const todayStr = new Date().toISOString().split("T")[0];
+        const todayStr = formatLocalDate();
         const todayGames = await fetchSchedule(todayStr);
+        const previousGames = await fetchSchedule(shiftLocalDate(todayStr, -1));
+        const now = Date.now();
+        const hasStartedToday = todayGames.some((game) => {
+          if (game.status.abstractGameState === "Live" || game.status.detailedState === "In Progress") return true;
+          if (game.status.abstractGameState === "Final" || game.status.detailedState === "Final") return true;
+          const gameTime = new Date(game.gameDate).getTime();
+          return Number.isFinite(gameTime) && gameTime <= now;
+        });
+        const allTodayGamesAreFinal = todayGames.length > 0 && todayGames.every(
+          (game) => game.status.abstractGameState === "Final" || game.status.detailedState === "Final"
+        );
+        let gamesForDisplay = todayGames;
+        if (!hasStartedToday) {
+          // Bridge the overnight window with yesterday's completed scores until
+          // the first game of the local calendar day begins.
+          gamesForDisplay = [...previousGames.filter(
+            (game) => game.status.abstractGameState === "Final" || game.status.detailedState === "Final"
+          ), ...todayGames];
+        } else if (allTodayGamesAreFinal || todayGames.length === 0) {
+          // Once today's slate is complete, move forward to the next available
+          // slate rather than leaving the wallboard on an exhausted day.
+          gamesForDisplay = [];
+          for (let offset = 1; offset <= 7 && gamesForDisplay.length === 0; offset += 1) {
+            gamesForDisplay = await fetchSchedule(shiftLocalDate(todayStr, offset));
+          }
+        }
 
         if (!isMounted) return;
 
-        const combinedGames: ScheduledGame[] = todayGames;
+        const combinedGames: ScheduledGame[] = gamesForDisplay;
 
         setScheduleGames(combinedGames);
         setScheduleError(null);

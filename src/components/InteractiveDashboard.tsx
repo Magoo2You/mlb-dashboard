@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from
 import { ArrowLeft, CalendarDays, Flame, Trophy, Zap } from "lucide-react";
 import { fetchGameDetail, fetchSchedule } from "../services/api";
 import { DetailedGameFeed, ScheduledGame } from "../types";
+import { formatLocalDate } from "../utils/local-date";
 
 const DateNavigator = lazy(() => import("./DateNavigator").then(({ DateNavigator: component }) => ({ default: component })));
 const PlayerModal = lazy(() => import("./PlayerModal").then(({ PlayerModal: component }) => ({ default: component })));
@@ -45,7 +46,7 @@ const modeMeta = {
 } as const;
 
 export const InteractiveDashboard: React.FC<InteractiveDashboardProps> = ({ mode, onReturnToWallboard }) => {
-  const [currentDate, setCurrentDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [currentDate, setCurrentDate] = useState(() => formatLocalDate());
   const [games, setGames] = useState<ScheduledGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [scheduleError, setScheduleError] = useState<string | null>(null);

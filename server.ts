@@ -7,6 +7,7 @@ import { isNormalizedNflScoreboard } from "./src/sports/nfl/nfl-route-contract";
 import { espnNbaScoreboardAdapter } from "./src/sports/nba/espn";
 import { isEspnNbaScoreboardRouteResponse } from "./src/sports/nba/espn";
 import { analyzeHitterEvidence, analyzePitcherEvidence } from "./src/sports/mlb/whos-hot-analysis";
+import { formatLocalDate } from "./src/utils/local-date";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -119,7 +120,7 @@ async function fetchMLB(url: string) {
 app.get("/api/schedule", async (req, res) => {
   try {
     const requestedDate = singleQueryValue(req.query.date);
-    const date = requestedDate || new Date().toISOString().split("T")[0];
+    const date = requestedDate || formatLocalDate();
     if (requestedDate && !validDate(requestedDate)) return res.status(400).json({ error: INVALID_INPUT });
     const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=team,linescore(matchup,runners),flags,liveLookin,decisions,scoringPlays,probablePitcher(stats)`;
     const data = await fetchMLB(url);
@@ -144,7 +145,7 @@ app.get("/api/schedule", async (req, res) => {
 // Experimental NHL schedule preview. It never substitutes mock or MLB data.
 app.get("/api/sports/nhl/schedule", async (req, res) => {
   const requestedDate = singleQueryValue(req.query.date);
-  const date = requestedDate || new Date().toISOString().split("T")[0];
+  const date = requestedDate || formatLocalDate();
   if (!validDate(date)) return res.status(400).json({ error: INVALID_INPUT });
 
   try {

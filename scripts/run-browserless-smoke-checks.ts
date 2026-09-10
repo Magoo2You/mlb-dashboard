@@ -11,6 +11,7 @@ import {AppErrorBoundary, ErrorBoundaryFallback} from '../src/components/AppErro
 import { isNhlScheduleResponse, isNormalizedNhlSchedule } from '../src/sports/nhl/nhl-route-contract';
 import { isNflScoreboardRouteResponse } from '../src/sports/nfl/nfl-route-contract';
 import { isEspnNbaScoreboardRouteResponse } from '../src/sports/nba/espn/espn-route-contract';
+import { formatLocalDate, shiftLocalDate } from '../src/utils/local-date';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -35,6 +36,9 @@ async function runNavigationChecks(): Promise<void> {
   assert.equal(getAdjacentDashboardMode('wallboard', -1), 'sports');
   assert.equal(getModeAfterSportSelection('sports', 'mlb'), 'wallboard');
   assert.equal(getModeAfterSportSelection('sports', 'nba'), 'sports');
+  const easternBoundary = new Date('2026-09-10T00:30:00-04:00');
+  assert.equal(formatLocalDate(easternBoundary), '2026-09-10');
+  assert.equal(shiftLocalDate('2026-09-09', 1), '2026-09-10');
 }
 
 function runErrorBoundaryChecks(): void {
