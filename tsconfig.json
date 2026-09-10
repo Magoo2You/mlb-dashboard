@@ -26,6 +26,8 @@
   "include": [
     "server.ts",
     "vite.config.ts",
-    "src/main.tsx"
+    "src/main.tsx",
+    "src/data/historical-player-profiles.ts",
+    "scripts/run-lore-validation-checks.ts"
   ]
 }

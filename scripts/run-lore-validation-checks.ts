@@ -60,11 +60,56 @@ assert(lorePage([], 0).length === 0, "empty lore pool should render no entries")
 assert(lorePage(sequenceA, 0, 3).length === Math.min(3, sequenceA.length), "lore page size is not deterministic");
 
 assert(HISTORICAL_PLAYER_PROFILES.every((profile) => profile.verificationStatus === "verified"), "unverified historical player profile cannot be presented");
-for (const profile of HISTORICAL_PLAYER_PROFILES) {
-  assert(profile.id.trim() && profile.name.trim() && profile.biography.trim(), `player profile ${profile.id} is incomplete`);
-  assert(profile.sourceUrls.length > 0, `player profile ${profile.id} requires source URLs`);
-  if (profile.image) assert(profile.image.url.startsWith("https://") && profile.image.rights.trim() && profile.image.provenance.trim(), `player profile ${profile.id} has incomplete image provenance`);
+const EXPECTED_PROFILE_IDS = ["jackie-robinson", "roberto-clemente", "ted-williams", "satchel-paige"];
+assert(HISTORICAL_PLAYER_PROFILES.length === 4, "historical profile pilot must contain exactly four profiles");
+const profileIds = new Set(HISTORICAL_PLAYER_PROFILES.map((profile) => profile.id));
+assert(profileIds.size === HISTORICAL_PLAYER_PROFILES.length, "historical profile IDs must be unique");
+const TRUSTED_SOURCE_HOSTS = ["baseballhall.org", "mlb.com", "baseball-reference.com", "wikimedia.org"];
+const isHttpsUrl = (value: string) => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" && Boolean(parsed.hostname) && !/\s/.test(value) && TRUSTED_SOURCE_HOSTS.some((host) => parsed.hostname === host || parsed.hostname.endsWith(`.${host}`));
+  } catch { return false; }
+};
+const isReviewDate = (value: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day && value <= "2026-09-10";
+};
+for (const id of EXPECTED_PROFILE_IDS) {
+  assert(HISTORICAL_PLAYER_PROFILES.some((profile) => profile.id === id), `historical profile ${id} is missing`);
 }
+for (const profile of HISTORICAL_PLAYER_PROFILES) {
+  assert(profile.id.trim() && profile.name.trim() && profile.era.trim() && profile.biography.trim(), `player profile ${profile.id} is incomplete`);
+  assert(profile.sourceUrls.length > 0 && profile.sourceUrls.every(isHttpsUrl), `player profile ${profile.id} requires HTTPS source URLs`);
+  assert(profile.verifiedFacts.length > 0, `player profile ${profile.id} requires verified facts`);
+  assert(profile.biographyEvidence.length > 0, `player profile ${profile.id} requires provenance-bound biography evidence`);
+  assert(profile.stats.length > 0, `player profile ${profile.id} requires scoped stats`);
+  assert(profile.biographyEvidence.some((evidence) => evidence.statement === profile.biography), `player profile ${profile.id} biography is not bound to evidence`);
+  for (const fact of [...profile.verifiedFacts, ...profile.biographyEvidence, ...(profile.unresolvedItems ?? [])]) {
+    assert(fact.scope.trim().length >= 8 && fact.scope !== "Historical profile record" && fact.sourceUrls.length > 0 && fact.sourceUrls.every(isHttpsUrl) && fact.provenance.trim().length >= 20, `player profile ${profile.id} has an unprovenanced or unscoped fact`);
+  }
+  for (const stat of profile.stats) {
+    assert(stat.scope.trim().length >= 8 && stat.sourceUrls.length > 0 && stat.sourceUrls.every(isHttpsUrl) && stat.provenance.trim().length >= 20 && stat.seasonOrContext.trim(), `player profile ${profile.id} has an unprovenanced or unscoped stat`);
+  }
+  for (const lead of profile.mediaLeads ?? []) {
+    assert(isHttpsUrl(lead.pageOrFileUrl) && isHttpsUrl(lead.sourceRecordUrl), `player profile ${profile.id} has invalid media URLs`);
+    assert(lead.creator.trim() && lead.collectionOrItemId.trim() && lead.attribution.trim() && isReviewDate(lead.reviewedAt), `player profile ${profile.id} has incomplete media provenance`);
+    assert(lead.rightsStatus === "rights-unresolved" || lead.rightsStatus === "permission-required", `player profile ${profile.id} has unsafe media rights status`);
+  }
+  if (profile.image) {
+    assert(isHttpsUrl(profile.image.url) && profile.image.rights.trim().length >= 12 && !/^(cleared|approved|public domain)$/i.test(profile.image.rights) && profile.image.provenance.trim().length >= 20, `player profile ${profile.id} has incomplete image provenance`);
+  }
+  assert(isReviewDate(profile.lastReviewed), `player profile ${profile.id} requires a valid review date`);
+}
+const paige = HISTORICAL_PLAYER_PROFILES.find((profile) => profile.id === "satchel-paige");
+assert(paige?.unresolvedItems?.some((item) => item.statement.includes("124") && item.statement.includes("132")), "Satchel Paige's 124/132 win discrepancy must remain explicit");
+const williams = HISTORICAL_PLAYER_PROFILES.find((profile) => profile.id === "ted-williams");
+assert(williams?.unresolvedItems?.some((item) => item.statement.includes("18") && item.statement.includes("19")), "Ted Williams's 18/19 All-Star discrepancy must remain explicit");
 
 for (const item of BASEBALL_LORE_ITEMS) {
   if (!item.image) continue;
