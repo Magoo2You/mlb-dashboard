@@ -28,10 +28,11 @@ const pitchingCategories = new Set([
 ]);
 
 const fieldingCategories = new Set([
-  'fieldingPercentage',
   'putOuts',
   'assists',
-  'errors',
+  'doublePlays',
+  'triplePlays',
+  'rangeFactorPerGame',
 ]);
 
 export type StatcastTab = 'hitting' | 'pitching' | 'fielding';
@@ -48,10 +49,11 @@ export const STATCAST_CATEGORY_CONFIG = {
   whip: { tab: 'pitching', label: 'WHIP', description: 'Season walks plus hits per inning pitched (lowest first)', unit: 'WHIP', color: 'text-purple-400', providerCategory: 'walksAndHitsPerInningPitched', sortDirection: 'asc' },
   wins: { tab: 'pitching', label: 'Wins', description: 'Season pitching win leaders', unit: 'W', color: 'text-orange-400', providerCategory: 'wins', sortDirection: 'desc' },
   saves: { tab: 'pitching', label: 'Saves', description: 'Season pitching save leaders', unit: 'SV', color: 'text-emerald-400', providerCategory: 'saves', sortDirection: 'desc' },
-  fieldingPercentage: { tab: 'fielding', label: 'Fielding Percentage', description: 'Season fielding-percentage leaders', unit: 'FPCT', color: 'text-cyan-400', providerCategory: 'fieldingPercentage', sortDirection: 'desc' },
-  putOuts: { tab: 'fielding', label: 'Putouts', description: 'Season fielding putout leaders', unit: 'PO', color: 'text-sky-400', providerCategory: 'putOuts', sortDirection: 'desc' },
-  assists: { tab: 'fielding', label: 'Assists', description: 'Season fielding assist leaders', unit: 'A', color: 'text-teal-400', providerCategory: 'assists', sortDirection: 'desc' },
-  errors: { tab: 'fielding', label: 'Errors', description: 'Season fielding error leaders (most first)', unit: 'E', color: 'text-rose-400', providerCategory: 'errors', sortDirection: 'desc' },
+  putOuts: { tab: 'fielding', label: 'Putouts', description: 'Defensive activity total; strongly influenced by position and playing time', unit: 'PO', color: 'text-sky-400', providerCategory: 'putOuts', sortDirection: 'desc' },
+  assists: { tab: 'fielding', label: 'Assists', description: 'Defensive activity total; strongly influenced by position and playing time', unit: 'A', color: 'text-teal-400', providerCategory: 'assists', sortDirection: 'desc' },
+  doublePlays: { tab: 'fielding', label: 'Double Plays', description: 'Completed double plays; opportunity and position context apply', unit: 'DP', color: 'text-cyan-400', providerCategory: 'doublePlays', sortDirection: 'desc' },
+  triplePlays: { tab: 'fielding', label: 'Triple Plays', description: 'Completed triple plays; rare event total, not a general fielding quality measure', unit: 'TP', color: 'text-violet-400', providerCategory: 'triplePlays', sortDirection: 'desc' },
+  rangeFactorPerGame: { tab: 'fielding', label: 'Range Factor / Game', description: 'Putouts plus assists per game; compare within position and opportunity', unit: 'RF/G', color: 'text-emerald-400', providerCategory: 'rangeFactorPerGame', sortDirection: 'desc' },
 } as const satisfies Record<string, { tab: StatcastTab; label: string; description: string; unit: string; color: string; providerCategory: string; sortDirection: StatcastSortDirection }>;
 
 const categoryByTab: Record<StatcastTab, Set<string>> = {

@@ -15,10 +15,10 @@ const capturedHittingGroups = [
 
 const capturedFieldingGroups = [
   { leaderCategory: 'putOuts', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '1216', season: '2025', person: { id: 13, fullName: 'Matt Olson' } }] },
-  { leaderCategory: 'errors', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '26', season: '2025', person: { id: 14, fullName: 'Example Fielder' } }] },
-  { leaderCategory: 'fieldingPercentage', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '1.000', season: '2025', person: { id: 15, fullName: 'Example Fielder' } }] },
   { leaderCategory: 'assists', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '398', season: '2025', person: { id: 16, fullName: 'Example Fielder' } }] },
-  { leaderCategory: 'stolenBases', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '87', season: '2025', person: { id: 17, fullName: 'Catcher Stat' } }] },
+  { leaderCategory: 'doublePlays', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '120', season: '2025', person: { id: 17, fullName: 'Example Fielder' } }] },
+  { leaderCategory: 'triplePlays', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '1', season: '2025', person: { id: 18, fullName: 'Example Fielder' } }] },
+  { leaderCategory: 'rangeFactorPerGame', statGroup: 'fielding', season: '2025', leaders: [{ rank: 1, value: '9.72', season: '2025', person: { id: 19, fullName: 'Example Fielder' } }] },
 ];
 
 const capturedPitchingGroups = [
@@ -46,10 +46,14 @@ export function runStatcastTransformerChecks(): void {
   assert.deepEqual(Object.keys(pitching).sort(), ['earnedRunAverage', 'strikeouts', 'saves', 'whip', 'wins'].sort());
 
   const fielding = transformStatcastLeaderGroups(capturedFieldingGroups, 'fielding' as any, '2025');
-  assert.deepEqual(Object.keys(fielding).sort(), ['assists', 'errors', 'fieldingPercentage', 'putOuts'].sort());
+  assert.deepEqual(Object.keys(fielding).sort(), ['assists', 'doublePlays', 'putOuts', 'rangeFactorPerGame', 'triplePlays'].sort());
   assert.equal(fielding.putOuts[0].providerCategory, 'putOuts');
   assert.equal(fielding.putOuts[0].season, '2025');
-  assert.equal(fielding.errors[0].value, '26');
+  assert.equal(fielding.doublePlays[0].value, '120');
+  assert.equal(fielding.triplePlays[0].value, '1');
+  assert.equal(fielding.rangeFactorPerGame[0].value, '9.72');
+  assert.equal(fielding.errors, undefined);
+  assert.equal(fielding.fieldingPercentage, undefined);
   assert.equal(fielding.stolenBases, undefined);
 
   const wrongSeason = transformStatcastLeaderGroups(capturedFieldingGroups, 'fielding' as any, '2026');
@@ -65,6 +69,6 @@ export function runStatcastTransformerChecks(): void {
   assert.equal(STATCAST_CATEGORY_CONFIG.whip.providerCategory, 'walksAndHitsPerInningPitched');
   assert.equal(STATCAST_CATEGORY_CONFIG.earnedRunAverage.sortDirection, 'asc');
   assert.equal(STATCAST_CATEGORY_CONFIG.whip.sortDirection, 'asc');
-  assert.equal(STATCAST_CATEGORY_CONFIG.errors.sortDirection, 'desc');
+  assert.equal(STATCAST_CATEGORY_CONFIG.rangeFactorPerGame.sortDirection, 'desc');
   assert.equal(new Set(Object.values(STATCAST_CATEGORY_CONFIG).map((category) => category.providerCategory)).size, Object.keys(STATCAST_CATEGORY_CONFIG).length);
 }

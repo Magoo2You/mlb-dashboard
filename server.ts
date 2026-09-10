@@ -584,7 +584,7 @@ app.get("/api/statcast-leaders", async (req, res) => {
     if (requestedSeason && !validSeason(requestedSeason)) return res.status(400).json({ error: INVALID_INPUT });
     const hittingCategories = "homeRuns,battingAverage,runsBattedIn,onBasePlusSlugging,stolenBases";
     const pitchingCategories = "earnedRunAverage,strikeouts,wins,walksAndHitsPerInningPitched,saves";
-    const fieldingCategories = "fieldingPercentage,putOuts,assists,errors";
+    const fieldingCategories = "putOuts,assists,doublePlays,triplePlays,rangeFactorPerGame";
     const makeUrl = (categories: string, statGroup: string) =>
       `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${categories}&season=${season}&limit=10&hydrate=person,team&statGroup=${statGroup}&statType=season`;
     const [hittingData, pitchingData, fieldingData] = await Promise.all([
