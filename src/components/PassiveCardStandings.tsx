@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { DivisionStanding } from "../types";
+import { DivisionStanding, WildCardStanding } from "../types";
 import { Trophy, Award, Shield, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface PassiveCardStandingsProps {
   standings: DivisionStanding[];
+  wildCardStandings: WildCardStanding[];
   loading: boolean;
   error?: string | null;
   onRetry?: () => void;
 }
 
-export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, loading, error, onRetry }) => {
+export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, wildCardStandings, loading, error, onRetry }) => {
   // Tab 0: American League + Wildcard, Tab 1: National League + Wildcard
   const [activeTab, setActiveTab] = useState<number>(0);
 
@@ -36,26 +37,9 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
       d.division?.name?.includes("National")
   );
 
-  // Mock / Calculated Wildcard standings for clean display
-  const alWildcardTeams = [
-    { name: "New York Yankees", wins: 76, losses: 52, pct: ".594", wcgb: "+4.5", status: "WC1" },
-    { name: "Baltimore Orioles", wins: 74, losses: 54, pct: ".578", wcgb: "+2.5", status: "WC2" },
-    { name: "Boston Red Sox", wins: 71, losses: 57, pct: ".555", wcgb: "-", status: "WC3" },
-    { name: "Seattle Mariners", wins: 70, losses: 58, pct: ".547", wcgb: "1.0 GB", status: "In Hunt" },
-    { name: "Detroit Tigers", wins: 68, losses: 60, pct: ".531", wcgb: "3.0 GB", status: "In Hunt" },
-  ];
-
-  const nlWildcardTeams = [
-    { name: "Atlanta Braves", wins: 78, losses: 50, pct: ".609", wcgb: "+5.0", status: "WC1" },
-    { name: "San Diego Padres", wins: 75, losses: 53, pct: ".586", wcgb: "+2.0", status: "WC2" },
-    { name: "Arizona Diamondbacks", wins: 73, losses: 55, pct: ".570", wcgb: "-", status: "WC3" },
-    { name: "New York Mets", wins: 71, losses: 57, pct: ".555", wcgb: "2.0 GB", status: "In Hunt" },
-    { name: "Chicago Cubs", wins: 69, losses: 59, pct: ".539", wcgb: "4.0 GB", status: "In Hunt" },
-  ];
-
   const currentDivisions = activeTab === 0 ? alDivisions : nlDivisions;
-  const currentWildcard: typeof alWildcardTeams = [];
   const leagueName = activeTab === 0 ? "American League" : "National League";
+  const currentWildcard = wildCardStandings.find((league) => league.league.name === leagueName);
   const leagueBadgeColor = activeTab === 0 ? "text-red-400 bg-red-500/10 border-red-500/30" : "text-blue-400 bg-blue-500/10 border-blue-500/30";
 
   return (
@@ -211,7 +195,22 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
                 </span>
               </div>
 
-              <div className="py-4 text-center text-xs text-slate-500">Official wildcard data is not available from the current standings feed.</div>
+              {currentWildcard?.teamRecords?.length ? (
+                <div className="grid grid-cols-5 gap-3">
+                  {currentWildcard.teamRecords.slice(0, 5).map((team) => (
+                    <div key={team.team.id} className="rounded-lg border border-slate-800 bg-slate-950/70 p-2 text-center">
+                      <div className="flex items-center justify-center gap-1.5 min-w-0">
+                        {team.team.logoUrl && <img src={team.team.logoUrl} alt="" width={18} height={18} className="w-[18px] h-[18px] object-contain shrink-0" />}
+                        <span className="truncate text-xs font-bold text-white">{team.team.name}</span>
+                      </div>
+                      <div className="mt-1 text-[10px] text-amber-400 font-mono">WC{team.wildCardRank ?? "—"} · {team.wildCardGamesBehind ?? "—"} GB</div>
+                      <div className="text-[10px] text-slate-400 font-mono">{team.wins}-{team.losses} · {team.pct}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center text-xs text-slate-500">Official Wild Card data is unavailable for this season.</div>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>

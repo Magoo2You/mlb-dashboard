@@ -60,6 +60,8 @@ function runScrollOwnershipChecks(): void {
   const statcastComponent = readSource('src/components/StatcastLeaderboard.tsx');
   const whosHotComponent = readSource('src/components/WhosHotView.tsx');
   const standingsComponent = readSource('src/components/StandingsView.tsx');
+  const passiveStandingsComponent = readSource('src/components/PassiveCardStandings.tsx');
+  const passiveScreen = readSource('src/components/PassiveScreen.tsx');
   const gameView = readSource('src/components/GameView.tsx');
   const serverSource = readSource('server.ts');
   const indexCss = readSource('src/index.css');
@@ -77,6 +79,11 @@ function runScrollOwnershipChecks(): void {
   assert.match(standingsComponent, /team\.wildCardGamesBehind/);
   assert.match(serverSource, /standingsTypes=wildCard/);
   assert.match(serverSource, /wildCardGamesBack \?\? tr\.wildCardGamesBehind/);
+  assert.match(passiveScreen, /fetchStandingsBundle/);
+  assert.match(passiveScreen, /wildCardStandings/);
+  assert.match(passiveStandingsComponent, /currentWildcard\?\.teamRecords/);
+  assert.doesNotMatch(passiveStandingsComponent, /Mock \/ Calculated Wildcard/);
+  assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);
   assert.match(gameView, /lg:col-span-6 lg:self-start[\s\S]*flex flex-col/);
   assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
   assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);

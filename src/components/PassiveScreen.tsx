@@ -3,13 +3,13 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   fetchSchedule,
   fetchGameDetail,
-  fetchStandings,
+  fetchStandingsBundle,
   fetchStatcastLeaders,
   fetchWhosHot,
   fetchTicker,
   fetchMLBNews,
 } from "../services/api";
-import { ScheduledGame, DetailedGameFeed, DivisionStanding, TickerItem, MLBNewsArticle } from "../types";
+import { ScheduledGame, DetailedGameFeed, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle } from "../types";
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
 import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
@@ -29,6 +29,7 @@ export const PassiveScreen: React.FC = () => {
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [gameFeed, setGameFeed] = useState<DetailedGameFeed | null>(null);
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
+  const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [newsArticles, setNewsArticles] = useState<MLBNewsArticle[]>([]);
   const [hotData, setHotData] = useState<any>({
     timeframe: "14",
@@ -194,9 +195,10 @@ export const PassiveScreen: React.FC = () => {
 
     const loadStandingsData = async () => {
       try {
-        const data = await fetchStandings(CURRENT_SEASON);
+        const data = await fetchStandingsBundle(CURRENT_SEASON);
         if (isMounted) {
-          setStandings(data);
+          setStandings(data.divisions);
+          setWildCardStandings(data.wildCardStandings);
           setStandingsError(null);
           setLoadingStandings(false);
         }
@@ -443,7 +445,7 @@ export const PassiveScreen: React.FC = () => {
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               className="w-full h-full absolute inset-0"
             >
-              <PassiveCardStandings standings={standings} loading={loadingStandings} error={standingsError} onRetry={retryData} />
+              <PassiveCardStandings standings={standings} wildCardStandings={wildCardStandings} loading={loadingStandings} error={standingsError} onRetry={retryData} />
             </motion.div>
           )}
         </AnimatePresence>
