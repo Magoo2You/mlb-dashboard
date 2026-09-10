@@ -604,7 +604,7 @@ export const GameView: React.FC<GameViewProps> = ({
             </div>
 
             {/* Right Col (6/12): Statcast Strike Zone Pitch Tracker */}
-            <div className="lg:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div className="lg:col-span-6 lg:self-start bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col">
               <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-400" />
@@ -675,10 +675,11 @@ export const GameView: React.FC<GameViewProps> = ({
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+              <div className="max-w-full overflow-x-auto flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
                 <button
                   onClick={() => setPlayFilter("all")}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  type="button"
+                  className={`focus-ring shrink-0 px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     playFilter === "all" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -686,7 +687,8 @@ export const GameView: React.FC<GameViewProps> = ({
                 </button>
                 <button
                   onClick={() => setPlayFilter("scoring")}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  type="button"
+                  className={`focus-ring shrink-0 px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     playFilter === "scoring" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -694,7 +696,8 @@ export const GameView: React.FC<GameViewProps> = ({
                 </button>
                 <button
                   onClick={() => setPlayFilter("statcast")}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  type="button"
+                  className={`focus-ring shrink-0 px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     playFilter === "statcast" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -702,7 +705,8 @@ export const GameView: React.FC<GameViewProps> = ({
                 </button>
                 <button
                   onClick={() => setPlayFilter("strikeouts")}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  type="button"
+                  className={`focus-ring shrink-0 px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     playFilter === "strikeouts" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
                   }`}
                 >

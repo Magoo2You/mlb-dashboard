@@ -59,6 +59,8 @@ function runScrollOwnershipChecks(): void {
   const sportsPanel = readSource('src/components/SportsPanel.tsx');
   const statcastComponent = readSource('src/components/StatcastLeaderboard.tsx');
   const whosHotComponent = readSource('src/components/WhosHotView.tsx');
+  const standingsComponent = readSource('src/components/StandingsView.tsx');
+  const gameView = readSource('src/components/GameView.tsx');
   const serverSource = readSource('server.ts');
   const indexCss = readSource('src/index.css');
 
@@ -67,6 +69,12 @@ function runScrollOwnershipChecks(): void {
   assert.match(statcastComponent, /id: "pitching"/);
   assert.match(statcastComponent, /id: "fielding"/);
   assert.doesNotMatch(whosHotComponent, /Exit Velo Spike|recentExitVelo|baselineExitVelo|exitVeloSurge/);
+  assert.doesNotMatch(standingsComponent, /<td className="py-3 font-sans font-bold text-white flex/);
+  assert.match(standingsComponent, /min-w-\[760px\]/);
+  assert.match(standingsComponent, /whitespace-nowrap/);
+  assert.match(gameView, /lg:col-span-6 lg:self-start[\s\S]*flex flex-col/);
+  assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
+  assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);
   assert.match(serverSource, /statGroup=\$\{statGroup\}&statType=season/);
   assert.match(serverSource, /numDays > 120/);
   assert.match(serverSource, /makeUrl\(fieldingCategories, "fielding"\)/);

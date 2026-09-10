@@ -92,7 +92,8 @@ export const StandingsView: React.FC = () => {
           isWcLeader ? "bg-emerald-950/20 hover:bg-emerald-950/30" : "hover:bg-slate-900"
         }`}
       >
-        <td className="py-3 font-sans font-bold text-white flex items-center gap-3">
+        <td className="py-3 font-sans font-bold text-white">
+          <div className="flex items-center gap-3 min-w-[220px]">
           <span className="w-5 text-center font-mono text-slate-500 font-medium text-[11px]">
             {idx + 1}
           </span>
@@ -104,28 +105,29 @@ export const StandingsView: React.FC = () => {
               (e.target as HTMLElement).style.display = "none";
             }}
           />
-          <span className="truncate">{tr.team.name}</span>
+            <span className="truncate">{tr.team.name}</span>
 
           {/* Clinch / Wildcard Badges */}
-          {tr.clinchIndicator && (
+            {tr.clinchIndicator && (
             <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/60 font-mono">
               {tr.clinchIndicator.toUpperCase()}
             </span>
           )}
 
-          {showWildCardBadge && isWcLeader && (
+            {showWildCardBadge && isWcLeader && (
             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-900/90 text-emerald-300 border border-emerald-700 font-mono shadow-sm flex items-center gap-1">
               <Award className="w-3 h-3 text-emerald-400" />
               WC{wcRank}
             </span>
-          )}
+            )}
+          </div>
         </td>
-        <td className="text-center font-bold text-white">{tr.wins}</td>
-        <td className="text-center text-slate-400">{tr.losses}</td>
-        <td className="text-center font-bold text-amber-400">{tr.pct}</td>
-        <td className="text-center font-bold text-slate-200 font-mono">{displayGb}</td>
+        <td className="text-center font-bold text-white whitespace-nowrap">{tr.wins}</td>
+        <td className="text-center text-slate-400 whitespace-nowrap">{tr.losses}</td>
+        <td className="text-center font-bold text-amber-400 whitespace-nowrap">{tr.pct}</td>
+        <td className="text-center font-bold text-slate-200 font-mono whitespace-nowrap">{displayGb}</td>
         <td
-          className={`text-center font-bold font-mono ${
+          className={`text-center font-bold font-mono whitespace-nowrap ${
             displayWcgb.startsWith("+")
               ? "text-emerald-400"
               : displayWcgb === "—" || displayWcgb === "-"
@@ -135,12 +137,12 @@ export const StandingsView: React.FC = () => {
         >
           {displayWcgb}
         </td>
-        <td className="text-center text-slate-400">{tr.homeRecord}</td>
-        <td className="text-center text-slate-400">{tr.awayRecord}</td>
-        <td className="text-center text-slate-300">{tr.lastTen}</td>
-        <td className="text-center font-bold text-slate-200">{tr.streak?.streakCode || "-"}</td>
+        <td className="text-center text-slate-400 whitespace-nowrap">{tr.homeRecord}</td>
+        <td className="text-center text-slate-400 whitespace-nowrap">{tr.awayRecord}</td>
+        <td className="text-center text-slate-300 whitespace-nowrap">{tr.lastTen}</td>
+        <td className="text-center font-bold text-slate-200 whitespace-nowrap">{tr.streak?.streakCode || "-"}</td>
         <td
-          className={`text-center font-black ${
+          className={`text-center font-black whitespace-nowrap ${
             tr.runDifferential > 0
               ? "text-emerald-400"
               : tr.runDifferential < 0
