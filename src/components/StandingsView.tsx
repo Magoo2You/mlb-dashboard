@@ -195,7 +195,7 @@ export const StandingsView: React.FC = () => {
                 </div>
 
                 <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
-                  <table className="min-w-[760px] w-full text-left text-xs font-mono">
+                  <table className="standings-table min-w-[760px] w-full text-left text-xs font-mono">
                     <thead>
                       <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                         <th className="py-2 font-sans font-bold text-slate-400">TEAM</th>
@@ -265,7 +265,7 @@ export const StandingsView: React.FC = () => {
 
                 {/* Wild Card Contenders Table */}
                 <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
-                  <table className="min-w-[760px] w-full text-left text-xs font-mono">
+                  <table className="standings-table min-w-[760px] w-full text-left text-xs font-mono">
                     <thead>
                       <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                         <th className="py-2 font-sans font-bold text-slate-400">WILD CARD CONTENDER</th>
@@ -328,7 +328,7 @@ export const StandingsView: React.FC = () => {
             {league.lastUpdated && <span className="text-[10px] text-slate-500 font-mono">Updated {new Date(league.lastUpdated).toLocaleString()}</span>}
           </div>
           <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
-            <table className="min-w-[560px] w-full text-left text-xs font-mono">
+            <table className="standings-table min-w-[560px] w-full text-left text-xs font-mono">
               <thead>
                 <tr className="text-slate-500 border-b border-slate-800/80">
                   <th className="py-2 font-sans font-bold text-slate-400 whitespace-nowrap">WILD CARD TEAM</th>
@@ -465,7 +465,7 @@ export const StandingsView: React.FC = () => {
                   </div>
 
                   <div className="responsive-table-wrap" data-scroll-hint="Scroll horizontally to see all columns">
-                    <table className="min-w-[760px] w-full text-left text-xs font-mono">
+                    <table className="standings-table min-w-[760px] w-full text-left text-xs font-mono">
                       <thead>
                         <tr className="text-slate-500 border-b border-slate-800/80 pb-2">
                           <th className="py-2 font-sans font-bold text-slate-400">TEAM</th>

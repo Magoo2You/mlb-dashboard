@@ -1,5 +1,61 @@
 @import "tailwindcss";
 
+:root {
+  --dashboard-bg: #020617;
+  --dashboard-surface: #0f172a;
+  --dashboard-panel: #020617;
+  --dashboard-border: #1e293b;
+  --dashboard-text: #f8fafc;
+  --dashboard-muted: #94a3b8;
+  --dashboard-accent: #fbbf24;
+  --dashboard-focus: #fbbf24;
+  --dashboard-radius: 1rem;
+  --dashboard-control-height: 2.5rem;
+}
+
+.dashboard-card {
+  background: var(--dashboard-surface);
+  border: 1px solid var(--dashboard-border);
+  border-radius: var(--dashboard-radius);
+}
+
+.standings-table {
+  table-layout: fixed;
+  min-width: 760px;
+}
+
+.standings-table th:first-child,
+.standings-table td:first-child {
+  width: 15rem;
+}
+
+.standings-table th:not(:first-child),
+.standings-table td:not(:first-child) {
+  width: 4.25rem;
+}
+
+.standings-table td:first-child > div {
+  min-width: 0;
+}
+
+.game-feed-shell {
+  gap: 1.25rem;
+}
+
+.game-feed-panel {
+  min-height: 0;
+  justify-content: flex-start;
+}
+
+.game-feed-table {
+  table-layout: fixed;
+}
+
+.game-feed-table th:first-child,
+.game-feed-table td:first-child {
+  width: 12rem;
+}
+
 /* Keep the broadcast canvas intentionally clipped; interactive pages use document scrolling. */
 .dashboard-shell--wallboard {
   overflow: hidden;

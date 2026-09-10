@@ -78,7 +78,7 @@ export const GameView: React.FC<GameViewProps> = ({
   const latestPlay = plays[0];
 
   return (
-    <div className="space-y-6 bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
+    <div className="game-feed-shell flex flex-col bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
       {/* Top Bar: Game Title & Live Status */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div className="flex items-center gap-3">
@@ -189,7 +189,7 @@ export const GameView: React.FC<GameViewProps> = ({
           {/* Grid Layout: Diamond/Matchup (Left) & Strike Zone Pitch Tracker (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Col (6/12): Diamond & Current At-Bat State */}
-            <div className="lg:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+            <div className="lg:col-span-6 game-feed-panel bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
               <div className="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-1 rounded-lg bg-blue-950 text-blue-400 border border-blue-800/60 font-black text-xs uppercase">
@@ -604,7 +604,7 @@ export const GameView: React.FC<GameViewProps> = ({
             </div>
 
             {/* Right Col (6/12): Statcast Strike Zone Pitch Tracker */}
-            <div className="lg:col-span-6 lg:self-start bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col">
+            <div className="lg:col-span-6 lg:self-start game-feed-panel bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col">
               <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-400" />
