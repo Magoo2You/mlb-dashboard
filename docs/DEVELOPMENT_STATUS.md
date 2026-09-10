@@ -1,6 +1,6 @@
 # Development Status
 
-_Last updated: 2026-09-09_
+_Last updated: 2026-09-10_
 
 This document records verified work on the `ChatGPT2026Version` branch. It is a living record, not a replacement for the README or the clean-room build guide.
 
@@ -34,6 +34,7 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 | Historical player profiles | Separate four-profile data-only pilot is populated at `src/data/historical-player-profiles.ts` for Jackie Robinson, Roberto Clemente, Ted Williams, and Satchel Paige. Profiles are not yet consumed by an application view and remain separate from Lore & Curios; each record carries source/scope metadata, known conflicts remain explicit, and media remains rights-unresolved/permission-required leads rather than local assets. |
 | Visual QA baseline | Fresh baseline recorded at `docs/VISUAL-QA-BASELINE-2026-09-10.md` against commit `1093e50973dde37ec2fe9cd80ed2414f00f365f4`, fresh port 4330, and intended 1920×1080 desktop scope. The embedded preview-width artifact and standalone Chrome compositor limitation are separated from confirmed app backlog findings; no styling changes were made in the baseline checkpoint. |
 | Visual geometry pass | Shared dashboard tokens now define surface/border/text/accent/focus/radius values. Interactive standings tables reserve a 15rem team column and stable numeric columns while retaining narrow horizontal access. Game Feed panels explicitly opt out of stretch-driven minimum height and use compact shell spacing. Full verification passed after the change; wallboard clipping was not altered. |
+| Data context pass | Added reusable `DataContext` presentation to Statcast and Who's Hot. Panels now show provider, season/window scope, and the freshness event without inventing retrieval timestamps or changing provider data. |
 | Lore image pilot | Two verified local assets are active: Cy Young (`public/assets/lore/cy-young-commons-18463908.jpg`, Commons page ID 18463908, LOC `ppmsca.18460`) and Walter Johnson (`public/assets/lore/walter-johnson-commons-67430005.jpg`, Commons page ID 67430005, LOC LCCN `2016873232` / `hec.24261`). Both are recorded as public domain/no-known-restrictions candidates with creator, collection, source record, rights advisory, attribution, and retrieval date metadata. |
 
 ### Verified lore IDs and sources (evidence checked 2026-09-10)

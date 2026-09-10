@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Flame, Zap, TrendingUp, Award, Trophy, Activity, ArrowUpRight, Shield, Target, Sparkles, User, RefreshCw, Calendar, Clock } from "lucide-react";
 import { fetchWhosHot } from "../services/api";
 import { CURRENT_SEASON, CURRENT_SEASON_END, CURRENT_SEASON_START } from "../utils/season";
+import { DataContext } from "./DataContext";
 
 interface WhosHotViewProps {
   onSelectPlayer: (personId: number) => void;
@@ -87,6 +88,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
               <p className="text-sm text-slate-300 leading-relaxed">
                 Filter MLB players across any relevant date span or preset window, comparing recent performance directly against their <strong className="text-amber-300">{CURRENT_SEASON} full season baseline</strong>.
               </p>
+              <DataContext source="MLB Stats API" scope={timeMode === "custom" ? `${startDate} to ${endDate} vs ${CURRENT_SEASON} full-season baseline` : `past ${timeframe} days vs ${CURRENT_SEASON} full-season baseline`} freshness="Fetched for the selected span" />
             </div>
 
             {/* Time Window & Season Controls */}

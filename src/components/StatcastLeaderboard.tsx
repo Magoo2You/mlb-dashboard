@@ -3,6 +3,7 @@ import { BarChart2, Calendar, RefreshCw, Zap } from "lucide-react";
 import { fetchStatcastLeaders } from "../services/api";
 import { CURRENT_SEASON } from "../utils/season";
 import { STATCAST_CATEGORY_CONFIG, StatcastTab } from "../sports/mlb/statcast-transformers";
+import { DataContext } from "./DataContext";
 
 interface StatcastLeaderboardProps {
   onSelectPlayer: (personId: number) => void;
@@ -55,6 +56,7 @@ export const StatcastLeaderboard: React.FC<StatcastLeaderboardProps> = ({ onSele
               </span>
             </div>
             <p className="text-xs text-slate-400">Season values rendered directly from separate official MLB Stats API stat groups.</p>
+            <DataContext source="MLB Stats API" scope={`${selectedSeason} regular-season leaderboards`} freshness="Fetched on initial load and when the season changes" />
           </div>
         </div>
         <select aria-label="Leaderboard season" value={selectedSeason} onChange={(event) => setSelectedSeason(event.target.value)} className="focus-ring bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none">
