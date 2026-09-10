@@ -81,10 +81,10 @@ function runScrollOwnershipChecks(): void {
   assert.match(serverSource, /standingsTypes=wildCard/);
   assert.match(serverSource, /wildCardGamesBack \?\? tr\.wildCardGamesBehind/);
   assert.match(passiveScreen, /fetchStandingsBundle/);
-  assert.match(passiveScreen, /h-36 bg-slate-900[\s\S]*items-end/);
-  assert.match(passiveScreen, /justify-start gap-3/);
-  assert.match(passiveScreen, /order-1 flex items-center/);
-  assert.match(passiveScreen, /order-2 flex items-center/);
+  assert.match(passiveScreen, /min-h-20 bg-slate-900[\s\S]*items-center/);
+  assert.match(passiveScreen, /px-8 py-3 flex items-center gap-5/);
+  assert.match(passiveScreen, /aria-label="Wallboard rotation views"/);
+  assert.match(passiveScreen, /aria-label="Selectable dashboard views"/);
   assert.match(passiveScreen, /wildCardStandings/);
   assert.match(passiveScreen, /aria-label="Selectable dashboard views"/);
   assert.match(passiveScreen, /mode: "sports"/);

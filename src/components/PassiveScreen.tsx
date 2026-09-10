@@ -12,7 +12,7 @@ import {
 import { ScheduledGame, DetailedGameFeed, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle } from "../types";
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
-import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
+import { Activity, CalendarDays, CircleDot, Clock, Flame, Pause, Play, Radio, Trophy, Zap } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
 import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
 
@@ -328,21 +328,21 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
     { label: "2. DIVISION STANDINGS", icon: Trophy, color: "text-amber-400" },
   ];
   const selectableViews = [
-    { mode: "schedule" as const, label: "Schedule", icon: "▦" },
-    { mode: "statcast" as const, label: "Statcast", icon: "↗" },
-    { mode: "hot" as const, label: "Who's Hot", icon: "♨" },
-    { mode: "sports" as const, label: "Sports", icon: "◉" },
+    { mode: "schedule" as const, label: "Schedule", icon: CalendarDays },
+    { mode: "statcast" as const, label: "Statcast", icon: Zap },
+    { mode: "hot" as const, label: "Who's Hot", icon: Flame },
+    { mode: "sports" as const, label: "Sports", icon: CircleDot },
   ];
 
   return (
     <div className="w-screen h-screen max-w-[1920px] max-h-[1080px] bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans relative">
       {/* TOP BROADCAST HEADER BAR */}
-      <header className="h-36 bg-slate-900 border-b border-slate-800 px-6 pb-4 flex items-end justify-start gap-3 shrink-0 shadow-lg relative z-20">
+      <header className="min-h-20 bg-slate-900 border-b border-slate-800 px-8 py-3 flex items-center gap-5 shrink-0 shadow-lg relative z-20">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-          {/* MLB Logo - Using user's custom transparent PNG */}
-            <img src="/assets/mlblogo.png" alt="MLB Logo" width={32} height={32} decoding="async" className="w-8 h-auto shrink-0 object-contain" />
+          {/* MLB logo: local SVG keeps the mark sharp at wallboard scale. */}
+            <img src="/assets/mlb-logo.svg" alt="MLB Logo" width={52} height={28} decoding="async" className="w-[52px] h-7 shrink-0 object-contain" />
             <h1 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
               Todd's <span className="text-amber-400">MLB Gameday</span>
             </h1>
@@ -350,7 +350,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         </div>
 
         {/* Slide Stack Navigation Indicators */}
-        <div className="order-2 flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" aria-label="Wallboard rotation views">
           {slideTitles.map((slide, idx) => {
             const Icon = slide.icon;
             const isActive = activeSlideIndex === idx;
@@ -363,7 +363,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                   setActiveSlideIndex(idx);
                   setProgress(0);
                 }}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold font-mono transition-all relative overflow-hidden ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all relative overflow-hidden whitespace-nowrap ${
                   isActive
                     ? "bg-slate-800 text-white shadow-md border border-slate-700"
                     : "text-slate-500 hover:text-slate-300"
@@ -384,23 +384,23 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
           })}
         </div>
 
-        <div className="order-3 flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" aria-label="Selectable dashboard views">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" aria-label="Selectable dashboard views">
           {selectableViews.map((view) => (
             <button
               key={view.mode}
               type="button"
               onClick={() => onSelectMode?.(view.mode)}
               title={`Open ${view.label}`}
-              className="focus-ring flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold font-mono text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="focus-ring flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white whitespace-nowrap"
             >
-              <span aria-hidden="true">{view.icon}</span>
+              <view.icon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{view.label}</span>
             </button>
           ))}
         </div>
 
         {/* Clock */}
-        <div className="order-1 flex items-center gap-2 font-mono shrink-0">
+        <div className="ml-auto flex items-center gap-2 font-mono shrink-0">
           <button
             type="button"
             onClick={() => setIsPaused((paused) => !paused)}
