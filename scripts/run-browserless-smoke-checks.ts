@@ -62,6 +62,7 @@ function runScrollOwnershipChecks(): void {
   const standingsComponent = readSource('src/components/StandingsView.tsx');
   const passiveStandingsComponent = readSource('src/components/PassiveCardStandings.tsx');
   const passiveScreen = readSource('src/components/PassiveScreen.tsx');
+  const appSource = readSource('src/App.tsx');
   const gameView = readSource('src/components/GameView.tsx');
   const serverSource = readSource('server.ts');
   const indexCss = readSource('src/index.css');
@@ -85,6 +86,10 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScreen, /order-1 flex items-center/);
   assert.match(passiveScreen, /order-2 flex items-center/);
   assert.match(passiveScreen, /wildCardStandings/);
+  assert.match(passiveScreen, /aria-label="Selectable dashboard views"/);
+  assert.match(passiveScreen, /mode: "sports"/);
+  assert.match(passiveScreen, /onSelectMode\?\.\(view\.mode\)/);
+  assert.doesNotMatch(appSource, /<nav className="fixed right-2 top-2/);
   assert.match(passiveStandingsComponent, /currentWildcard\?\.teamRecords/);
   assert.doesNotMatch(passiveStandingsComponent, /Mock \/ Calculated Wildcard/);
   assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);

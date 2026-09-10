@@ -16,7 +16,13 @@ import { Activity, Clock, Pause, Play, Trophy, Radio } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
 import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
 
-export const PassiveScreen: React.FC = () => {
+import type { DashboardMode } from "../domain/dashboard-navigation";
+
+interface PassiveScreenProps {
+  onSelectMode?: (mode: DashboardMode) => void;
+}
+
+export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) => {
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard & Live Feed, 1: Division Standings
   const [progress, setProgress] = useState<number>(0); // 0 to 100
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -321,6 +327,12 @@ export const PassiveScreen: React.FC = () => {
     { label: "1. SCOREBOARD & GAME FEED", icon: Activity, color: "text-blue-400" },
     { label: "2. DIVISION STANDINGS", icon: Trophy, color: "text-amber-400" },
   ];
+  const selectableViews = [
+    { mode: "schedule" as const, label: "Schedule", icon: "▦" },
+    { mode: "statcast" as const, label: "Statcast", icon: "↗" },
+    { mode: "hot" as const, label: "Who's Hot", icon: "♨" },
+    { mode: "sports" as const, label: "Sports", icon: "◉" },
+  ];
 
   return (
     <div className="w-screen h-screen max-w-[1920px] max-h-[1080px] bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans relative">
@@ -346,6 +358,7 @@ export const PassiveScreen: React.FC = () => {
             return (
               <button
                 key={idx}
+                type="button"
                 onClick={() => {
                   setActiveSlideIndex(idx);
                   setProgress(0);
@@ -369,6 +382,21 @@ export const PassiveScreen: React.FC = () => {
               </button>
             );
           })}
+        </div>
+
+        <div className="order-3 flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" aria-label="Selectable dashboard views">
+          {selectableViews.map((view) => (
+            <button
+              key={view.mode}
+              type="button"
+              onClick={() => onSelectMode?.(view.mode)}
+              title={`Open ${view.label}`}
+              className="focus-ring flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold font-mono text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+            >
+              <span aria-hidden="true">{view.icon}</span>
+              <span>{view.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Clock */}
