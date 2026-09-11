@@ -472,7 +472,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
               ref={scoreboardSlideRef}
               id="wallboard-scoreboard-game-feed-panel"
               role="tabpanel"
-              aria-labelledby={`wallboard-tab-${activeSlideIndex}`}
+              aria-labelledby="wallboard-tab-0 wallboard-tab-1"
               aria-hidden={activeSlideIndex >= 2}
               className={`w-full h-full absolute inset-0 ${activeSlideIndex < 2 ? "z-10" : "pointer-events-none"}`}
             >
@@ -502,7 +502,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
               ref={standingsSlideRef}
               id="wallboard-standings-panel"
               role="tabpanel"
-              aria-labelledby={activeSlideIndex === 2 ? "wallboard-tab-2" : "wallboard-tab-3"}
+              aria-labelledby="wallboard-tab-2 wallboard-tab-3"
               aria-hidden={activeSlideIndex < 2}
               inert={activeSlideIndex < 2}
               tabIndex={-1}
