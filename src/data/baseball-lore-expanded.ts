@@ -877,6 +877,72 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     source: "https://sabr.org/gamesproj/game/may-1-1920-an-extreme-exercise-in-futility-braves-dodgers-play-26-innings-to-no-decision",
     verificationStatus: "verified",
     provenance: "Verified 2026-09-10 against SABR's detailed game record, which states that the game lasted 26 innings, ended 1-1, and was called because of darkness."
+  },
+  {
+    id: "record-orel-hershiser-59-scoreless-1988",
+    title: "Orel Hershiser's 59 Scoreless Innings",
+    tag: "PITCHING RECORD",
+    statBadge: "59 innings",
+    fact: "Orel Hershiser completed a 59-inning scoreless streak during the 1988 regular season for the Dodgers.",
+    whimsy: "MLB distinguishes the regular-season streak from the additional scoreless innings he opened with in the postseason.",
+    source: "https://www.mlb.com/news/orel-hershiser-scoreless-inning-streak-record",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's record account, which identifies the 59-inning streak, the 1988 game-by-game sequence, and the regular-season boundary."
+  },
+  {
+    id: "record-fernando-tatis-two-grand-slams-inning",
+    title: "Fernando Tatis's Two Grand Slams in One Inning",
+    tag: "SINGLE-GAME RARITY",
+    statBadge: "2 grand slams",
+    fact: "Fernando Tatis hit two grand slams in the same inning for the Cardinals at Dodger Stadium on April 23, 1999.",
+    whimsy: "MLB's account says no player had done it before and no player has repeated it since.",
+    source: "https://www.mlb.com/news/fernando-tatis-hit-2-grand-slams-in-1-inning",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's historical account, which identifies the April 23, 1999 game, the Cardinals-Dodgers setting, and the two-grand-slam inning."
+  },
+  {
+    id: "record-jim-abbott-one-handed-no-hitter-1993",
+    title: "Jim Abbott's 1993 No-Hitter",
+    tag: "NO-HITTER HISTORY",
+    statBadge: "no-hitter",
+    fact: "Jim Abbott threw a no-hitter for the Yankees against Cleveland on September 4, 1993.",
+    whimsy: "MLB's record account identifies it as the only recognized no-hitter thrown by a pitcher born without a right hand.",
+    source: "https://www.mlb.com/news/jim-abbott-no-hitter-streaming-on-mlb",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's account, which records Abbott's September 4, 1993 Yankees no-hitter, opponent, date, and the qualified no-hitter distinction."
+  },
+  {
+    id: "jewish-lip-pike-first-great-jewish-player",
+    title: "Lipman Pike, an Early Jewish Baseball Star",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: "1866–1881",
+    fact: "SABR describes Lipman Pike as the first great Jewish baseball player; he played professionally from 1866 through 1881.",
+    whimsy: "SABR preserves the period context and notes that comparable statistical records do not exist for his career through 1870.",
+    source: "https://sabr.org/bioproj/person/lip-pike",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against SABR's Lipman Pike biography, which uses the qualified phrase ‘first great Jewish baseball player’ and gives the professional-playing span."
+  },
+  {
+    id: "jewish-hank-greenberg-yom-kippur-1934",
+    title: "Hank Greenberg and Yom Kippur",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: "1934 Tigers",
+    fact: "Hank Greenberg refused to play on Yom Kippur in 1934 while the Detroit Tigers were involved in a pennant race.",
+    whimsy: "The Jewish Baseball Museum describes the decision as drawing national attention during the pennant race.",
+    source: "https://jewishbaseballmuseum.com/player/hank-greenberg",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the Jewish Baseball Museum player biography, which states the 1934 season, Yom Kippur decision, Detroit setting, and pennant-race context."
+  },
+  {
+    id: "jewish-sandy-koufax-yom-kippur-game-1-1965",
+    title: "Sandy Koufax Sits Out World Series Game 1",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: "1965 World Series",
+    fact: "Sandy Koufax did not pitch Game 1 of the 1965 World Series because it fell on Yom Kippur; Don Drysdale started for the Dodgers.",
+    whimsy: "Koufax pitched later in the Series, so this entry concerns Game 1 rather than the entire championship series.",
+    source: "https://baseballhall.org/discover/sandy-koufax-sits-out-game-one",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which states the Yom Kippur conflict, Game 1 context, and Drysdale's start."
   }
 ];
 
