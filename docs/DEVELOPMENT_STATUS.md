@@ -70,6 +70,11 @@ This document records verified work on the `ChatGPT2026Version` branch. It is a 
 - `jewish-lip-pike-first-great-jewish-player` — https://sabr.org/bioproj/person/lip-pike
 - `jewish-hank-greenberg-yom-kippur-1934` — https://jewishbaseballmuseum.com/player/hank-greenberg
 - `jewish-sandy-koufax-yom-kippur-game-1-1965` — https://baseballhall.org/discover/sandy-koufax-sits-out-game-one
+- `game-larry-yount-never-appeared-1971` — https://baseballhall.org/larry-yount-one-game
+- `record-kerry-wood-20-strikeouts-1998` — https://www.mlb.com/news/pitchers-who-recorded-20-strikeouts-in-a-game
+- `jewish-moe-berg-15-seasons-oss` — https://baseballhall.org/discover/short-stops/moe-bergs-life-in-baseball
+- `jewish-al-rosen-unanimous-mvp-1953` — https://jewishbaseballmuseum.com/player/al-rosen
+- `jewish-sammy-samuels-fifth-major-leaguer-1895` — https://sabr.org/bioproj/person/sammy-samuels
 
 Sources were used for factual verification and file-level rights review. The repository copies only the two documented public-domain Commons derivatives; no MLB or Hall CDN image is used. Exact source records, rights text, and limitations are maintained in `LORE-IMAGE-RIGHTS-RESEARCH.md`; all other historical-player images remain deferred.
 

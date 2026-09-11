@@ -127,10 +127,11 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   // Game Feed rotates eligible live/completed games; Scoreboard remains static.
   useEffect(() => {
     if (isAutoRotationPaused || activeSlideIndex !== 1) return;
+    const today = formatLocalDate();
     const eligibleGames = scheduleGames.filter((game) => {
       const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
       const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
-      return isLive || isFinal;
+      return isLive || (isFinal && game.officialDate === today);
     });
     if (eligibleGames.length <= 1) return;
     gameFeedGameIndexRef.current = Math.max(0, eligibleGames.findIndex((game) => game.gamePk === selectedGamePk));
