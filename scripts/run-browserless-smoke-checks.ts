@@ -131,6 +131,8 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /liveGameFeeds\[game\.gamePk\]/);
   assert.ok(passiveScheduleComponent.includes('P:</span> {livePitcherName || "Unavailable"}'));
   assert.ok(passiveScheduleComponent.includes('H:</span> {liveBatterName || "Unavailable"}'));
+  assert.ok(!passiveScheduleComponent.includes('Live: see Game Feed'));
+  assert.match(passiveScheduleComponent, /Count \$\{liveData\.linescore\.balls\}-\$\{liveData\.linescore\.strikes\}/);
   assert.match(passiveScheduleComponent, /Array\.from\(\{ length: 3 \}/);
   assert.match(passiveScreen, /for \(const game of liveGames\)/);
   assert.match(passiveScheduleComponent, /displayedScoreboardGames = scoreboardCardSlots/);

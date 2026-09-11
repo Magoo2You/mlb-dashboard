@@ -1,14 +1,14 @@
 # Development Status
 
-_Last updated: 2026-09-10_
+_Last updated: 2026-09-11_
 
-This document records verified work on the `ChatGPT2026Version` branch. It is a living record, not a replacement for the README or the clean-room build guide.
+This document records verified work on the `main` branch. It is a living record, not a replacement for the README or the clean-room build guide.
 
 ## Branch and release boundary
 
-- Working branch: `ChatGPT2026Version`
-- Protected baseline: `main` remains unchanged
-- Latest verified checkpoint: experimental NFL current-scoreboard preview (this branch)
+- Working branch: `main`
+- Backup baseline: `MainBACK2026` preserves the former GitHub `main`
+- Latest verified checkpoint: MLB live scoreboard count and lower-box refinement
 - Changes are committed and pushed only after tests, lint, build, and relevant smoke checks pass.
 - Scratch probes, credentials, caches, generated media, and temporary runtime files remain outside production commits.
 
@@ -93,8 +93,8 @@ Sources were used for factual verification and file-level rights review. The rep
 | Wallboard header geometry | At the 1920x1080 desktop baseline, the wallboard header reserves a dedicated upper band and keeps its slide selector, pause control, and clock in a non-overlapping lower control row. Fresh Chrome capture against port 4326 verified the geometry before navigation consolidation. |
 | Wallboard view navigation | The wallboard header auto-rotates Scoreboard, Game Feed, AL Standings, and NL Standings. Schedule, Statcast, Who's Hot, and Sports remain selectable manual destinations; Sports is never auto-rotated. |
 | Wallboard scoreboard density | Before current-day live play, the Scoreboard presents eligible prior-day carryover plus today’s slate. Once a current-day game is live, it filters to current-day active and scheduled/pre-game games only. Fixed viewport-fitting card slots prevent scoreboard scrolling or clipping; larger filtered slates rotate one card slot at a time. |
-| Wallboard scoreboard card refinement | Scoreboard cards use team-primary shading with club-specific secondary/accent gradients, centered scheduled start times, and provider-safe pitcher labels. Live cards keep compact, fixed-height team panels and show provider-sourced pitcher/hitter names, three out indicators beneath `AT`, and a centered three-base runner diamond (1B/2B/3B only); live games remain pinned while non-live slots rotate. |
-| Wallboard learning integration | The global lower Scoreboard rectangle is disabled. Each upcoming game card owns its lower `Pregame` strip: an official MLB preview will take priority when integrated; current team-matched hot hitters or hot pitchers are used when provider-backed data exists; otherwise verified Lore & Curios content is used. No synthetic commentary is shown. |
+| Wallboard scoreboard card refinement | Scoreboard cards use team-primary shading with club-specific secondary/accent gradients, centered scheduled start times, and provider-safe pitcher labels. Live and pre-game team panels use the same larger fixed height. Live cards omit the redundant `Live: see Game Feed` panel text, show provider-sourced pitcher/hitter names, three out indicators beneath `AT`, the live pitching count (`balls-strikes`) beneath the outs, and a centered three-base runner diamond (1B/2B/3B only); live games remain pinned while non-live slots rotate. |
+| Wallboard learning integration | The global lower Scoreboard rectangle is disabled. Each upcoming game card owns its lower `Pregame` strip, fixed at 48px to match the live lower detail box. An official MLB preview will take priority when integrated; current team-matched hot hitters or hot pitchers are used when provider-backed data exists; otherwise verified Lore & Curios content is used. No synthetic commentary is shown. |
 | Wallboard Game Feed rotation | Game Feed rotates through current-day active games first and current-day completed games once a current-day game is live; prior-day carryover finals are excluded after live play begins. Before any current-day game is live, eligible carryover finals remain available. Upcoming games are excluded and Scoreboard selection remains static. |
 | Wallboard pause semantics | The wallboard pause control freezes the primary four-view rotation and the Headlines/Hot Hitters/Lore inner rotations together. Live Scoreboard games stay pinned; only non-live scoreboard slots rotate. |
 | Combined learning stream | The Scoreboard surplus card now presents Headlines, Hot Hitters, Lore & Curios, and verified biographies as one automatic stream with no sub-tab controls and no more than two items visible per circulation. |

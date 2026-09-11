@@ -460,7 +460,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <div className="min-w-0 h-[150px] max-h-[150px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
                             <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.away?.team?.abbreviation}</div>
-                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.away?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "away") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
+                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.away?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "away") || "Final pitcher unavailable") : gIsLive ? "" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
                               <div className={`mt-1 font-mono font-black text-lg ${game.teams?.away?.isWinner ? "text-amber-400" : "text-white"}`}>
                                 {game.teams?.away?.score}
@@ -477,6 +477,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                                     <span key={outIndex} className={`h-2.5 w-2.5 rounded-full border ${outIndex < (liveData?.linescore?.outs ?? 0) ? "border-red-300 bg-red-500" : "border-slate-600 bg-slate-800"}`} aria-hidden="true" />
                                   ))}
                                 </div>
+                                <span className="mt-1 text-[10px] font-bold tabular-nums text-slate-400" aria-label={liveData?.linescore?.balls != null && liveData?.linescore?.strikes != null ? `Pitching count: ${liveData.linescore.balls} balls, ${liveData.linescore.strikes} strikes` : "Pitching count unavailable"}>
+                                  {liveData?.linescore?.balls != null && liveData?.linescore?.strikes != null ? `Count ${liveData.linescore.balls}-${liveData.linescore.strikes}` : "Count —"}
+                                </span>
                               </>
                             ) : gIsFinal ? (
                               <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
@@ -495,7 +498,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <div className="min-w-0 h-[150px] max-h-[150px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
                             <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.home?.team?.abbreviation}</div>
-                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.home?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "home") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
+                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.home?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "home") || "Final pitcher unavailable") : gIsLive ? "" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
                               <div className={`mt-1 font-mono font-black text-lg ${game.teams?.home?.isWinner ? "text-amber-400" : "text-white"}`}>
                                 {game.teams?.home?.score}
