@@ -231,9 +231,10 @@ async function fetchGameEditorial(gamePk: string) {
   if (typeof previewRef === "string" && /^https:\/\/dapi(?:\.cms)?\.mlbinfra\.com\//.test(previewRef)) {
     const previewContent = await fetchMLB(previewRef);
     const previewUrl = typeof previewContent?.selfUrl === "string" ? previewContent.selfUrl : previewRef;
+    const previewDescription = previewContent?.summary || previewContent?.fields?.summary || previewContent?.parts?.map((part: any) => part?.fields?.accessibilityText || part?.fields?.blurb || part?.contextualFields?.description).find((text: unknown) => normalizeEditorialText(text));
     const preview = editorialArticle({
       headline: previewContent?.title,
-      blurb: previewContent?.summary || previewContent?.fields?.summary,
+      blurb: previewDescription,
       url: previewUrl,
     }, "preview");
     if (preview) result.preview = preview;
