@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { BASEBALL_LORE_ITEMS, LoreItem } from "@/src/data/baseball-lore-expanded";
 import { HISTORICAL_PLAYER_PROFILES, HistoricalPlayerProfile } from "../data/historical-player-profiles";
 import { createLoreSequence } from "@/src/utils/lore-rotation";
+import { formatLocalDate } from "../utils/local-date";
 
 function hasUsableBiographyEvidence(profile: HistoricalPlayerProfile) {
   const evidence = profile.biographyEvidence[0];
@@ -70,14 +71,28 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [loreRound, setLoreRound] = useState<number>(0);
   const [loreBoundaryId, setLoreBoundaryId] = useState<string | undefined>();
 
-  // Sort the full slate: live first, then scheduled, then final.
+  // Group the local-day slate: yesterday/overnight carryover first, then
+  // today's ongoing, upcoming, and completed games.
+  const localToday = formatLocalDate();
+  const getGameSection = (game: ScheduledGame) => {
+    const isLive = game?.status?.abstractGameState === "Live" || game?.status?.detailedState === "In Progress";
+    const isFinal = game?.status?.abstractGameState === "Final" || game?.status?.detailedState === "Final";
+    if (game.officialDate !== localToday) return "yesterday";
+    if (isLive) return "ongoing";
+    if (isFinal) return "completed";
+    return "upcoming";
+  };
+  const sectionRank: Record<string, number> = { yesterday: 0, ongoing: 1, upcoming: 2, completed: 3 };
+  const sectionLabel: Record<string, string> = {
+    yesterday: "Yesterday / Overnight Carryover",
+    ongoing: "Ongoing Games",
+    upcoming: "Upcoming Games",
+    completed: "Completed Games",
+  };
   const sortedGames = [...games].sort((a, b) => {
-    const getGameRank = (game: ScheduledGame) => {
-      const isLive = game?.status?.abstractGameState === "Live" || game?.status?.detailedState === "In Progress";
-      const isFinal = game?.status?.abstractGameState === "Final" || game?.status?.detailedState === "Final";
-      return isLive ? 0 : isFinal ? 2 : 1;
-    };
-    return getGameRank(a) - getGameRank(b);
+    const rankDifference = sectionRank[getGameSection(a)] - sectionRank[getGameSection(b)];
+    if (rankDifference !== 0) return rankDifference;
+    return new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime();
   });
 
   // All games remain visible on the centered Scoreboard; selectedGamePk only marks the active game.
@@ -273,13 +288,19 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className="flex flex-wrap justify-center gap-2.5"
                 >
-                  {visibleGames.map((game) => {
+                  {visibleGames.map((game, index) => {
                     if (!game) return null;
                     const gIsLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
 
                     return (
-                      <div
+                      <React.Fragment key={game.gamePk}>
+                        {(index === 0 || getGameSection(visibleGames[index - 1]) !== getGameSection(game)) && (
+                          <div className="basis-full mt-1 border-b border-slate-700/70 pb-1 text-left text-[10px] font-black uppercase tracking-[0.18em] text-slate-400" role="heading" aria-level={4}>
+                            {sectionLabel[getGameSection(game)]}
+                          </div>
+                        )}
+                        <div
                         key={game.gamePk}
                         role="button"
                         tabIndex={0}
@@ -349,6 +370,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           </div>
                         </div>
                       </div>
+                      </React.Fragment>
                     );
                   })}
                 </motion.div>
