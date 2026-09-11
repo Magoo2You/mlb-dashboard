@@ -126,15 +126,31 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
     return () => clearInterval(interval);
   }, [isAutoRotationPaused]);
 
-  // Game Feed rotates eligible live/completed games; Scoreboard remains static.
+  // Game Feed rotates active games first, then completed games in the
+  // currently displayed slate (including overnight carryover); upcoming games
+  // never enter the feed rotation. Scoreboard remains static.
   useEffect(() => {
     if (isAutoRotationPaused || activeSlideIndex !== 1) return;
-    const today = formatLocalDate();
-    const eligibleGames = scheduleGames.filter((game) => {
-      const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
-      const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
-      return isLive || (isFinal && game.officialDate === today);
-    });
+    const eligibleGames = scheduleGames
+      .filter((game) => {
+        const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
+        const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+        return isLive || isFinal;
+      })
+      .sort((a, b) => {
+        const aLive = a.status?.abstractGameState === "Live" || a.status?.detailedState === "In Progress";
+        const bLive = b.status?.abstractGameState === "Live" || b.status?.detailedState === "In Progress";
+        return Number(!aLive) - Number(!bLive);
+      });
+    if (eligibleGames.length === 0) {
+      setSelectedGamePk(null);
+      return;
+    }
+    if (!eligibleGames.some((game) => game.gamePk === selectedGamePk)) {
+      gameFeedGameIndexRef.current = 0;
+      setSelectedGamePk(eligibleGames[0].gamePk);
+      return;
+    }
     if (eligibleGames.length <= 1) return;
     gameFeedGameIndexRef.current = Math.max(0, eligibleGames.findIndex((game) => game.gamePk === selectedGamePk));
     const interval = setInterval(() => {
@@ -167,15 +183,21 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         setScheduleError(null);
         setLoadingSchedule(false);
 
-        // Maintain valid selectedGamePk
+        // Maintain a valid selection for the current slate and keep Game Feed
+        // constrained to active/completed games.
         setSelectedGamePk((prevPk) => {
-          if (prevPk && combinedGames.some((g) => g.gamePk === prevPk)) {
+          const feedEligibleGames = combinedGames.filter((game) => {
+            const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
+            const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+            return isLive || isFinal;
+          });
+          if (prevPk && combinedGames.some((g) => g.gamePk === prevPk) && (activeSlideIndexRef.current !== 1 || feedEligibleGames.some((g) => g.gamePk === prevPk))) {
             return prevPk;
           }
-          const liveGame = combinedGames.find(
+          const liveGame = feedEligibleGames.find(
             (g) => g.status.abstractGameState === "Live" || g.status.detailedState === "In Progress"
           );
-          return liveGame ? liveGame.gamePk : combinedGames[0]?.gamePk ?? null;
+          return (liveGame || feedEligibleGames[0] || (activeSlideIndexRef.current === 1 ? null : combinedGames[0]))?.gamePk ?? null;
         });
       } catch (e) {
         console.error("Error loading schedule data:", e);

@@ -185,14 +185,23 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const currentHotSlice = hotHittersList.slice(hotPageIndex * 2, hotPageIndex * 2 + 2);
   const currentLoreSlice = loreSequence.slice(lorePageIndex, lorePageIndex + 2);
 
+  const isFeedEligibleGame = (game: ScheduledGame) => {
+    const isLive = game?.status?.abstractGameState === "Live" || game?.status?.detailedState === "In Progress";
+    const isFinal = game?.status?.abstractGameState === "Final" || game?.status?.detailedState === "Final";
+    return isLive || isFinal;
+  };
+
   // Selected Game and detailed game Feed properties
-  const selectedGame = sortedGames.find((g) => g.gamePk === selectedGamePk) || sortedGames[0];
+  const selectedGame = panel === "game-feed"
+    ? sortedGames.find((g) => g.gamePk === selectedGamePk && isFeedEligibleGame(g)) || sortedGames.find(isFeedEligibleGame)
+    : sortedGames.find((g) => g.gamePk === selectedGamePk) || sortedGames[0];
+  const displayGameFeed = gameFeed?.gamePk === selectedGame?.gamePk ? gameFeed : null;
   const isLive = selectedGame?.status?.abstractGameState === "Live" || selectedGame?.status?.detailedState === "In Progress";
   const isFinal = selectedGame?.status?.abstractGameState === "Final" || selectedGame?.status?.detailedState === "Final";
 
   // Live Batter & Pitcher
-  const liveBatter = gameFeed?.liveData?.matchup?.batter;
-  const livePitcher = gameFeed?.liveData?.matchup?.pitcher;
+  const liveBatter = displayGameFeed?.liveData?.matchup?.batter;
+  const livePitcher = displayGameFeed?.liveData?.matchup?.pitcher;
 
   // Probables & Decisions
   const awayProbable = selectedGame?.teams?.away?.probablePitcher;
@@ -216,12 +225,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
   const liveGames = sortedGames.filter((game) => game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress");
   const completedGames = sortedGames.filter((game) => game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final");
-  const completedGamesToday = completedGames.filter((game) => {
-    if (!game.gameDate) return false;
-    return new Date(game.gameDate).toLocaleDateString() === new Date().toLocaleDateString();
-  });
-  const gameFeedOverviewGames = liveGames.length > 0 ? [...liveGames, ...completedGamesToday] : completedGamesToday;
-  const recentNotablePlays = (gameFeed?.liveData?.plays || [])
+  const completedGamesInDisplayedSlate = completedGames;
+  const gameFeedOverviewGames = liveGames.length > 0 ? [...liveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
+  const recentNotablePlays = (displayGameFeed?.liveData?.plays || [])
     .filter((play: any) => {
       const description = typeof play?.description === "string" ? play.description.trim() : "";
       const eventType = String(play?.eventType || "").toLowerCase();
@@ -233,7 +239,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     .slice(0, 5);
   const showLearningCard = panel === "scoreboard" && visibleGames.length <= 12;
 
-  const decisions = gameFeed?.liveData?.decisions || selectedGame?.decisions;
+  const decisions = displayGameFeed?.liveData?.decisions || selectedGame?.decisions;
   const winner = decisions?.winner;
   const loser = decisions?.loser;
   const save = decisions?.save;
@@ -608,11 +614,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                 <div className={`px-3 py-1.5 rounded-xl border font-black ${
                   isLive ? "bg-red-950 text-red-400 border-red-800" : isFinal ? "bg-emerald-950 text-emerald-400 border-emerald-800" : "bg-slate-950 text-blue-400 border-slate-800"
                 }`}>
-                  {isLive ? `INNING: ${gameFeed?.liveData?.linescore?.inningState || "Live"} ${gameFeed?.liveData?.linescore?.currentInningOrdinal || ""}` : isFinal ? "FINAL GAME RESULT" : "UPCOMING GAME"}
+                  {isLive ? `INNING: ${displayGameFeed?.liveData?.linescore?.inningState || "Live"} ${displayGameFeed?.liveData?.linescore?.currentInningOrdinal || ""}` : isFinal ? "FINAL GAME RESULT" : "UPCOMING GAME"}
                 </div>
                 {isLive && (
                   <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-200 font-bold">
-                    B: {gameFeed?.liveData?.linescore?.balls ?? "—"} | S: {gameFeed?.liveData?.linescore?.strikes ?? "—"} | O: {gameFeed?.liveData?.linescore?.outs ?? "—"}
+                    B: {displayGameFeed?.liveData?.linescore?.balls ?? "—"} | S: {displayGameFeed?.liveData?.linescore?.strikes ?? "—"} | O: {displayGameFeed?.liveData?.linescore?.outs ?? "—"}
                   </div>
                 )}
               </div>
@@ -624,7 +630,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                 <thead>
                   <tr className="text-slate-400 border-b border-slate-800 pb-1.5 text-xs font-bold">
                     <th className="text-left font-sans text-slate-400 pb-1">TEAM</th>
-                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || [
+                    {((displayGameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || [
                       { num: 1 }, { num: 2 }, { num: 3 }, { num: 4 }, { num: 5 }, { num: 6 }, { num: 7 }, { num: 8 }, { num: 9 }
                     ]).map((i: any, idx: number) => (
                       <th key={i.num || idx} className="w-6 pb-1">
@@ -642,28 +648,28 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                       <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
                       <span className="truncate">{selectedGame.teams?.away?.team?.abbreviation}</span>
                     </td>
-                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
+                    {((displayGameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
                       <td key={i.num || idx} className="text-slate-300 font-semibold">
                         {i.away?.runs ?? "-"}
                       </td>
                     ))}
                     <td className="text-amber-400 font-black text-base">{selectedGame.teams?.away?.score ?? "—"}</td>
-                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? "—"}</td>
-                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame.linescore?.teams?.away?.errors ?? "—"}</td>
+                    <td className="text-slate-200 font-bold">{displayGameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? "—"}</td>
+                    <td className="text-slate-400">{displayGameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame.linescore?.teams?.away?.errors ?? "—"}</td>
                   </tr>
                   <tr>
                     <td className="text-left py-1.5 font-bold font-sans text-white text-xs sm:text-sm flex items-center gap-2">
                       <img src={selectedGame.teams?.home?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
                       <span className="truncate">{selectedGame.teams?.home?.team?.abbreviation}</span>
                     </td>
-                    {((gameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
+                    {((displayGameFeed?.liveData?.linescore?.innings || selectedGame.linescore?.innings) || []).map((i: any, idx: number) => (
                       <td key={i.num || idx} className="text-slate-300 font-semibold">
                         {i.home?.runs ?? "-"}
                       </td>
                     ))}
                     <td className="text-amber-400 font-black text-base">{selectedGame.teams?.home?.score ?? "—"}</td>
-                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame.linescore?.teams?.home?.hits ?? "—"}</td>
-                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame.linescore?.teams?.home?.errors ?? "—"}</td>
+                    <td className="text-slate-200 font-bold">{displayGameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame.linescore?.teams?.home?.hits ?? "—"}</td>
+                    <td className="text-slate-400">{displayGameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame.linescore?.teams?.home?.errors ?? "—"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -696,9 +702,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   <div className="text-xs font-black uppercase text-slate-300 tracking-wider mb-2 font-mono">Infield Runners</div>
                   <div className="relative w-28 h-28 border border-slate-800 bg-slate-900/60 rounded-xl flex items-center justify-center">
                     <div className="w-20 h-20 border-2 border-slate-700 transform rotate-45" />
-                    <div className={`absolute top-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
-                    <div className={`absolute left-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
-                    <div className={`absolute right-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute top-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute left-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute right-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
                   </div>
                 </div>
               )}
@@ -850,8 +856,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                       </div>
 
                       <div className="space-y-2 font-mono text-xs">
-                        {gameFeed?.liveData?.scoringPlays && gameFeed.liveData.scoringPlays.length > 0 ? (
-                          gameFeed.liveData.scoringPlays.slice(0, 3).map((sp: any, idx: number) => (
+                        {displayGameFeed?.liveData?.scoringPlays && displayGameFeed.liveData.scoringPlays.length > 0 ? (
+                          displayGameFeed.liveData.scoringPlays.slice(0, 3).map((sp: any, idx: number) => (
                             <div key={sp.id || idx} className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-200 font-bold truncate max-w-[130px]">
                                 {sp.batter?.fullName || "Scoring Play"}
@@ -866,13 +872,13 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-200 font-bold">{selectedGame?.teams?.away?.team?.abbreviation || "Away"} Stats</span>
                               <span className="text-amber-400 font-bold">
-                                {selectedGame?.teams?.away?.score ?? "—"} R, {gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame?.linescore?.teams?.away?.hits ?? "—"} H, {gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame?.linescore?.teams?.away?.errors ?? "—"} E
+                                {selectedGame?.teams?.away?.score ?? "—"} R, {displayGameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame?.linescore?.teams?.away?.hits ?? "—"} H, {displayGameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame?.linescore?.teams?.away?.errors ?? "—"} E
                               </span>
                             </div>
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-200 font-bold">{selectedGame?.teams?.home?.team?.abbreviation || "Home"} Stats</span>
                               <span className="text-emerald-400 font-bold">
-                                {selectedGame?.teams?.home?.score ?? "—"} R, {gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame?.linescore?.teams?.home?.hits ?? "—"} H, {gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame?.linescore?.teams?.home?.errors ?? "—"} E
+                                {selectedGame?.teams?.home?.score ?? "—"} R, {displayGameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame?.linescore?.teams?.home?.hits ?? "—"} H, {displayGameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame?.linescore?.teams?.home?.errors ?? "—"} E
                               </span>
                             </div>
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
@@ -1030,7 +1036,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               </span>
               <p className="text-slate-200 font-semibold truncate flex-1 text-xs sm:text-sm">
                 {isLive
-                  ? String(gameFeed?.liveData?.playByPlay?.currentPlay?.result?.description || gameFeed?.liveData?.playByPlay?.currentPlay?.result || "In progress - pitch sequence underway...")
+                  ? String(displayGameFeed?.liveData?.playByPlay?.currentPlay?.result?.description || displayGameFeed?.liveData?.playByPlay?.currentPlay?.result || "In progress - pitch sequence underway...")
                   : isFinal
                   ? `${selectedGame.teams?.away?.team?.name} (${selectedGame.teams?.away?.score}) @ ${selectedGame.teams?.home?.team?.name} (${selectedGame.teams?.home?.score}) - Final`
                   : `First pitch set for ${new Date(selectedGame.gameDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
