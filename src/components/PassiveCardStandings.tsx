@@ -9,11 +9,13 @@ interface PassiveCardStandingsProps {
   loading: boolean;
   error?: string | null;
   onRetry?: () => void;
+  league?: "American League" | "National League";
 }
 
-export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, wildCardStandings, loading, error, onRetry }) => {
+export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ standings, wildCardStandings, loading, error, onRetry, league }) => {
   // Tab 0: American League + Wildcard, Tab 1: National League + Wildcard
   const [activeTab, setActiveTab] = useState<number>(0);
+  const displayedTab = league === "National League" ? 1 : league === "American League" ? 0 : activeTab;
 
   // Auto-switch tabs every 13.8 seconds (slowed down by ~15%)
   useEffect(() => {
@@ -37,10 +39,10 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
       d.division?.name?.includes("National")
   );
 
-  const currentDivisions = activeTab === 0 ? alDivisions : nlDivisions;
-  const leagueName = activeTab === 0 ? "American League" : "National League";
+  const currentDivisions = displayedTab === 0 ? alDivisions : nlDivisions;
+  const leagueName = displayedTab === 0 ? "American League" : "National League";
   const currentWildcard = wildCardStandings.find((league) => league.league.name === leagueName);
-  const leagueBadgeColor = activeTab === 0 ? "text-red-400 bg-red-500/10 border-red-500/30" : "text-blue-400 bg-blue-500/10 border-blue-500/30";
+  const leagueBadgeColor = displayedTab === 0 ? "text-red-400 bg-red-500/10 border-red-500/30" : "text-blue-400 bg-blue-500/10 border-blue-500/30";
 
   return (
     <div className="w-full h-full p-5 bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden font-sans">
@@ -59,6 +61,7 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
         </div>
 
         {/* Two League Tabs */}
+        {!league && (
         <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
           <button
             onClick={() => setActiveTab(0)}
@@ -84,6 +87,7 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
             <span>NATIONAL LEAGUE & WILDCARD</span>
           </button>
         </div>
+        )}
       </div>
 
       {error && (
@@ -105,7 +109,7 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
       ) : (
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTab}
+            key={displayedTab}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.02 }}
@@ -196,17 +200,36 @@ export const PassiveCardStandings: React.FC<PassiveCardStandingsProps> = ({ stan
               </div>
 
               {currentWildcard?.teamRecords?.length ? (
-                <div className="grid grid-cols-5 gap-3">
-                  {currentWildcard.teamRecords.slice(0, 5).map((team) => (
-                    <div key={team.team.id} className="rounded-lg border border-slate-800 bg-slate-950/70 p-2 text-center">
-                      <div className="flex items-center justify-center gap-1.5 min-w-0">
-                        {team.team.logoUrl && <img src={team.team.logoUrl} alt="" width={18} height={18} className="w-[18px] h-[18px] object-contain shrink-0" />}
-                        <span className="truncate text-xs font-bold text-white">{team.team.name}</span>
+                <div className="space-y-2.5">
+                  <div className="grid grid-cols-3 gap-3" aria-label={`${leagueName} Wild Card playoff spots`}>
+                    {currentWildcard.teamRecords.slice(0, 3).map((team) => (
+                      <div key={team.team.id} className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-center shadow-inner">
+                        <div className="mb-1 text-[10px] font-black uppercase tracking-wider text-amber-300">WC{team.wildCardRank ?? "—"} · PLAYOFF SPOT</div>
+                        <div className="flex items-center justify-center gap-1.5 min-w-0">
+                          {team.team.logoUrl && <img src={team.team.logoUrl} alt="" width={22} height={22} className="w-[22px] h-[22px] object-contain shrink-0" />}
+                          <span className="truncate text-sm font-black text-white">{team.team.name}</span>
+                        </div>
+                        <div className="mt-1 text-xs text-amber-200 font-mono font-bold">{team.wildCardGamesBehind ?? "—"} GB</div>
+                        <div className="text-[10px] text-slate-300 font-mono">{team.wins}-{team.losses} · {team.pct}</div>
                       </div>
-                      <div className="mt-1 text-[10px] text-amber-400 font-mono">WC{team.wildCardRank ?? "—"} · {team.wildCardGamesBehind ?? "—"} GB</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{team.wins}-{team.losses} · {team.pct}</div>
+                    ))}
+                  </div>
+                  {currentWildcard.teamRecords.length > 3 && (
+                    <div>
+                      <div className="mb-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">In contention</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {currentWildcard.teamRecords.slice(3).map((team) => (
+                          <div key={team.team.id} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              {team.team.logoUrl && <img src={team.team.logoUrl} alt="" width={18} height={18} className="w-[18px] h-[18px] object-contain shrink-0" />}
+                              <span className="truncate text-xs font-bold text-slate-200">WC{team.wildCardRank ?? "—"} · {team.team.name}</span>
+                            </div>
+                            <span className="ml-2 shrink-0 text-[10px] font-mono font-bold text-slate-400">{team.wildCardGamesBehind ?? "—"} GB</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               ) : (
                 <div className="py-4 text-center text-xs text-slate-500">Official Wild Card data is unavailable for this season.</div>

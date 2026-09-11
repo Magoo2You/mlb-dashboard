@@ -34,6 +34,7 @@ interface PassiveCardScheduleProps {
   loadingNews?: boolean;
   loadingHot?: boolean;
   isVisible?: boolean;
+  panel?: "all" | "scoreboard" | "game-feed";
 }
 
 export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
@@ -51,6 +52,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   loadingNews = false,
   loadingHot = false,
   isVisible = true,
+  panel = "all",
 }) => {
   // Lower box active tab: 'news' | 'hot' | 'lore'
   const [lowerTab, setLowerTab] = useState<'news' | 'hot' | 'lore'>('news');
@@ -71,13 +73,13 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return 0;
   });
 
-  // Calculate 2-game page index based on selectedGamePk
+  // Calculate 4-game page index based on selectedGamePk
   const selectedIdx = sortedGames.findIndex((g) => g?.gamePk === selectedGamePk);
   const activeIdx = selectedIdx >= 0 ? selectedIdx : 0;
-  const pageIndex = Math.floor(activeIdx / 2);
+  const pageIndex = Math.floor(activeIdx / 4);
 
   // Games for current page
-  const visibleGames = sortedGames.slice(pageIndex * 2, pageIndex * 2 + 2);
+  const visibleGames = sortedGames.slice(pageIndex * 4, pageIndex * 4 + 4);
 
   // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
   useEffect(() => {
@@ -200,10 +202,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const save = decisions?.save;
 
   return (
-    <div className="w-full h-full grid grid-cols-12 gap-4 p-4 bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="w-full h-full max-w-[1920px] mx-auto grid grid-cols-12 gap-4 p-4 bg-slate-950 text-slate-100 overflow-hidden font-sans">
       {/* Left 5 Columns: Compact Scoreboard + Expanded News & Hot Hitters */}
-      <div className="col-span-5 flex flex-col justify-between gap-3.5 h-full overflow-hidden">
-        
+      <div className={`${panel === "game-feed" ? "hidden" : "col-span-5"} flex flex-col justify-between gap-3.5 h-full overflow-hidden`}>
+
         {/* Upper Box: Compact Scoreboard & Slate */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-xl flex flex-col shrink-0 overflow-hidden relative">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 shrink-0">
@@ -217,7 +219,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             </div>
             
             <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-              Games {pageIndex * 2 + 1}-{Math.min((pageIndex + 1) * 2, sortedGames.length)} / {sortedGames.length}
+              Games {pageIndex * 4 + 1}-{Math.min((pageIndex + 1) * 4, sortedGames.length)} / {sortedGames.length}
             </span>
           </div>
 
@@ -524,7 +526,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
       </div>
 
       {/* Right 7 Columns: Featured Live Game Feed, Pitch Tracker & Contextual Matchup / Final Summary Cards */}
-      <div className="col-span-7 flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full">
+      <div className={`${panel === "scoreboard" ? "hidden" : panel === "game-feed" ? "col-span-12" : "col-span-7"} flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full`}>
         {gameError && (
           <div className="mb-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-200" role="status">
             {gameError}

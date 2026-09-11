@@ -12,7 +12,7 @@ import {
 import { ScheduledGame, DetailedGameFeed, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle } from "../types";
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
 import { PassiveCardStandings } from "./PassiveCardStandings";
-import { Activity, CalendarDays, CircleDot, Clock, Flame, Pause, Play, Radio, Trophy, Zap } from "lucide-react";
+import { Activity, CalendarDays, CircleDot, Clock, Flame, Pause, Play, Radio, Trophy, Tv, Zap } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
 import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
 
@@ -23,12 +23,13 @@ interface PassiveScreenProps {
 }
 
 export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) => {
-  const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard & Live Feed, 1: Division Standings
+  const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0); // 0: Scoreboard, 1: Game Feed, 2: AL Standings, 3: NL Standings
   const [progress, setProgress] = useState<number>(0); // 0 to 100
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>("");
   const prefersReducedMotion = useReducedMotion() ?? false;
-  const isAutoRotationPaused = isPaused || prefersReducedMotion;
+  const isAutoRotationPaused = isPaused;
+  // Reduced motion removes transitions but does not disable the wallboard's information rotation.
 
   // Data States
   const [scheduleGames, setScheduleGames] = useState<ScheduledGame[]>([]);
@@ -76,78 +77,71 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
   // Timings (Slowed down by ~15% for smoother viewing)
   const GAME_STEP_SECONDS = 9.2; // ~9.2 seconds per game step on Scoreboard
-  const SLATE_DURATION_SECONDS = 46; // 46 seconds total on Scoreboard view before transitioning
+  const SLATE_DURATION_SECONDS = 30; // Scoreboard and Game Feed each remain visible long enough to read before advancing
   const STANDINGS_DURATION_SECONDS = 29; // 29 seconds on Division Standings view
 
   // Ref to hold current games list for interval access without stale closures
   const scheduleGamesRef = useRef<ScheduledGame[]>([]);
   const scoreboardSlideRef = useRef<HTMLDivElement>(null);
+  const standingsSlideRef = useRef<HTMLDivElement>(null);
+  const activeSlideIndexRef = useRef(activeSlideIndex);
+  const rotationElapsedRef = useRef(0);
   scheduleGamesRef.current = scheduleGames;
 
   useLayoutEffect(() => {
     const scoreboardSlide = scoreboardSlideRef.current;
-    if (!scoreboardSlide) return;
-    scoreboardSlide.inert = activeSlideIndex !== 0;
-    if (activeSlideIndex === 0) return;
+    const standingsSlide = standingsSlideRef.current;
+    if (!scoreboardSlide || !standingsSlide) return;
+    scoreboardSlide.inert = activeSlideIndex >= 2;
+    standingsSlide.inert = activeSlideIndex < 2;
+    const inactiveSlide = activeSlideIndex >= 2 ? scoreboardSlide : standingsSlide;
     const focusedElement = document.activeElement;
-    if (focusedElement instanceof HTMLElement && scoreboardSlide.contains(focusedElement)) {
+    if (focusedElement instanceof HTMLElement && inactiveSlide.contains(focusedElement)) {
       focusedElement.blur();
     }
   }, [activeSlideIndex]);
 
-  // Auto-Rotation logic across games & guaranteed transition to Division Standings
+  useEffect(() => {
+    activeSlideIndexRef.current = activeSlideIndex;
+    rotationElapsedRef.current = 0;
+  }, [activeSlideIndex]);
+
+  // Single deterministic wallboard rotation clock. Reduced motion affects animation only.
   useEffect(() => {
     if (isAutoRotationPaused) return;
-
-    if (activeSlideIndex === 0) {
-      // 1. Cycle through selected game on the scoreboard every 8 seconds
-      const gameTimer = setInterval(() => {
-        const games = scheduleGamesRef.current;
-        if (games.length === 0) return;
-
-        setSelectedGamePk((currPk) => {
-          const currIdx = games.findIndex((g) => g.gamePk === currPk);
-          const nextIdx = (currIdx + 1) % games.length;
-          return games[nextIdx]?.gamePk ?? games[0]?.gamePk ?? null;
-        });
-        setProgress(0);
-      }, GAME_STEP_SECONDS * 1000);
-
-      // 2. Automatically transition to Division Standings (Slide 1) after SLATE_DURATION_SECONDS
-      const transitionToStandingsTimer = setTimeout(() => {
-        setActiveSlideIndex(1);
-        setProgress(0);
-      }, SLATE_DURATION_SECONDS * 1000);
-
-      return () => {
-        clearInterval(gameTimer);
-        clearTimeout(transitionToStandingsTimer);
-      };
-    } else {
-      // Slide 1 (Division Standings): Show for 25 seconds, then return to Scoreboard (Slide 0)
-      const transitionToScoreboardTimer = setTimeout(() => {
-        setActiveSlideIndex(0);
-        setProgress(0);
-      }, STANDINGS_DURATION_SECONDS * 1000);
-
-      return () => clearTimeout(transitionToScoreboardTimer);
-    }
-  }, [isAutoRotationPaused, activeSlideIndex]);
-
-  // Smooth Progress Bar ticker
-  useEffect(() => {
-    if (isAutoRotationPaused) return;
-
-    const duration = activeSlideIndex === 0 ? SLATE_DURATION_SECONDS : STANDINGS_DURATION_SECONDS;
-    const tickMs = 100;
-    const increment = (tickMs / (duration * 1000)) * 100;
 
     const interval = setInterval(() => {
-      setProgress((prev) => (prev + increment >= 100 ? 100 : prev + increment));
-    }, tickMs);
+      const currentIndex = activeSlideIndexRef.current;
+      const duration = currentIndex < 2 ? SLATE_DURATION_SECONDS : STANDINGS_DURATION_SECONDS;
+      rotationElapsedRef.current += 1;
+      if (rotationElapsedRef.current >= duration) {
+        rotationElapsedRef.current = 0;
+        setActiveSlideIndex((index) => (index + 1) % 4);
+        setProgress(0);
+      } else {
+        setProgress((rotationElapsedRef.current / duration) * 100);
+      }
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [isAutoRotationPaused, activeSlideIndex, selectedGamePk]);
+  }, [isAutoRotationPaused]);
+  // Cycle through games independently while the scoreboard is visible.
+  useEffect(() => {
+    if (isAutoRotationPaused || activeSlideIndex !== 0) return;
+
+    const interval = setInterval(() => {
+      const games = scheduleGamesRef.current;
+      if (games.length === 0) return;
+
+      setSelectedGamePk((currentPk) => {
+        const currentIndex = games.findIndex((game) => game.gamePk === currentPk);
+        const nextIndex = (currentIndex + 1) % games.length;
+        return games[nextIndex]?.gamePk ?? games[0]?.gamePk ?? null;
+      });
+    }, GAME_STEP_SECONDS * 1000);
+
+    return () => clearInterval(interval);
+  }, [isAutoRotationPaused, activeSlideIndex]);
 
   // Initial Data Loader & Poller
   useEffect(() => {
@@ -336,8 +330,10 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const retryData = () => setRetryNonce((nonce) => nonce + 1);
 
   const slideTitles = [
-    { label: "1. SCOREBOARD & GAME FEED", icon: Activity, color: "text-blue-400" },
-    { label: "2. DIVISION STANDINGS", icon: Trophy, color: "text-amber-400" },
+    { label: "1. SCOREBOARD", icon: Activity, color: "text-blue-400" },
+    { label: "2. GAME FEED", icon: Tv, color: "text-red-400" },
+    { label: "3. AL STANDINGS", icon: Trophy, color: "text-red-400" },
+    { label: "4. NL STANDINGS", icon: Trophy, color: "text-blue-400" },
   ];
   const selectableViews = [
     { mode: "schedule" as const, label: "Schedule", icon: CalendarDays },
@@ -346,8 +342,26 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
     { mode: "sports" as const, label: "Sports", icon: CircleDot },
   ];
 
+  const handleRotationTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const tabButtons = Array.from(event.currentTarget.parentElement?.querySelectorAll('[role="tab"]') ?? []) as HTMLButtonElement[];
+    const currentIndex = tabButtons.indexOf(event.currentTarget);
+    if (currentIndex < 0) return;
+
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % tabButtons.length;
+    if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabButtons.length) % tabButtons.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = tabButtons.length - 1;
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    setActiveSlideIndex(nextIndex);
+    setProgress(0);
+    tabButtons[nextIndex]?.focus();
+  };
+
   return (
-    <div className="w-screen h-screen max-w-[1920px] max-h-[1080px] bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans relative">
+    <div className="w-full h-screen max-w-[1920px] max-h-[1080px] mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans relative">
       {/* TOP BROADCAST HEADER BAR */}
       <header className="min-h-20 bg-slate-900 border-b border-slate-800 px-8 py-3 flex items-center gap-5 shrink-0 shadow-lg relative z-20">
         {/* Brand Logo & Title */}
@@ -362,7 +376,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         </div>
 
         {/* Slide Stack Navigation Indicators */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" aria-label="Wallboard rotation views">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" role="tablist" aria-label="Wallboard rotation views">
           {slideTitles.map((slide, idx) => {
             const Icon = slide.icon;
             const isActive = activeSlideIndex === idx;
@@ -370,11 +384,17 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
             return (
               <button
                 key={idx}
+                id={`wallboard-tab-${idx}`}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={idx < 2 ? "wallboard-scoreboard-game-feed-panel" : "wallboard-standings-panel"}
+                tabIndex={isActive ? 0 : -1}
                 type="button"
                 onClick={() => {
                   setActiveSlideIndex(idx);
                   setProgress(0);
                 }}
+                onKeyDown={handleRotationTabKeyDown}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all relative overflow-hidden whitespace-nowrap ${
                   isActive
                     ? "bg-slate-800 text-white shadow-md border border-slate-700"
@@ -416,16 +436,9 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
           <button
             type="button"
             onClick={() => setIsPaused((paused) => !paused)}
-            disabled={prefersReducedMotion}
             aria-label={isAutoRotationPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
             aria-pressed={isAutoRotationPaused}
-            title={
-              prefersReducedMotion
-                ? "Auto-rotation disabled by reduced-motion preference"
-                : isAutoRotationPaused
-                  ? "Resume auto-rotation"
-                  : "Pause auto-rotation"
-            }
+            title={isAutoRotationPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
             className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-xs font-bold text-slate-200 transition-colors hover:border-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isAutoRotationPaused ? <Play className="h-4 w-4 text-amber-400" /> : <Pause className="h-4 w-4 text-amber-400" />}
@@ -453,12 +466,15 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
             <motion.div
               key="slide-0"
               initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: activeSlideIndex === 0 ? 1 : 0, scale: activeSlideIndex === 0 ? 1 : 1.01 }}
+              animate={{ opacity: activeSlideIndex < 2 ? 1 : 0, scale: activeSlideIndex < 2 ? 1 : 1.01 }}
               exit={{ opacity: 0, scale: 1.01 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               ref={scoreboardSlideRef}
-              aria-hidden={activeSlideIndex !== 0}
-              className={`w-full h-full absolute inset-0 ${activeSlideIndex === 0 ? "z-10" : "pointer-events-none"}`}
+              id="wallboard-scoreboard-game-feed-panel"
+              role="tabpanel"
+              aria-labelledby={`wallboard-tab-${activeSlideIndex}`}
+              aria-hidden={activeSlideIndex >= 2}
+              className={`w-full h-full absolute inset-0 ${activeSlideIndex < 2 ? "z-10" : "pointer-events-none"}`}
             >
               <PassiveCardSchedule
                     games={scheduleGames}
@@ -474,21 +490,27 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                 hotData={hotData}
                 loadingNews={loadingNews}
                 loadingHot={loadingHot}
-                isVisible={activeSlideIndex === 0}
+                isVisible={activeSlideIndex < 2}
+                panel={activeSlideIndex === 0 ? "scoreboard" : "game-feed"}
                 />
             </motion.div>
           )}
 
-          {activeSlideIndex === 1 && (
+          {(
             <motion.div
               key="slide-1"
-              initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.01 }}
+              ref={standingsSlideRef}
+              id="wallboard-standings-panel"
+              role="tabpanel"
+              aria-labelledby={activeSlideIndex === 2 ? "wallboard-tab-2" : "wallboard-tab-3"}
+              aria-hidden={activeSlideIndex < 2}
+              inert={activeSlideIndex < 2}
+              tabIndex={-1}
+              animate={{ opacity: activeSlideIndex >= 2 ? 1 : 0, scale: activeSlideIndex >= 2 ? 1 : 1.01 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
-              className="w-full h-full absolute inset-0"
+              className={`w-full h-full absolute inset-0 ${activeSlideIndex >= 2 ? "z-10" : "pointer-events-none"}`}
             >
-              <PassiveCardStandings standings={standings} wildCardStandings={wildCardStandings} loading={loadingStandings} error={standingsError} onRetry={retryData} />
+              <PassiveCardStandings standings={standings} wildCardStandings={wildCardStandings} loading={loadingStandings} error={standingsError} onRetry={retryData} league={activeSlideIndex === 2 ? "American League" : "National League"} />
             </motion.div>
           )}
         </AnimatePresence>
