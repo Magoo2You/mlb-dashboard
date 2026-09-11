@@ -62,8 +62,9 @@ interface PassiveCardScheduleProps {
   games: ScheduledGame[];
   selectedGamePk: number | null;
   onSelectGame?: (gamePk: number) => void;
-  gameFeed: DetailedGameFeed | null;
-  loadingSchedule: boolean;
+  gameFeed?: DetailedGameFeed | null;
+  liveGameFeeds?: Record<number, DetailedGameFeed>;
+  loadingSchedule?: boolean;
   scheduleError?: string | null;
   onRetrySchedule?: () => void;
   loadingGame: boolean;
@@ -84,6 +85,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   selectedGamePk,
   onSelectGame,
   gameFeed,
+  liveGameFeeds = {},
   loadingSchedule,
   scheduleError,
   onRetrySchedule,
@@ -143,7 +145,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     completed: "Completed Games",
     other: "Status Unavailable",
   };
-  const sortedGames = [...games].sort((a, b) => {
+  const uniqueGames = Array.from(new Map(games.map((game) => [game.gamePk, game])).values());
+  const sortedGames = uniqueGames.sort((a, b) => {
     const rankDifference = sectionRank[getGameSection(a)] - sectionRank[getGameSection(b)];
     if (rankDifference !== 0) return rankDifference;
     return new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime();
@@ -387,6 +390,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
                     const gIsUpcoming = !gIsLive && !gIsFinal && game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "");
                     const gStatusLabel = game.status?.detailedState || "Status unavailable";
+                    const liveFeed = gIsLive ? liveGameFeeds[game.gamePk] : undefined;
+                    const liveData = liveFeed?.liveData;
+                    const liveBatterName = liveData?.matchup?.batter?.fullName;
+                    const livePitcherName = liveData?.matchup?.pitcher?.fullName;
 
                     return (
                       <div key={`scoreboard-slot-${index}`} className="relative min-w-0" data-scoreboard-slot>
@@ -474,7 +481,20 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             ) : null}
                           </div>
                         </div>
-                        </motion.div>
+                        {gIsLive && (
+                          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1.5 text-[10px]">
+                            <div className="min-w-0 truncate text-slate-200"><span className="font-black text-red-300">P:</span> {livePitcherName || "Unavailable"}</div>
+                            <div className="relative mx-auto h-12 w-12" aria-label={`Base runners: ${liveData?.matchup?.postOnFirst?.fullName || "no runner on first"}; ${liveData?.matchup?.postOnSecond?.fullName || "no runner on second"}; ${liveData?.matchup?.postOnThird?.fullName || "no runner on third"}`} role="img">
+                              <span className={`absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rotate-45 border ${liveData?.matchup?.postOnSecond ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className={`absolute bottom-0 left-0 h-3 w-3 rotate-45 border ${liveData?.matchup?.postOnThird ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className={`absolute bottom-0 right-0 h-3 w-3 rotate-45 border ${liveData?.matchup?.postOnFirst ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className="absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-slate-500 bg-slate-700" />
+                              <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap font-black text-slate-300">O: {liveData?.linescore?.outs ?? "—"}</span>
+                            </div>
+                            <div className="min-w-0 truncate text-right text-slate-200"><span className="font-black text-amber-300">H:</span> {liveBatterName || "Unavailable"}</div>
+                          </div>
+                        )}
+                      </motion.div>
                         </AnimatePresence>
                       </div>
                     );

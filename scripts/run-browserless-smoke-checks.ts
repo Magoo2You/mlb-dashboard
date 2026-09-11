@@ -56,6 +56,7 @@ function runWallboardSlateChecks(): void {
   const overnightLive = game(2, '2026-09-09T23:45:00-04:00', 'Live');
   const todayScheduled = game(3, '2026-09-10T18:40:00-04:00', 'Preview');
   const todayLater = game(4, '2026-09-10T21:10:00-04:00', 'Preview');
+  const todayReplacement = game(2, '2026-09-10T19:00:00-04:00', 'Live');
 
   assert.deepEqual(
     selectWallboardSlate({ previousGames: [previousFinal, overnightLive, previousFinal], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T10:00:00-04:00') }).map(({ gamePk }) => gamePk),
@@ -63,9 +64,9 @@ function runWallboardSlateChecks(): void {
     'before the first local-day start, retain yesterday final/carryover games and today schedule',
   );
   assert.deepEqual(
-    selectWallboardSlate({ previousGames: [previousFinal, overnightLive, previousFinal], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T19:00:00-04:00') }).map(({ gamePk }) => gamePk),
-    [1, 2, 3, 4],
-    'after the first local-day game starts, retain carryover and today slate without duplicates',
+    selectWallboardSlate({ previousGames: [overnightLive], todayGames: [todayReplacement], now: new Date('2026-09-10T19:05:00-04:00') }).map(({ gamePk, officialDate, status }) => ({ gamePk, officialDate, state: status.abstractGameState })),
+    [{ gamePk: 2, officialDate: '2026-09-10', state: 'Live' }],
+    'prefer the current-day object when a gamePk is duplicated across carryover and today',
   );
 }
 
@@ -126,6 +127,12 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /const completedGamesInDisplayedSlate = completedGames/);
   assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
   assert.match(passiveScheduleComponent, /scoreboardSlotCount = Math\.min\(scoreboardPageSize, scoreboardGames\.length\)/);
+  assert.match(passiveScheduleComponent, /uniqueGames = Array\.from\(new Map\(games\.map\(\(game\) => \[game\.gamePk, game\]\)\)\.values\(\)\)/);
+  assert.match(passiveScheduleComponent, /liveGameFeeds\[game\.gamePk\]/);
+  assert.ok(passiveScheduleComponent.includes('P:</span> {livePitcherName || "Unavailable"}'));
+  assert.ok(passiveScheduleComponent.includes('H:</span> {liveBatterName || "Unavailable"}'));
+  assert.match(passiveScheduleComponent, /O: \{liveData\?\.linescore\?\.outs \?\? "—"\}/);
+  assert.match(passiveScreen, /for \(const game of liveGames\)/);
   assert.match(passiveScheduleComponent, /displayedScoreboardGames = scoreboardCardSlots/);
   assert.match(passiveScheduleComponent, /rotateY/);
   assert.match(passiveScheduleComponent, /min-h-\[168px\]/);

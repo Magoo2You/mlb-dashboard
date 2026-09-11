@@ -36,6 +36,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const [scheduleGames, setScheduleGames] = useState<ScheduledGame[]>([]);
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [gameFeed, setGameFeed] = useState<DetailedGameFeed | null>(null);
+  const [liveGameFeeds, setLiveGameFeeds] = useState<Record<number, DetailedGameFeed>>({});
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
   const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [newsArticles, setNewsArticles] = useState<MLBNewsArticle[]>([]);
@@ -309,6 +310,37 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
     };
   }, [retryNonce]);
 
+  // Keep a small live-detail cache so every live Scoreboard card can show
+  // provider-sourced matchup data without claiming that schedule data is live.
+  useEffect(() => {
+    let isMounted = true;
+    const loadLiveGameFeeds = async () => {
+      const liveGames = scheduleGames.filter((game) =>
+        game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress"
+      );
+      if (liveGames.length === 0) {
+        setLiveGameFeeds({});
+        return;
+      }
+      const nextFeeds: Record<number, DetailedGameFeed> = {};
+      for (const game of liveGames) {
+        if (!isMounted) return;
+        try {
+          nextFeeds[game.gamePk] = await fetchGameDetail(game.gamePk);
+        } catch {
+          // Keep this card fail-closed; the scoreboard renders Unavailable values.
+        }
+      }
+      if (isMounted) setLiveGameFeeds(nextFeeds);
+    };
+    void loadLiveGameFeeds();
+    const interval = setInterval(() => void loadLiveGameFeeds(), 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [scheduleGames]);
+
   // Fetch Game Detail whenever selectedGamePk changes
   useEffect(() => {
     if (!selectedGamePk) return;
@@ -508,6 +540,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                     selectedGamePk={selectedGamePk}
                     onSelectGame={(pk) => setSelectedGamePk(pk)}
                     gameFeed={gameFeed}
+                    liveGameFeeds={liveGameFeeds}
                     loadingSchedule={loadingSchedule}
                     scheduleError={scheduleError}
                     onRetrySchedule={retryData}
