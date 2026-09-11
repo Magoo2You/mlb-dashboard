@@ -512,6 +512,12 @@ export interface TickerItem {
   pubDate?: string;
 }
 
+export interface MLBGameEditorial {
+  gamePk: number;
+  preview?: { headline: string; blurb: string; url: string; provider: "MLB"; type: "preview" };
+  recap?: { headline: string; blurb: string; url: string; provider: "MLB"; type: "recap" };
+}
+
 export interface MLBNewsArticle {
   id: string;
   title: string;

@@ -1,4 +1,4 @@
-import { ScheduledGame, DetailedGameFeed, PlayerProfile, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle, GameHighlight } from "../types";
+import { ScheduledGame, DetailedGameFeed, PlayerProfile, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle, GameHighlight, MLBGameEditorial } from "../types";
 import { MOCK_SCHEDULE_GAMES, MOCK_DETAILED_GAME } from "./mockData";
 import { CURRENT_SEASON } from "../utils/season";
 import type { NormalizedGame } from "../domain/sports";
@@ -87,6 +87,10 @@ export async function fetchNbaScoreboard(): Promise<NormalizedGame[]> {
 export async function fetchGameDetail(gamePk: number, forceDemo = false): Promise<DetailedGameFeed> {
   if (forceDemo) return MOCK_DETAILED_GAME;
   return requestJson<DetailedGameFeed>(`/api/game/${gamePk}`);
+}
+
+export async function fetchGameEditorial(gamePk: number): Promise<MLBGameEditorial> {
+  return requestJson<MLBGameEditorial>(`/api/game/${gamePk}/editorial`);
 }
 
 export async function fetchPlayerProfile(personId: number): Promise<PlayerProfile> {

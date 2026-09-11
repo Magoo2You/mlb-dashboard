@@ -204,6 +204,55 @@ app.get("/api/game/:gamePk", async (req, res) => {
   }
 });
 
+function normalizeEditorialText(value: unknown, maxLength = 220): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const text = value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  if (!text) return undefined;
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1).trimEnd()}…` : text;
+}
+
+function editorialArticle(value: any, type: "preview" | "recap") {
+  const headline = normalizeEditorialText(value?.headline || value?.title, 120);
+  const blurb = normalizeEditorialText(value?.blurb || value?.summary || value?.description, 220);
+  const url = typeof value?.url === "string" && /^https:\/\//.test(value.url) ? value.url : undefined;
+  if (!headline || !blurb || !url) return undefined;
+  return { headline, blurb, url, provider: "MLB" as const, type };
+}
+
+async function fetchGameEditorial(gamePk: string) {
+  const content = await fetchMLB(`https://statsapi.mlb.com/api/v1/game/${gamePk}/content`);
+  if (!content) return { gamePk: Number(gamePk) };
+
+  const result: any = { gamePk: Number(gamePk) };
+  const recap = editorialArticle(content.editorial?.recap?.mlb || content.editorial?.recap?.home || content.editorial?.recap?.away, "recap");
+  if (recap) result.recap = recap;
+
+  const previewRef = content.media?.previewStory?.mlb?.dapiURL || content.media?.previewStory?.items?.[0]?.dapiURL;
+  if (typeof previewRef === "string" && /^https:\/\/dapi(?:\.cms)?\.mlbinfra\.com\//.test(previewRef)) {
+    const previewContent = await fetchMLB(previewRef);
+    const previewUrl = typeof previewContent?.selfUrl === "string" ? previewContent.selfUrl : previewRef;
+    const preview = editorialArticle({
+      headline: previewContent?.title,
+      blurb: previewContent?.summary || previewContent?.fields?.summary,
+      url: previewUrl,
+    }, "preview");
+    if (preview) result.preview = preview;
+  }
+  return result;
+}
+
+// 2a. Official MLB preview/recap editorial endpoint.
+app.get("/api/game/:gamePk/editorial", async (req, res) => {
+  const { gamePk } = req.params;
+  if (!validNumericId(gamePk)) return res.status(400).json({ error: INVALID_INPUT });
+  try {
+    return res.json(await fetchGameEditorial(gamePk));
+  } catch (error) {
+    logServerError("Error fetching game editorial:", error);
+    return res.status(503).json({ gamePk: Number(gamePk), error: "MLB editorial unavailable" });
+  }
+});
+
 // 3. Player details, bio, draft, awards, stats
 app.get("/api/player/:personId", async (req, res) => {
   try {

@@ -157,7 +157,10 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);
   assert.match(passiveScreen, /setLoadingGame\(true\);\s*setGameFeed\(null\);/);
   assert.match(passiveScheduleComponent, /const showLearningCard = false/);
-  assert.match(passiveScheduleComponent, /gIsUpcoming && \(gameHotPerformer \|\| gameLore\)/);
+  assert.match(passiveScheduleComponent, /\(gIsUpcoming \|\| gIsFinal\) && lowerCardText/);
+  assert.match(passiveScheduleComponent, /gameEditorial\[game\.gamePk\]/);
+  assert.match(passiveScheduleComponent, /editorialRotationTick % 2 === 0/);
+  assert.match(passiveScheduleComponent, /target="_blank" rel="noreferrer"/);
   assert.match(passiveScheduleComponent, /hotPerformersList = \[\.\.\.hotHittersList, \.\.\.hotPitchersList\]/);
   assert.match(passiveScheduleComponent, /Pregame:/);
   assert.match(passiveScheduleComponent, /const currentLiveGames = sortedGames\.filter/);
@@ -191,6 +194,10 @@ function runScrollOwnershipChecks(): void {
   assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
   assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);
   assert.match(serverSource, /https:\/\/www\.espn\.com\/espn\/rss\/mlb\/news/);
+  assert.match(serverSource, /app\.get\("\/api\/game\/:gamePk\/editorial"/);
+  assert.match(serverSource, /editorialArticle\(content\.editorial\?\.recap/);
+  assert.match(serverSource, /previewStory/);
+  assert.match(serverSource, /normalizeEditorialText/);
   assert.match(serverSource, /publisher/);
   assert.match(serverSource, /parseNewsFeed\(mlbXml, "MLB\.com"/);
   assert.match(serverSource, /parseNewsFeed\(espnXml, "ESPN"/);

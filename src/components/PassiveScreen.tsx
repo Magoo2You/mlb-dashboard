@@ -8,6 +8,7 @@ import {
   fetchWhosHot,
   fetchTicker,
   fetchMLBNews,
+  fetchGameEditorial,
 } from "../services/api";
 import { ScheduledGame, DetailedGameFeed, DivisionStanding, WildCardStanding, TickerItem, MLBNewsArticle } from "../types";
 import { PassiveCardSchedule } from "./PassiveCardSchedule";
@@ -37,6 +38,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const [selectedGamePk, setSelectedGamePk] = useState<number | null>(null);
   const [gameFeed, setGameFeed] = useState<DetailedGameFeed | null>(null);
   const [liveGameFeeds, setLiveGameFeeds] = useState<Record<number, DetailedGameFeed>>({});
+  const [gameEditorial, setGameEditorial] = useState<Record<number, import("../types").MLBGameEditorial>>({});
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
   const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [newsArticles, setNewsArticles] = useState<MLBNewsArticle[]>([]);
@@ -166,6 +168,28 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
     }, 9200);
     return () => clearInterval(interval);
   }, [activeSlideIndex, isAutoRotationPaused, scheduleGames, selectedGamePk]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const editorialGames = scheduleGames.filter((game) => {
+      const isPreview = game.status?.abstractGameState === "Preview";
+      const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+      return isPreview || isFinal;
+    });
+    if (editorialGames.length === 0) return () => { isMounted = false; };
+    (async () => {
+      for (const game of editorialGames) {
+        if (!isMounted || gameEditorial[game.gamePk]) continue;
+        try {
+          const editorial = await fetchGameEditorial(game.gamePk);
+          if (isMounted) setGameEditorial((current) => ({ ...current, [game.gamePk]: editorial }));
+        } catch {
+          if (isMounted) setGameEditorial((current) => ({ ...current, [game.gamePk]: { gamePk: game.gamePk } }));
+        }
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [scheduleGames, gameEditorial]);
 
   // Initial Data Loader & Poller
   useEffect(() => {
@@ -541,6 +565,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                     onSelectGame={(pk) => setSelectedGamePk(pk)}
                     gameFeed={gameFeed}
                     liveGameFeeds={liveGameFeeds}
+                    gameEditorial={gameEditorial}
                     loadingSchedule={loadingSchedule}
                     scheduleError={scheduleError}
                     onRetrySchedule={retryData}
@@ -602,6 +627,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
             )}
           </div>
         </div>
+        <span className="ml-3 shrink-0 text-[9px] text-slate-500">MLB data and editorial references are sourced from MLB.com and MLB StatsAPI, with gratitude for non-commercial use.</span>
       </footer>
     </div>
   );

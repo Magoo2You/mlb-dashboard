@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
+import { ScheduledGame, DetailedGameFeed, MLBNewsArticle, MLBGameEditorial } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { BASEBALL_LORE_ITEMS, LoreItem } from "@/src/data/baseball-lore-expanded";
@@ -64,6 +64,7 @@ interface PassiveCardScheduleProps {
   onSelectGame?: (gamePk: number) => void;
   gameFeed?: DetailedGameFeed | null;
   liveGameFeeds?: Record<number, DetailedGameFeed>;
+  gameEditorial?: Record<number, MLBGameEditorial>;
   loadingSchedule?: boolean;
   scheduleError?: string | null;
   onRetrySchedule?: () => void;
@@ -86,6 +87,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   onSelectGame,
   gameFeed,
   liveGameFeeds = {},
+  gameEditorial = {},
   loadingSchedule,
   scheduleError,
   onRetrySchedule,
@@ -114,6 +116,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [viewport, setViewport] = useState({ width: 1920, height: 1080 });
   const [scoreboardCardSlots, setScoreboardCardSlots] = useState<number[]>([]);
   const [scoreboardFlipSlot, setScoreboardFlipSlot] = useState(0);
+  const [editorialRotationTick, setEditorialRotationTick] = useState(0);
 
   useEffect(() => {
     const updateViewport = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
@@ -121,6 +124,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     window.addEventListener("resize", updateViewport);
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
+
+  useEffect(() => {
+    if (isAutoRotationPaused || !isVisible) return;
+    const interval = setInterval(() => setEditorialRotationTick((tick) => tick + 1), 9200);
+    return () => clearInterval(interval);
+  }, [isAutoRotationPaused, isVisible]);
 
   // Group the local-day slate: yesterday/overnight carryover first, then
   // today's ongoing, upcoming, and completed games.
@@ -407,6 +416,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     const gameTeamCodes = [game.teams?.away?.team?.abbreviation, game.teams?.home?.team?.abbreviation].filter(Boolean);
                     const gameHotPerformer = hotPerformersList.find((performer: any) => gameTeamCodes.some((code) => String(performer.team || "").toUpperCase().includes(String(code).toUpperCase())));
                     const gameLore = currentLoreSlice[index % Math.max(currentLoreSlice.length, 1)];
+                    const gameEditorialItem = gameEditorial[game.gamePk]?.[gIsFinal ? "recap" : "preview"];
+                    const showOfficialEditorial = Boolean(gameEditorialItem) && (!gameHotPerformer || editorialRotationTick % 2 === 0);
+                    const displayedEditorial = showOfficialEditorial ? gameEditorialItem : undefined;
+                    const lowerCardText = displayedEditorial?.blurb || (gameHotPerformer ? `${gameHotPerformer.name} — ${gameHotPerformer.hotReason || gameHotPerformer.breakoutNotes || "hot performer"}` : gameLore?.fact) || "Editorial content unavailable";
+                    const lowerCardLabel = displayedEditorial?.type === "recap" ? "Recap:" : "Pregame:";
 
                     return (
                       <div key={`scoreboard-slot-${index}`} className="relative min-w-0" data-scoreboard-slot>
@@ -506,10 +520,15 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             ) : null}
                           </div>
                         </div>
-                        {gIsUpcoming && (gameHotPerformer || gameLore) && (
-                          <div className="absolute bottom-2 left-3 right-3 grid h-[48px] items-center rounded-lg border border-amber-900/60 bg-amber-950/25 px-2 py-1 text-[10px] leading-tight text-amber-200">
-                            <span className="mr-1 font-black uppercase text-amber-400">Pregame:</span>
-                            <span className="line-clamp-2">{gameHotPerformer ? `${gameHotPerformer.name} — ${gameHotPerformer.hotReason || gameHotPerformer.breakoutNotes || "hot performer"}` : gameLore?.fact}</span>
+                        {(gIsUpcoming || gIsFinal) && lowerCardText && (
+                          <div className="absolute bottom-2 left-3 right-3 grid h-[48px] items-center overflow-hidden rounded-lg border border-amber-900/60 bg-amber-950/25 px-2 py-1 text-[10px] leading-tight text-amber-200">
+                            {displayedEditorial?.url ? (
+                              <a href={displayedEditorial.url} target="_blank" rel="noreferrer" className="line-clamp-2 rounded focus:outline-none focus:ring-1 focus:ring-amber-300" aria-label={`Open MLB ${displayedEditorial.type} article: ${displayedEditorial.headline}`}>
+                                <span className="mr-1 font-black uppercase text-amber-400">{lowerCardLabel}</span>{lowerCardText}
+                              </a>
+                            ) : (
+                              <span className="line-clamp-2"><span className="mr-1 font-black uppercase text-amber-400">{lowerCardLabel}</span>{lowerCardText}</span>
+                            )}
                           </div>
                         )}
                         {gIsLive && (
