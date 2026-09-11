@@ -114,7 +114,7 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScreen, /fetchStandingsBundle/);
   assert.match(passiveScreen, /min-h-20 bg-slate-900[\s\S]*items-center/);
   assert.match(passiveScreen, /px-8 py-3 flex items-center gap-5/);
-  assert.match(passiveScreen, /aria-label="Wallboard rotation views"/);
+  assert.match(passiveScreen, /aria-label="Selectable wallboard views"/);
   assert.match(passiveScreen, /aria-label="Selectable dashboard views"/);
   assert.match(passiveScreen, /wildCardStandings/);
   assert.match(passiveScreen, /aria-label="Selectable dashboard views"/);
@@ -184,7 +184,8 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveScreen, /GAME_STEP_SECONDS|scheduleGamesRef/);
   assert.match(passiveScheduleComponent, /Recent notable plays/);
   assert.match(passiveScheduleComponent, /description !== "Play in progress\.\.\."/);
-  assert.match(passiveScreen, /setActiveSlideIndex\(\(index\) => \(index \+ 1\) % 4\)/);
+  assert.match(passiveScreen, /const ENABLE_OUTER_VIEW_ROTATION = false/);
+  assert.match(passiveScreen, /if \(!ENABLE_OUTER_VIEW_ROTATION \|\| isAutoRotationPaused\) return/);
   assert.doesNotMatch(passiveScheduleComponent, /onClick=\{\(\) => setLowerTab/);
   assert.match(passiveScheduleComponent, /Headlines · Hot Hitters · Lore & Curios/);
   assert.match(passiveScheduleComponent, /2 per circulation/);

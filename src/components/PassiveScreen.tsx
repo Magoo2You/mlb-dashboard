@@ -31,7 +31,8 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const [currentTime, setCurrentTime] = useState<string>("");
   const prefersReducedMotion = useReducedMotion() ?? false;
   const isAutoRotationPaused = isPaused;
-  // Reduced motion removes transitions but does not disable the wallboard's information rotation.
+  const ENABLE_OUTER_VIEW_ROTATION = false;
+  // Reduced motion removes transitions; outer dashboard views are manually selected for testing.
 
   // Data States
   const [scheduleGames, setScheduleGames] = useState<ScheduledGame[]>([]);
@@ -111,7 +112,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
   // Single deterministic wallboard rotation clock. Reduced motion affects animation only.
   useEffect(() => {
-    if (isAutoRotationPaused) return;
+    if (!ENABLE_OUTER_VIEW_ROTATION || isAutoRotationPaused) return;
 
     const interval = setInterval(() => {
       const currentIndex = activeSlideIndexRef.current;
@@ -459,7 +460,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         </div>
 
         {/* Slide Stack Navigation Indicators */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" role="tablist" aria-label="Wallboard rotation views">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0" role="tablist" aria-label="Selectable wallboard views">
           {slideTitles.map((slide, idx) => {
             const Icon = slide.icon;
             const isActive = activeSlideIndex === idx;
@@ -519,9 +520,9 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
           <button
             type="button"
             onClick={() => setIsPaused((paused) => !paused)}
-            aria-label={isAutoRotationPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
-            aria-pressed={isAutoRotationPaused}
-            title={isAutoRotationPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
+            aria-label={isAutoRotationPaused ? "Resume inner rotations" : "Pause inner rotations"}
+                        aria-pressed={isAutoRotationPaused}
+                        title={isAutoRotationPaused ? "Resume inner rotations" : "Pause inner rotations"}
             className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-xs font-bold text-slate-200 transition-colors hover:border-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isAutoRotationPaused ? <Play className="h-4 w-4 text-amber-400" /> : <Pause className="h-4 w-4 text-amber-400" />}
@@ -534,13 +535,14 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         </div>
       </header>
 
-      {/* TOP PROGRESS countdown bar */}
-      <div className="w-full h-1 bg-slate-900 shrink-0">
-        <div
-          className="h-full bg-gradient-to-r from-amber-500 via-red-500 to-blue-500 transition-all duration-100"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      {ENABLE_OUTER_VIEW_ROTATION && (
+        <div className="w-full h-1 bg-slate-900 shrink-0">
+          <div
+            className="h-full bg-gradient-to-r from-amber-500 via-red-500 to-blue-500 transition-all duration-100"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 relative overflow-hidden bg-slate-950">
