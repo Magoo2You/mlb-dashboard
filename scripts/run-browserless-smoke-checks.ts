@@ -129,7 +129,12 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /const scoreboardGames = hasCurrentDayStarted/);
   assert.match(passiveScheduleComponent, /!hasCurrentDayStarted \|\| game\.officialDate === localToday/);
   assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
-  assert.match(passiveScheduleComponent, /scoreboardSlotCount = Math\.min\(scoreboardPageSize, scoreboardGames\.length\)/);
+  assert.match(passiveScheduleComponent, /pinnedLiveSlotIndices/);
+  assert.match(passiveScheduleComponent, /pinnedFinalSlotIndices/);
+  assert.match(passiveScheduleComponent, /snakeSlotOrder\(scoreboardColumns, scoreboardRows, true\)/);
+  assert.match(passiveScheduleComponent, /fromBottom \? rowOrder % 2 !== 0 : rowOrder % 2 === 0/);
+  assert.match(passiveScheduleComponent, /saturatedPinnedGroups/);
+  assert.match(passiveScheduleComponent, /finalSlotSet\.has\(slot\) \? finalGameIndices : liveGameIndices/);
   assert.match(passiveScheduleComponent, /uniqueGames = Array\.from\(new Map\(games\.map\(\(game\) => \[game\.gamePk, game\]\)\)\.values\(\)\)/);
   assert.match(passiveScheduleComponent, /liveGameFeeds\[game\.gamePk\]/);
   assert.ok(passiveScheduleComponent.includes('P:</span> {livePitcherName || "Unavailable"}'));

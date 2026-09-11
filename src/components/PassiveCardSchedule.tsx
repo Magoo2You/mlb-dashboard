@@ -58,6 +58,25 @@ function hasUsableBiographyEvidence(profile: HistoricalPlayerProfile) {
   }
 }
 
+function snakeSlotOrder(columns: number, rows: number, fromBottom = false): number[] {
+  const order: number[] = [];
+  const rowIndexes = Array.from({ length: rows }, (_, index) => fromBottom ? rows - 1 - index : index);
+  rowIndexes.forEach((row, rowOrder) => {
+    const leftToRight = fromBottom ? rowOrder % 2 !== 0 : rowOrder % 2 === 0;
+    const columnsInRow = Array.from({ length: columns }, (_, index) => leftToRight ? index : columns - 1 - index);
+    columnsInRow.forEach((column) => order.push(row * columns + column));
+  });
+  return order;
+}
+
+function completedGameStatus(game: ScheduledGame) {
+  return game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+}
+
+function liveGameStatus(game: ScheduledGame) {
+  return game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
+}
+
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
   selectedGamePk: number | null;
@@ -163,10 +182,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
   // The scoreboard flips through fixed-size viewport pages; selectedGamePk only marks the active game.
   const visibleGames = sortedGames;
-  const currentLiveGames = sortedGames.filter((game) =>
-    game.officialDate === localToday &&
-    (game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress")
-  );
+  const currentLiveGames = sortedGames.filter((game) => game.officialDate === localToday && liveGameStatus(game));
   const hasCurrentDayStarted = sortedGames.some((game) =>
     game.officialDate === localToday &&
     (game.status?.abstractGameState === "Live" || game.status?.abstractGameState === "Final" || game.status?.detailedState === "In Progress" || game.status?.detailedState === "Final")
@@ -182,39 +198,89 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const scoreboardRows = viewport.height >= 1000 ? 3 : viewport.height >= 700 ? 2 : 1;
   const scoreboardPageSize = scoreboardColumns * scoreboardRows;
   const scoreboardSlotCount = Math.min(scoreboardPageSize, scoreboardGames.length);
-  const pinnedLiveSlotCount = Math.min(currentLiveGames.length, scoreboardSlotCount);
+  const allScoreboardSlots = Array.from({ length: scoreboardSlotCount }, (_, index) => index);
+  const liveSlotOrder = snakeSlotOrder(scoreboardColumns, scoreboardRows);
+  const finalSlotOrder = snakeSlotOrder(scoreboardColumns, scoreboardRows, true);
+  const liveGameIndices = currentLiveGames
+    .map((game) => scoreboardGames.findIndex((candidate) => candidate.gamePk === game.gamePk))
+    .filter((index) => index >= 0);
+  const finalGameIndices = scoreboardGames
+    .map((game, index) => completedGameStatus(game) ? index : -1)
+    .filter((index) => index >= 0);
+  const saturatedPinnedGroups = liveGameIndices.length + finalGameIndices.length > scoreboardSlotCount;
+  const pinnedFinalSlotIndices = finalSlotOrder.slice(0, Math.min(finalGameIndices.length, scoreboardColumns, scoreboardSlotCount));
+  const finalSlotSet = new Set(pinnedFinalSlotIndices);
+  const pinnedLiveSlotIndices = (saturatedPinnedGroups
+    ? liveSlotOrder.filter((slot) => !finalSlotSet.has(slot))
+    : liveSlotOrder.filter((slot) => !finalSlotSet.has(slot)).slice(0, Math.min(liveGameIndices.length, scoreboardSlotCount - pinnedFinalSlotIndices.length)));
+  const pinnedSlotSet = new Set([...pinnedLiveSlotIndices, ...pinnedFinalSlotIndices]);
+  const rotatableSlotIndices = saturatedPinnedGroups ? allScoreboardSlots : allScoreboardSlots.filter((slot) => !pinnedSlotSet.has(slot));
 
   useEffect(() => {
-    setScoreboardCardSlots(Array.from({ length: scoreboardSlotCount }, (_, index) => index));
+    const nextSlots = Array.from({ length: scoreboardSlotCount }, () => -1);
+    const assignedGames = new Set<number>();
+    if (saturatedPinnedGroups) {
+      pinnedFinalSlotIndices.forEach((slot, index) => {
+        nextSlots[slot] = finalGameIndices[index % finalGameIndices.length];
+      });
+      pinnedLiveSlotIndices.forEach((slot, index) => {
+        nextSlots[slot] = liveGameIndices[index % liveGameIndices.length];
+      });
+    } else {
+      liveGameIndices.forEach((gameIndex, index) => {
+        const slot = pinnedLiveSlotIndices[index];
+        if (slot !== undefined) {
+          nextSlots[slot] = gameIndex;
+          assignedGames.add(gameIndex);
+        }
+      });
+      finalGameIndices.forEach((gameIndex, index) => {
+        const slot = pinnedFinalSlotIndices[index];
+        if (slot !== undefined && nextSlots[slot] === -1) {
+          nextSlots[slot] = gameIndex;
+          assignedGames.add(gameIndex);
+        }
+      });
+      const remainingGames = scoreboardGames.map((_, index) => index).filter((index) => !assignedGames.has(index));
+      rotatableSlotIndices.forEach((slot, index) => {
+        nextSlots[slot] = remainingGames[index] ?? -1;
+      });
+    }
+    setScoreboardCardSlots(nextSlots);
     setScoreboardFlipSlot(0);
-  }, [scoreboardSlotCount, scoreboardColumns, scoreboardRows]);
+  }, [scoreboardSlotCount, scoreboardColumns, scoreboardRows, scoreboardGames.length, currentLiveGames.length, finalGameIndices.length]);
 
   useEffect(() => {
-    if (panel !== "scoreboard" || isAutoRotationPaused || scoreboardGames.length <= scoreboardSlotCount || scoreboardSlotCount === 0) return;
-    const rotatableSlotCount = scoreboardSlotCount > pinnedLiveSlotCount ? scoreboardSlotCount - pinnedLiveSlotCount : scoreboardSlotCount;
-    const firstRotatableSlot = scoreboardSlotCount > pinnedLiveSlotCount ? pinnedLiveSlotCount : 0;
+    if (panel !== "scoreboard" || isAutoRotationPaused || scoreboardGames.length <= scoreboardSlotCount || rotatableSlotIndices.length === 0 || scoreboardSlotCount === 0) return;
     const interval = setInterval(() => {
       if (document.activeElement?.closest("[data-scoreboard-slot]")) return;
       setScoreboardCardSlots((slots) => {
         if (slots.length === 0) return slots;
-        const slot = firstRotatableSlot + (scoreboardFlipSlot % rotatableSlotCount);
+        const slot = rotatableSlotIndices[scoreboardFlipSlot % rotatableSlotIndices.length];
         const next = [...slots];
         const occupied = new Set(next);
-        let candidate = (next[slot] + scoreboardSlotCount) % scoreboardGames.length;
-        while (occupied.has(candidate)) {
-          candidate = (candidate + 1) % scoreboardGames.length;
+        const currentGameIndex = next[slot] ?? 0;
+        const rotationPool = saturatedPinnedGroups
+          ? (finalSlotSet.has(slot) ? finalGameIndices : liveGameIndices)
+          : scoreboardGames.map((_, index) => index).filter((index) => !pinnedSlotSet.has(index));
+        if (rotationPool.length <= 1) return next;
+        let candidate = rotationPool[(rotationPool.indexOf(currentGameIndex) + 1) % rotationPool.length];
+        if (!saturatedPinnedGroups) {
+          while (occupied.has(candidate)) {
+            candidate = rotationPool[(rotationPool.indexOf(candidate) + 1) % rotationPool.length];
+          }
         }
         next[slot] = candidate;
-        setScoreboardFlipSlot((current) => (current + 1) % rotatableSlotCount);
+        setScoreboardFlipSlot((current) => (current + 1) % rotatableSlotIndices.length);
         return next;
       });
     }, 4500);
     return () => clearInterval(interval);
-  }, [isAutoRotationPaused, panel, pinnedLiveSlotCount, scoreboardCardSlots.length, scoreboardFlipSlot, scoreboardGames.length, scoreboardSlotCount]);
+  }, [isAutoRotationPaused, panel, rotatableSlotIndices.length, scoreboardCardSlots.length, scoreboardFlipSlot, scoreboardGames.length, scoreboardSlotCount]);
 
   const displayedScoreboardGames = scoreboardCardSlots
-    .map((gameIndex) => scoreboardGames[gameIndex])
-    .filter(Boolean);
+    .map((gameIndex, slotIndex) => ({ game: scoreboardGames[gameIndex], slotIndex }))
+    .filter(({ game }) => Boolean(game));
 
   useEffect(() => {
     if (isAutoRotationPaused) return;
@@ -404,8 +470,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
                   style={{ perspective: 1200 }}
                 >
-                  {displayedScoreboardGames.map((game, index) => {
+                  {displayedScoreboardGames.map(({ game, slotIndex }) => {
                     if (!game) return null;
+                    const index = slotIndex;
                     const gIsLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
                     const gIsUpcoming = !gIsLive && !gIsFinal && game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "");
