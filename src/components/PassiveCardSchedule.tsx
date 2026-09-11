@@ -2,8 +2,22 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { BASEBALL_LORE_ITEMS } from "@/src/data/baseball-lore-expanded";
+import { BASEBALL_LORE_ITEMS, LoreItem } from "@/src/data/baseball-lore-expanded";
+import { HISTORICAL_PLAYER_PROFILES, HistoricalPlayerProfile } from "../data/historical-player-profiles";
 import { createLoreSequence, lorePage } from "@/src/utils/lore-rotation";
+
+function hasUsableBiographyEvidence(profile: HistoricalPlayerProfile) {
+  const evidence = profile.biographyEvidence[0];
+  if (profile.verificationStatus !== "verified" || !evidence) return false;
+  try {
+    return profile.biography === evidence.statement &&
+      Boolean(evidence.statement.trim() && evidence.provenance.trim()) &&
+      evidence.sourceUrls.length > 0 &&
+      evidence.sourceUrls.every((url) => new URL(url).protocol === "https:");
+  } catch {
+    return false;
+  }
+}
 
 interface PassiveCardScheduleProps {
   games: ScheduledGame[];
@@ -88,7 +102,27 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
-  const verifiedLore = useMemo(() => BASEBALL_LORE_ITEMS.filter((item) => item.verificationStatus === "verified"), []);
+  const biographyLore: LoreItem[] = useMemo(
+    () => HISTORICAL_PLAYER_PROFILES.filter(hasUsableBiographyEvidence).map((profile) => {
+          const biographyEvidence = profile.biographyEvidence[0];
+          return {
+          id: `biography-${profile.id}`,
+      title: profile.name,
+      tag: "HISTORICAL BIOGRAPHY",
+      statBadge: profile.era,
+      fact: biographyEvidence.statement,
+      whimsy: biographyEvidence.statement,
+      source: biographyEvidence.sourceUrls[0],
+      verificationStatus: "verified" as const,
+      provenance: biographyEvidence.provenance,
+      };
+    }),
+    [],
+  );
+  const verifiedLore = useMemo(() => [
+    ...BASEBALL_LORE_ITEMS.filter((item) => item.verificationStatus === "verified"),
+    ...biographyLore,
+  ], [biographyLore]);
   const loreSequence = useMemo(
     () => createLoreSequence(verifiedLore, 20260909 + loreRound, loreBoundaryId),
     [loreBoundaryId, loreRound, verifiedLore]

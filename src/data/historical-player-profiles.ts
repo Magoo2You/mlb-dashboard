@@ -1,8 +1,7 @@
 /**
- * Separate historical-player profile contract. These records are intentionally
- * not part of the Lore & Curios rotation. Biography facts and statistics retain
- * their provider scope, while unresolved conflicts and media rights leads stay
- * explicit instead of being silently normalized.
+ * Verified biographies may be included in the verified Trivia/Lore learning rotation
+ * through the presentation adapter, while this contract keeps their full source
+ * scope and unresolved conflicts separate from the compact lore records.
  */
 export type HistoricalPlayerFact = {
   statement: string;

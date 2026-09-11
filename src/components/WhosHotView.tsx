@@ -10,7 +10,7 @@ interface WhosHotViewProps {
 
 export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
   const [timeMode, setTimeMode] = useState<"preset" | "custom">("preset");
-  const [timeframe, setTimeframe] = useState<string>("14");
+  const [timeframe, setTimeframe] = useState<string>("7");
   const [startDate, setStartDate] = useState<string>(CURRENT_SEASON_START);
   const [endDate, setEndDate] = useState<string>(CURRENT_SEASON_END);
   const [positionFilter, setPositionFilter] = useState<"all" | "hitters" | "pitchers">("all");
@@ -26,7 +26,7 @@ export const WhosHotView: React.FC<WhosHotViewProps> = ({ onSelectPlayer }) => {
     surgeHitters: any[];
     surgePitchers: any[];
   }>({
-    timeframe: "14",
+    timeframe: "7",
     aggregateHitters: [],
     aggregatePitchers: [],
     surgeHitters: [],

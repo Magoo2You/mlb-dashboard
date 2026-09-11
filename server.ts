@@ -636,7 +636,7 @@ app.get("/api/whos-hot", async (req, res) => {
     if ([rawTimeframe, rawStartDate, rawEndDate, rawSeason].some((value) => value !== undefined && typeof value !== "string")) {
       return res.status(400).json({ error: INVALID_INPUT });
     }
-    const timeframe = (rawTimeframe as string | undefined) || "14";
+    const timeframe = (rawTimeframe as string | undefined) || "7";
     const startDate = rawStartDate as string | undefined;
     const endDate = rawEndDate as string | undefined;
     const currentYear = new Date().getFullYear().toString();

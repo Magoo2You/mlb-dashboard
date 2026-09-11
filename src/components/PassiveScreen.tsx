@@ -38,7 +38,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [newsArticles, setNewsArticles] = useState<MLBNewsArticle[]>([]);
   const [hotData, setHotData] = useState<any>({
-    timeframe: "14",
+    timeframe: "7",
     hotHitters: [],
     statcastHitters: [],
   });
@@ -231,7 +231,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
     const loadWhosHotData = async () => {
       try {
-        const data = await fetchWhosHot({ season: CURRENT_SEASON, timeframe: "14" });
+        const data = await fetchWhosHot({ season: CURRENT_SEASON, timeframe: "7" });
         if (isMounted) {
           setHotData(data);
           setLoadingHot(false);
