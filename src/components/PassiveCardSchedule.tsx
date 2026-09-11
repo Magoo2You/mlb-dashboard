@@ -340,7 +340,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
       );
     })
     .slice(0, 5);
-  const showLearningCard = panel === "scoreboard" && scoreboardGames.length <= 1;
+  const showLearningCard = panel === "scoreboard";
 
   const decisions = displayGameFeed?.liveData?.decisions || selectedGame?.decisions;
   const winner = decisions?.winner;
