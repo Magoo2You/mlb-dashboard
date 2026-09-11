@@ -131,21 +131,20 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   }, [isAutoRotationPaused]);
 
   // Game Feed rotates current-day active games first, then current-day completed
-  // games once live play begins; prior-day carryover is excluded at that point.
-  // Before current-day live play, eligible carryover finals remain available.
-  // Upcoming games never enter the feed rotation. Scoreboard remains static.
+  // games once any current-day game has started; prior-day carryover is excluded
+  // permanently after that boundary. Upcoming games never enter the feed rotation.
   useEffect(() => {
     if (isAutoRotationPaused || activeSlideIndex !== 1) return;
     const localToday = formatLocalDate();
-    const hasCurrentLiveGame = scheduleGames.some((game) =>
+    const hasCurrentDayStarted = scheduleGames.some((game) =>
       game.officialDate === localToday &&
-      (game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress")
+      (game.status?.abstractGameState === "Live" || game.status?.abstractGameState === "Final" || game.status?.detailedState === "In Progress" || game.status?.detailedState === "Final")
     );
     const eligibleGames = scheduleGames
       .filter((game) => {
         const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
         const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
-        return (isLive || isFinal) && (!hasCurrentLiveGame || game.officialDate === localToday);
+        return (isLive || isFinal) && (!hasCurrentDayStarted || game.officialDate === localToday);
       })
       .sort((a, b) => {
         const aLive = a.status?.abstractGameState === "Live" || a.status?.detailedState === "In Progress";
@@ -218,14 +217,14 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         // Maintain a valid selection for the current slate and keep Game Feed
         // constrained to active/completed games.
         setSelectedGamePk((prevPk) => {
-          const hasCurrentLiveGame = combinedGames.some((game) =>
+          const hasCurrentDayStarted = combinedGames.some((game) =>
             game.officialDate === todayStr &&
-            (game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress")
+            (game.status?.abstractGameState === "Live" || game.status?.abstractGameState === "Final" || game.status?.detailedState === "In Progress" || game.status?.detailedState === "Final")
           );
           const feedEligibleGames = combinedGames.filter((game) => {
             const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
             const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
-            return (isLive || isFinal) && (!hasCurrentLiveGame || game.officialDate === todayStr);
+            return (isLive || isFinal) && (!hasCurrentDayStarted || game.officialDate === todayStr);
           });
           if (prevPk && combinedGames.some((g) => g.gamePk === prevPk) && (activeSlideIndexRef.current !== 1 || feedEligibleGames.some((g) => g.gamePk === prevPk))) {
             return prevPk;

@@ -167,14 +167,15 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     game.officialDate === localToday &&
     (game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress")
   );
-  const hasCurrentLiveGame = currentLiveGames.length > 0;
-  const isScheduledPreview = (game: ScheduledGame) =>
-    game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "");
-  const scoreboardGames = hasCurrentLiveGame
-    ? sortedGames.filter((game) => game.officialDate === localToday && (currentLiveGames.some((liveGame) => liveGame.gamePk === game.gamePk) || isScheduledPreview(game)))
+  const hasCurrentDayStarted = sortedGames.some((game) =>
+    game.officialDate === localToday &&
+    (game.status?.abstractGameState === "Live" || game.status?.abstractGameState === "Final" || game.status?.detailedState === "In Progress" || game.status?.detailedState === "Final")
+  );
+  const scoreboardGames = hasCurrentDayStarted
+    ? sortedGames.filter((game) => game.officialDate === localToday)
     : sortedGames;
   const completedGames = sortedGames.filter((game) => game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final");
-  const completedGamesInDisplayedSlate = completedGames.filter((game) => !hasCurrentLiveGame || game.officialDate === localToday);
+  const completedGamesInDisplayedSlate = completedGames.filter((game) => !hasCurrentDayStarted || game.officialDate === localToday);
   const gameFeedOverviewGames = currentLiveGames.length > 0 ? [...currentLiveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
 
   const scoreboardColumns = viewport.width >= 1536 ? 5 : viewport.width >= 1024 ? 3 : viewport.width >= 640 ? 2 : 1;

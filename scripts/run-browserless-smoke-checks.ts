@@ -125,6 +125,9 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveStandingsComponent, /Mock \/ Calculated Wildcard/);
   assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);
   assert.match(passiveScheduleComponent, /const completedGamesInDisplayedSlate = completedGames/);
+  assert.match(passiveScheduleComponent, /const hasCurrentDayStarted = sortedGames\.some/);
+  assert.match(passiveScheduleComponent, /const scoreboardGames = hasCurrentDayStarted/);
+  assert.match(passiveScheduleComponent, /!hasCurrentDayStarted \|\| game\.officialDate === localToday/);
   assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
   assert.match(passiveScheduleComponent, /scoreboardSlotCount = Math\.min\(scoreboardPageSize, scoreboardGames\.length\)/);
   assert.match(passiveScheduleComponent, /uniqueGames = Array\.from\(new Map\(games\.map\(\(game\) => \[game\.gamePk, game\]\)\)\.values\(\)\)/);
@@ -172,9 +175,10 @@ function runScrollOwnershipChecks(): void {
   assert.match(scheduleGrid, /Provider play-by-play unavailable for this game/);
   assert.doesNotMatch(scheduleGrid, /Hard-hit drive down right-field line|Key pitching performance seals victory|Starting lineups announced/);
   assert.match(passiveScreen, /Game Feed rotates current-day active games first, then current-day completed/);
-  assert.match(passiveScreen, /!hasCurrentLiveGame \|\| game\.officialDate === localToday/);
-  assert.match(passiveScreen, /!hasCurrentLiveGame \|\| game\.officialDate === todayStr/);
-  assert.match(passiveScreen, /return \(isLive \|\| isFinal\) && \(!hasCurrentLiveGame \|\| game\.officialDate === localToday\)/);
+  assert.match(passiveScreen, /once any current-day game has started/);
+  assert.match(passiveScreen, /!hasCurrentDayStarted \|\| game\.officialDate === localToday/);
+  assert.match(passiveScreen, /!hasCurrentDayStarted \|\| game\.officialDate === todayStr/);
+  assert.match(passiveScreen, /return \(isLive \|\| isFinal\) && \(!hasCurrentDayStarted \|\| game\.officialDate === localToday\)/);
   assert.match(passiveScreen, /eligibleGames\.length === 0/);
   assert.match(passiveScreen, /activeSlideIndex !== 1/);
   assert.match(passiveScreen, /!eligibleGames\.some\(\(game\) => game\.gamePk === selectedGamePk\)/);
