@@ -943,6 +943,61 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     source: "https://baseballhall.org/discover/sandy-koufax-sits-out-game-one",
     verificationStatus: "verified",
     provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which states the Yom Kippur conflict, Game 1 context, and Drysdale's start."
+  },
+  {
+    id: "game-larry-yount-never-appeared-1971",
+    title: "Larry Yount: The Pitcher Who Never Appeared",
+    tag: "BASEBALL ODDITY",
+    statBadge: "1971 Astros",
+    fact: "Houston announced Larry Yount as its next pitcher in 1971, but an elbow injury kept him from entering the game; he never threw a major-league pitch.",
+    whimsy: "Because he was officially announced, the Hall of Fame says Yount remains in the record book as the only pitcher who never appeared in the only game he played.",
+    source: "https://baseballhall.org/larry-yount-one-game",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which states the announcement, injury, no pitch, and record-book distinction."
+  },
+  {
+    id: "record-kerry-wood-20-strikeouts-1998",
+    title: "Kerry Wood's 20-Strikeout Statement",
+    tag: "PITCHING MILESTONE",
+    statBadge: "20 strikeouts",
+    fact: "In his fifth career start, 20-year-old Kerry Wood struck out 20 Astros, allowed one hit, and threw a one-hit shutout for the Cubs on May 6, 1998.",
+    whimsy: "MLB identifies Wood as the third pitcher to record 20 strikeouts in a nine-inning game.",
+    source: "https://www.mlb.com/news/pitchers-who-recorded-20-strikeouts-in-a-game",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's 20-strikeout historical account, which states Wood's date, opponent, age, strikeouts, one hit, and no runs."
+  },
+  {
+    id: "jewish-moe-berg-15-seasons-oss",
+    title: "Moe Berg: Catcher, Scholar, and Intelligence Officer",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: "15 MLB seasons",
+    fact: "Moe Berg played 15 major-league seasons, transitioning from shortstop to catcher before later serving the United States during World War II.",
+    whimsy: "The Hall of Fame notes that Berg learned Japanese during baseball tours and was later awarded the Medal of Freedom, which he refused.",
+    source: "https://baseballhall.org/discover/short-stops/moe-bergs-life-in-baseball",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame biography, which states Berg's 15 seasons, position transition, Japanese fluency, wartime service, and Medal of Freedom episode."
+  },
+  {
+    id: "jewish-al-rosen-unanimous-mvp-1953",
+    title: "Al Rosen's Unanimous MVP Season",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: ".336 · 43 HR · 145 RBI",
+    fact: "Cleveland third baseman Al Rosen hit .336 with 43 home runs and 145 RBI in 1953, becoming the first unanimous American League MVP.",
+    whimsy: "The Jewish Baseball Museum notes that a ground-ball play in the final game kept Rosen from completing a Triple Crown season.",
+    source: "https://jewishbaseballmuseum.com/player/al-rosen",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the Jewish Baseball Museum biography, which states Rosen's 1953 batting line, unanimous MVP distinction, and final-game Triple Crown context."
+  },
+  {
+    id: "jewish-sammy-samuels-fifth-major-leaguer-1895",
+    title: "Sammy Samuels: A 19th-Century Jewish Baseball Pioneer",
+    tag: "JEWISH BASEBALL HISTORY",
+    statBadge: "1895 debut",
+    fact: "Sammy Samuels became the fifth Jewish player to appear in the major leagues when he debuted for the St. Louis Browns on August 3, 1895.",
+    whimsy: "SABR identifies him as one of only six Jewish major leaguers in the 19th century.",
+    source: "https://sabr.org/bioproj/person/sammy-samuels",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against SABR's Sammy Samuels biography, which states the debut date, fifth-player distinction, and 19th-century context."
   }
 ];
 

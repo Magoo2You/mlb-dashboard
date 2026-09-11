@@ -518,6 +518,7 @@ export interface MLBNewsArticle {
   link: string;
   description: string;
   pubDate: string;
+  publisher?: "MLB.com" | "ESPN";
   imageUrl?: string | null;
 }
 

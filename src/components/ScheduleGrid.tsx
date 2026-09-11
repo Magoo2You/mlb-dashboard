@@ -12,26 +12,8 @@ interface ScheduleGridProps {
 
 const VerticalGameTicker: React.FC<{
   playByPlay?: { id: string; text: string; inning?: string; type?: string }[];
-  game: ScheduledGame;
-}> = ({ playByPlay, game }) => {
-  const isLive = game.status.abstractGameState === "Live" || game.status.detailedState === "In Progress";
-  const isFinal = game.status.abstractGameState === "Final" || game.status.detailedState === "Final";
-
-  const fallbackItems = isLive
-    ? [
-        { id: "l1", text: `${game.teams.away.team.name} @ ${game.teams.home.team.name} — Batter working deep in count.`, inning: game.linescore?.inningState || "LIVE" },
-        { id: "l2", text: `Scoring Play: Hard-hit drive down right-field line for extra bases!`, inning: game.linescore?.inningState || "LIVE" },
-      ]
-    : isFinal
-    ? [
-        { id: "f1", text: `FINAL: ${game.teams.away.team.abbreviation} ${game.teams.away.score}, ${game.teams.home.team.abbreviation} ${game.teams.home.score} — Key pitching performance seals victory.`, inning: "FINAL" },
-      ]
-    : [
-        { id: "p1", text: `PREGAME: Probables — ${game.teams.away.probablePitcher?.fullName || "TBD"} vs ${game.teams.home.probablePitcher?.fullName || "TBD"}.`, inning: "UPCOMING" },
-        { id: "p2", text: `Stadium: ${game.venue?.name || "MLB Ballpark"} — Starting lineups announced.`, inning: "INFO" },
-      ];
-
-  const items = playByPlay && playByPlay.length > 0 ? playByPlay : fallbackItems;
+}> = ({ playByPlay }) => {
+  const items = playByPlay && playByPlay.length > 0 ? playByPlay : [];
   const [index, setIndex] = React.useState(0);
 
   React.useEffect(() => {
@@ -42,7 +24,13 @@ const VerticalGameTicker: React.FC<{
     return () => clearInterval(interval);
   }, [items.length]);
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <div className="mt-2.5 pt-2 border-t border-slate-800/80 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-500" role="status">
+        Provider play-by-play unavailable for this game.
+      </div>
+    );
+  }
 
   const current = items[index];
 
@@ -335,7 +323,7 @@ export const ScheduleGrid: React.FC<ScheduleGridProps> = ({
               </div>
 
               {/* Individual Game Play-by-Play Vertical Ticker */}
-              <VerticalGameTicker playByPlay={game.playByPlay} game={game} />
+              <VerticalGameTicker playByPlay={game.playByPlay} />
               </div>
             </div>
           );

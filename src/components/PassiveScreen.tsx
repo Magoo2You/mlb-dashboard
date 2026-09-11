@@ -84,6 +84,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const standingsSlideRef = useRef<HTMLDivElement>(null);
   const activeSlideIndexRef = useRef(activeSlideIndex);
   const rotationElapsedRef = useRef(0);
+  const gameFeedGameIndexRef = useRef(0);
 
   useLayoutEffect(() => {
     const scoreboardSlide = scoreboardSlideRef.current;
@@ -122,6 +123,24 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
     return () => clearInterval(interval);
   }, [isAutoRotationPaused]);
+
+  // Game Feed rotates eligible live/completed games; Scoreboard remains static.
+  useEffect(() => {
+    if (isAutoRotationPaused || activeSlideIndex !== 1) return;
+    const eligibleGames = scheduleGames.filter((game) => {
+      const isLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
+      const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+      return isLive || isFinal;
+    });
+    if (eligibleGames.length <= 1) return;
+    gameFeedGameIndexRef.current = Math.max(0, eligibleGames.findIndex((game) => game.gamePk === selectedGamePk));
+    const interval = setInterval(() => {
+      gameFeedGameIndexRef.current = (gameFeedGameIndexRef.current + 1) % eligibleGames.length;
+      setSelectedGamePk(eligibleGames[gameFeedGameIndexRef.current]?.gamePk ?? null);
+    }, 9200);
+    return () => clearInterval(interval);
+  }, [activeSlideIndex, isAutoRotationPaused, scheduleGames, selectedGamePk]);
+
   // Initial Data Loader & Poller
   useEffect(() => {
     let isMounted = true;

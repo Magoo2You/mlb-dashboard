@@ -93,6 +93,7 @@ function runScrollOwnershipChecks(): void {
   const passiveScreen = readSource('src/components/PassiveScreen.tsx');
   const appSource = readSource('src/App.tsx');
   const gameView = readSource('src/components/GameView.tsx');
+  const scheduleGrid = readSource('src/components/ScheduleGrid.tsx');
   const serverSource = readSource('server.ts');
   const indexCss = readSource('src/index.css');
 
@@ -129,6 +130,14 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);
   assert.match(passiveScreen, /setLoadingGame\(true\);\s*setGameFeed\(null\);/);
   assert.match(passiveScheduleComponent, /showLearningCard = panel === "scoreboard"/);
+  assert.match(passiveScheduleComponent, /const gameFeedOverviewGames = liveGames\.length > 0 \? \[\.\.\.liveGames, \.\.\.completedGamesToday\] : completedGamesToday/);
+  assert.match(passiveScheduleComponent, /role="button"[\s\S]*aria-label=\{`Open/);
+  assert.match(scheduleGrid, /Provider play-by-play unavailable for this game/);
+  assert.doesNotMatch(scheduleGrid, /Hard-hit drive down right-field line|Key pitching performance seals victory|Starting lineups announced/);
+  assert.match(passiveScreen, /Game Feed rotates eligible live\/completed games/);
+  assert.match(passiveScreen, /activeSlideIndex !== 1/);
+  assert.match(passiveScreen, /setSelectedGamePk\(eligibleGames\[gameFeedGameIndexRef\.current\]/);
+  assert.doesNotMatch(passiveScreen, /GAME_STEP_SECONDS|scheduleGamesRef/);
   assert.match(passiveScheduleComponent, /Recent notable plays/);
   assert.match(passiveScheduleComponent, /description !== "Play in progress\.\.\."/);
   assert.match(passiveScreen, /setActiveSlideIndex\(\(index\) => \(index \+ 1\) % 4\)/);
@@ -140,6 +149,11 @@ function runScrollOwnershipChecks(): void {
   assert.match(gameView, /lg:col-span-6 lg:self-start[\s\S]*flex flex-col/);
   assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
   assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);
+  assert.match(serverSource, /https:\/\/www\.espn\.com\/espn\/rss\/mlb\/news/);
+  assert.match(serverSource, /publisher/);
+  assert.match(serverSource, /parseNewsFeed\(mlbXml, "MLB\.com"/);
+  assert.match(serverSource, /parseNewsFeed\(espnXml, "ESPN"/);
+  assert.match(serverSource, /feed-provided|publisher/);
   assert.match(serverSource, /statGroup=\$\{statGroup\}&statType=season/);
   assert.match(serverSource, /numDays > 120/);
   assert.match(serverSource, /makeUrl\(fieldingCategories, "fielding"\)/);

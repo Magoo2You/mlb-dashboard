@@ -201,7 +201,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     if (!game.gameDate) return false;
     return new Date(game.gameDate).toLocaleDateString() === new Date().toLocaleDateString();
   });
-  const gameFeedOverviewGames = liveGames.length > 0 ? liveGames : completedGamesToday.slice(0, 6);
+  const gameFeedOverviewGames = liveGames.length > 0 ? [...liveGames, ...completedGamesToday] : completedGamesToday;
   const recentNotablePlays = (gameFeed?.liveData?.plays || [])
     .filter((play: any) => {
       const description = typeof play?.description === "string" ? play.description.trim() : "";
@@ -277,8 +277,17 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     return (
                       <div
                         key={game.gamePk}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open ${game.teams?.away?.team?.name} at ${game.teams?.home?.team?.name} in Game Feed`}
                         onClick={() => onSelectGame?.(game.gamePk)}
-                        className="w-[280px] max-w-full flex-none cursor-pointer rounded-xl p-2.5 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 transition-all duration-300"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            onSelectGame?.(game.gamePk);
+                          }
+                        }}
+                        className="w-[280px] max-w-full flex-none cursor-pointer rounded-xl p-2.5 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">

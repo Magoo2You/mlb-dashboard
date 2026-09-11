@@ -1,4 +1,5 @@
 import { transformGameLiveFeed, transformScheduleGame } from "./src/sports/mlb/mlb-transformers";
+import { MLBNewsArticle } from "./src/types";
 import { transformStatcastLeaderGroups } from "./src/sports/mlb/statcast-transformers";
 import { nhlReadOnlyAdapter } from "./src/sports/nhl/nhl-adapter";
 import { isNormalizedNhlSchedule } from "./src/sports/nhl/nhl-route-contract";
@@ -526,32 +527,38 @@ app.get("/api/ticker", async (req, res) => {
 });
 
 // 5b. Dedicated MLB News Endpoint
+function parseNewsFeed(xml: string | null, publisher: "MLB.com" | "ESPN", idPrefix: string): MLBNewsArticle[] {
+  if (!xml) return [];
+  const items: MLBNewsArticle[] = [];
+  const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g) || [];
+  itemMatches.forEach((itemXml, idx) => {
+    const titleMatch = itemXml.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) || itemXml.match(/<title>([\s\S]*?)<\/title>/);
+    const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/);
+    const descMatch = itemXml.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || itemXml.match(/<description>([\s\S]*?)<\/description>/);
+    const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+    if (!titleMatch) return;
+    const clean = (value: string) => value.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, " ").trim();
+    items.push({
+      id: `${idPrefix}-${idx}`,
+      title: clean(titleMatch[1]),
+      link: linkMatch ? clean(linkMatch[1]) : publisher === "ESPN" ? "https://www.espn.com/mlb/" : "https://www.mlb.com/news",
+      description: descMatch ? clean(descMatch[1]) : "",
+      pubDate: pubDateMatch ? clean(pubDateMatch[1]) : "",
+      publisher,
+      imageUrl: null,
+    });
+  });
+  return items;
+}
+
 app.get("/api/news", async (req, res) => {
   try {
-    const newsXml = await fetch("https://www.mlb.com/feeds/news/rss.xml").then((r) => r.text());
-    const items: any[] = [];
-
-    const itemMatches = newsXml.match(/<item>([\s\S]*?)<\/item>/g) || [];
-    itemMatches.forEach((itemXml, idx) => {
-      const titleMatch = itemXml.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) || itemXml.match(/<title>([\s\S]*?)<\/title>/);
-      const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/);
-      const descMatch = itemXml.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) || itemXml.match(/<description>([\s\S]*?)<\/description>/);
-      const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
-      const mediaMatch = itemXml.match(/url="([^"]+\.(?:jpg|png|jpeg)[^"]*)"/i) || itemXml.match(/src="([^"]+\.(?:jpg|png|jpeg)[^"]*)"/i);
-
-      if (titleMatch) {
-        items.push({
-          id: `news-feed-${idx}`,
-          title: titleMatch[1].trim(),
-          link: linkMatch ? linkMatch[1].trim() : "https://www.mlb.com/news",
-          description: descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "",
-          pubDate: pubDateMatch ? pubDateMatch[1].trim() : "",
-          imageUrl: mediaMatch ? mediaMatch[1] : null,
-        });
-      }
-    });
-
-    res.json({ count: items.length, articles: items });
+    const [mlbXml, espnXml] = await Promise.all([
+      fetch("https://www.mlb.com/feeds/news/rss.xml").then((r) => r.ok ? r.text() : null).catch(() => null),
+      fetch("https://www.espn.com/espn/rss/mlb/news").then((r) => r.ok ? r.text() : null).catch(() => null),
+    ]);
+    const articles = [...parseNewsFeed(mlbXml, "MLB.com", "mlb-news"), ...parseNewsFeed(espnXml, "ESPN", "espn-news")];
+    res.json({ count: articles.length, articles });
   } catch (error: any) {
     logServerError("Error fetching news:", error);
     res.status(500).json({ error: "Failed to fetch news" });
