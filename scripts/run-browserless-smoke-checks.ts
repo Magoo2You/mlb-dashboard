@@ -136,7 +136,7 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /displayedScoreboardGames = scoreboardCardSlots/);
   assert.match(passiveScheduleComponent, /rotateY/);
   assert.match(passiveScheduleComponent, /while \(occupied\.has\(candidate\)\)/);
-  assert.match(passiveScheduleComponent, /h-\[236px\]/);
+  assert.match(passiveScheduleComponent, /h-\[120px\] max-h-\[120px\] overflow-hidden rounded-lg border px-2\.5 py-2 text-center/);
   assert.match(passiveScheduleComponent, /Array\.from\(\{ length: 3 \}/);
   assert.match(passiveScheduleComponent, /grid-cols-1 gap-2\.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5/);
   assert.match(passiveScheduleComponent, /width=\{40\}[\s\S]*h-10 w-10/);
