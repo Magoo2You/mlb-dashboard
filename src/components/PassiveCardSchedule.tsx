@@ -510,7 +510,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           </div>
                         )}
                         {gIsLive && (
-                          <div className="absolute bottom-2 left-3 right-3 grid h-[48px] grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1 text-[10px]">
+                          <div className="absolute bottom-2 left-3 right-3 grid h-[48px] grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 overflow-hidden rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1 text-[10px]">
                             <div className="min-w-0 truncate text-slate-200"><span className="font-black text-red-300">P:</span> {livePitcherName || "Unavailable"}</div>
                             <div className="flex min-w-0 flex-col items-center justify-center gap-1">
                               <div className="relative mx-auto h-10 w-10" aria-label={`Base runners: ${liveData?.matchup?.postOnFirst?.fullName || "no runner on first"}; ${liveData?.matchup?.postOnSecond?.fullName || "no runner on second"}; ${liveData?.matchup?.postOnThird?.fullName || "no runner on third"}`} role="img">
