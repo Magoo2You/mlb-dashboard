@@ -169,7 +169,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const gameFeedOverviewGames = currentLiveGames.length > 0 ? [...currentLiveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
 
   const scoreboardColumns = viewport.width >= 1536 ? 5 : viewport.width >= 1024 ? 3 : viewport.width >= 640 ? 2 : 1;
-  const scoreboardRows = viewport.height >= 900 ? 3 : viewport.height >= 700 ? 2 : 1;
+  const scoreboardRows = viewport.height >= 1000 ? 3 : viewport.height >= 700 ? 2 : 1;
   const scoreboardPageSize = scoreboardColumns * scoreboardRows;
   const scoreboardSlotCount = Math.min(scoreboardPageSize, scoreboardGames.length);
   const pinnedLiveSlotCount = Math.min(currentLiveGames.length, scoreboardSlotCount);
@@ -427,7 +427,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             onSelectGame?.(game.gamePk);
                           }
                         }}
-                        className="relative w-full min-w-0 h-[236px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
+                        className="relative w-full min-w-0 h-[280px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -457,8 +457,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
                         {/* Teams, projected starters, and centered first-pitch time */}
                         <div className="relative mt-2 grid grid-cols-[minmax(0,1fr)_58px_minmax(0,1fr)] items-start gap-1.5">
-                          <div className="min-w-0 h-[120px] max-h-[120px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
-                            <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className={`mx-auto object-contain ${gIsLive ? "h-8 w-8" : "h-10 w-10"}`} />
+                          <div className="min-w-0 h-[150px] max-h-[150px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
+                            <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.away?.team?.abbreviation}</div>
                             <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.away?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "away") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
@@ -492,8 +492,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             )}
                           </div>
 
-                          <div className="min-w-0 h-[120px] max-h-[120px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
-                            <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className={`mx-auto object-contain ${gIsLive ? "h-8 w-8" : "h-10 w-10"}`} />
+                          <div className="min-w-0 h-[150px] max-h-[150px] overflow-hidden rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
+                            <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.home?.team?.abbreviation}</div>
                             <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.home?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "home") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
