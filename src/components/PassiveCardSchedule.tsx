@@ -169,7 +169,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const gameFeedOverviewGames = currentLiveGames.length > 0 ? [...currentLiveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
 
   const scoreboardColumns = viewport.width >= 1536 ? 5 : viewport.width >= 1024 ? 3 : viewport.width >= 640 ? 2 : 1;
-  const scoreboardRows = viewport.height >= 900 ? 4 : viewport.height >= 700 ? 2 : 1;
+  const scoreboardRows = viewport.height >= 900 ? 3 : viewport.height >= 700 ? 2 : 1;
   const scoreboardPageSize = scoreboardColumns * scoreboardRows;
   const scoreboardSlotCount = Math.min(scoreboardPageSize, scoreboardGames.length);
 
@@ -186,7 +186,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
         if (slots.length === 0) return slots;
         const slot = scoreboardFlipSlot % slots.length;
         const next = [...slots];
-        next[slot] = (next[slot] + scoreboardSlotCount) % scoreboardGames.length;
+        const occupied = new Set(next);
+        let candidate = (next[slot] + scoreboardSlotCount) % scoreboardGames.length;
+        while (occupied.has(candidate)) {
+          candidate = (candidate + 1) % scoreboardGames.length;
+        }
+        next[slot] = candidate;
         setScoreboardFlipSlot((current) => (current + 1) % slots.length);
         return next;
       });
@@ -414,7 +419,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             onSelectGame?.(game.gamePk);
                           }
                         }}
-                        className="w-full min-w-0 min-h-[168px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
+                        className="w-full min-w-0 h-[236px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -484,12 +489,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         {gIsLive && (
                           <div className="mt-2 grid grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1.5 text-[10px]">
                             <div className="min-w-0 truncate text-slate-200"><span className="font-black text-red-300">P:</span> {livePitcherName || "Unavailable"}</div>
-                            <div className="relative mx-auto h-12 w-12" aria-label={`Base runners: ${liveData?.matchup?.postOnFirst?.fullName || "no runner on first"}; ${liveData?.matchup?.postOnSecond?.fullName || "no runner on second"}; ${liveData?.matchup?.postOnThird?.fullName || "no runner on third"}`} role="img">
-                              <span className={`absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rotate-45 border ${liveData?.matchup?.postOnSecond ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
-                              <span className={`absolute bottom-0 left-0 h-3 w-3 rotate-45 border ${liveData?.matchup?.postOnThird ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
-                              <span className={`absolute bottom-0 right-0 h-3 w-3 rotate-45 border ${liveData?.matchup?.postOnFirst ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
-                              <span className="absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-slate-500 bg-slate-700" />
-                              <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap font-black text-slate-300">O: {liveData?.linescore?.outs ?? "—"}</span>
+                            <div className="flex min-w-0 flex-col items-center justify-center gap-1">
+                              <div className="relative mx-auto h-10 w-10" aria-label={`Base runners: ${liveData?.matchup?.postOnFirst?.fullName || "no runner on first"}; ${liveData?.matchup?.postOnSecond?.fullName || "no runner on second"}; ${liveData?.matchup?.postOnThird?.fullName || "no runner on third"}`} role="img">
+                              <span className={`absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border ${liveData?.matchup?.postOnSecond ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className={`absolute bottom-0 left-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnThird ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnFirst ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
+                              <span className="absolute bottom-0 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border border-slate-500 bg-slate-700" />
+                              </div>
+                              <div className="flex items-center justify-center gap-1" aria-label={`${liveData?.linescore?.outs ?? 0} outs`}>
+                                {Array.from({ length: 3 }, (_, outIndex) => (
+                                  <span key={outIndex} className={`h-2.5 w-2.5 rounded-full border ${outIndex < (liveData?.linescore?.outs ?? 0) ? "border-red-300 bg-red-500" : "border-slate-600 bg-slate-800"}`} aria-hidden="true" />
+                                ))}
+                              </div>
                             </div>
                             <div className="min-w-0 truncate text-right text-slate-200"><span className="font-black text-amber-300">H:</span> {liveBatterName || "Unavailable"}</div>
                           </div>

@@ -131,11 +131,13 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /liveGameFeeds\[game\.gamePk\]/);
   assert.ok(passiveScheduleComponent.includes('P:</span> {livePitcherName || "Unavailable"}'));
   assert.ok(passiveScheduleComponent.includes('H:</span> {liveBatterName || "Unavailable"}'));
-  assert.match(passiveScheduleComponent, /O: \{liveData\?\.linescore\?\.outs \?\? "—"\}/);
+  assert.match(passiveScheduleComponent, /Array\.from\(\{ length: 3 \}/);
   assert.match(passiveScreen, /for \(const game of liveGames\)/);
   assert.match(passiveScheduleComponent, /displayedScoreboardGames = scoreboardCardSlots/);
   assert.match(passiveScheduleComponent, /rotateY/);
-  assert.match(passiveScheduleComponent, /min-h-\[168px\]/);
+  assert.match(passiveScheduleComponent, /while \(occupied\.has\(candidate\)\)/);
+  assert.match(passiveScheduleComponent, /h-\[236px\]/);
+  assert.match(passiveScheduleComponent, /Array\.from\(\{ length: 3 \}/);
   assert.match(passiveScheduleComponent, /grid-cols-1 gap-2\.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5/);
   assert.match(passiveScheduleComponent, /width=\{40\}[\s\S]*h-10 w-10/);
   assert.match(passiveScheduleComponent, /completedPitcherLabel\(game, "away"\)/);
