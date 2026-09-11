@@ -125,6 +125,12 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);
   assert.match(passiveScheduleComponent, /const completedGamesInDisplayedSlate = completedGames/);
   assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
+  assert.match(passiveScheduleComponent, /w-\[320px\][\s\S]*min-h-\[168px\]/);
+  assert.match(passiveScheduleComponent, /width=\{40\}[\s\S]*h-10 w-10/);
+  assert.match(passiveScheduleComponent, /Projected: \{game\.teams\?\.away\?\.probablePitcher\?\.fullName \|\| "TBD"\}/);
+  assert.match(passiveScheduleComponent, /\["Scheduled", "Pre-Game"\]\.includes/);
+  assert.match(passiveScheduleComponent, /gStatusLabel/);
+  assert.match(passiveScheduleComponent, /new Date\(game\.gameDate\)\.toLocaleTimeString/);
   assert.match(passiveScheduleComponent, /flex flex-wrap justify-center/);
   assert.match(passiveScheduleComponent, /flex-1 min-h-0 flex flex-col gap-3 overflow-hidden/);
   assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);

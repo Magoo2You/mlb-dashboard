@@ -298,6 +298,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     if (!game) return null;
                     const gIsLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+                    const gIsUpcoming = !gIsLive && !gIsFinal && game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "");
+                    const gStatusLabel = game.status?.detailedState || "Status unavailable";
 
                     return (
                       <React.Fragment key={game.gamePk}>
@@ -318,7 +320,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             onSelectGame?.(game.gamePk);
                           }
                         }}
-                        className="w-[280px] max-w-full flex-none cursor-pointer rounded-xl p-2.5 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
+                        className="w-[320px] max-w-full min-h-[168px] flex-none cursor-pointer rounded-xl p-3 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -333,9 +335,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> FINAL
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300">
-                                <Clock className="w-3.5 h-3.5 text-blue-400" />
-                                {new Date(game.gameDate).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                              <span className="inline-flex max-w-[150px] items-center gap-1 rounded bg-slate-800 px-2 py-0.5 text-center text-xs font-bold text-slate-300">
+                                <Clock className="h-3.5 w-3.5 shrink-0 text-blue-400" /> {gStatusLabel}
                               </span>
                             )}
                           </div>
@@ -347,32 +348,43 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           )}
                         </div>
 
-                        {/* Teams Grid */}
-                        <div className="grid grid-cols-2 gap-2">
-                          {/* Away Team */}
-                          <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border ${
-                            game.teams?.away?.isWinner ? "bg-amber-500/10 border-amber-500/30" : "bg-slate-900 border-slate-800"
-                          }`}>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <img src={game.teams?.away?.team?.logoUrl} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain shrink-0" />
-                              <span className="font-bold text-xs sm:text-sm text-white truncate">{game.teams?.away?.team?.abbreviation}</span>
-                            </div>
-                            <span className={`font-mono font-black text-sm ${game.teams?.away?.isWinner ? "text-amber-400" : "text-white"}`}>
-                              {gIsLive || gIsFinal ? game.teams?.away?.score : "-"}
-                            </span>
+                        {/* Teams, projected starters, and centered first-pitch time */}
+                        <div className="relative mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                          <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-2 text-center">
+                            <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
+                            <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.away?.team?.abbreviation}</div>
+                            <div className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Projected: {game.teams?.away?.probablePitcher?.fullName || "TBD"}</div>
+                            {gIsLive || gIsFinal ? (
+                              <div className={`mt-1 font-mono font-black text-lg ${game.teams?.away?.isWinner ? "text-amber-400" : "text-white"}`}>
+                                {game.teams?.away?.score}
+                              </div>
+                            ) : null}
                           </div>
 
-                          {/* Home Team */}
-                          <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border ${
-                            game.teams?.home?.isWinner ? "bg-amber-500/10 border-amber-500/30" : "bg-slate-900 border-slate-800"
-                          }`}>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <img src={game.teams?.home?.team?.logoUrl} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain shrink-0" />
-                              <span className="font-bold text-xs sm:text-sm text-white truncate">{game.teams?.home?.team?.abbreviation}</span>
-                            </div>
-                            <span className={`font-mono font-black text-sm ${game.teams?.home?.isWinner ? "text-amber-400" : "text-white"}`}>
-                              {gIsLive || gIsFinal ? game.teams?.home?.score : "-"}
-                            </span>
+                          <div className="flex min-w-[74px] flex-col items-center justify-center text-center">
+                            {gIsLive || gIsFinal ? (
+                              <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
+                            ) : gIsUpcoming ? (
+                              <>
+                                <Clock className="h-4 w-4 text-blue-400" aria-hidden="true" />
+                                <span className="mt-0.5 whitespace-nowrap text-sm font-black text-blue-300">
+                                  {new Date(game.gameDate).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="max-w-[80px] text-center text-[10px] font-black uppercase leading-tight text-slate-500">{gStatusLabel}</span>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-2 text-center">
+                            <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
+                            <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.home?.team?.abbreviation}</div>
+                            <div className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Projected: {game.teams?.home?.probablePitcher?.fullName || "TBD"}</div>
+                            {gIsLive || gIsFinal ? (
+                              <div className={`mt-1 font-mono font-black text-lg ${game.teams?.home?.isWinner ? "text-amber-400" : "text-white"}`}>
+                                {game.teams?.home?.score}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       </div>
