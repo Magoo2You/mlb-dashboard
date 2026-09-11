@@ -8,7 +8,7 @@ import { isNormalizedNflScoreboard } from "./src/sports/nfl/nfl-route-contract";
 import { espnNbaScoreboardAdapter } from "./src/sports/nba/espn";
 import { isEspnNbaScoreboardRouteResponse } from "./src/sports/nba/espn";
 import { analyzeHitterEvidence, analyzePitcherEvidence } from "./src/sports/mlb/whos-hot-analysis";
-import { formatLocalDate } from "./src/utils/local-date";
+import { formatLocalDate, shiftLocalDate } from "./src/utils/local-date";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -322,8 +322,8 @@ app.get("/api/ticker", async (req, res) => {
       return res.json(tickerCache.data);
     }
 
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const today = formatLocalDate();
+    const yesterday = shiftLocalDate(today, -1);
 
     // Fetch Today AND Yesterday schedules in parallel for complete slate coverage
     const [todaySched, yestSched, newsXml] = await Promise.all([

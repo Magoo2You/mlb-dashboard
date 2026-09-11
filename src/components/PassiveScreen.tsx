@@ -49,6 +49,8 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   const [standingsError, setStandingsError] = useState<string | null>(null);
   const [gameError, setGameError] = useState<string | null>(null);
   const [tickerError, setTickerError] = useState<string | null>(null);
+  const [newsError, setNewsError] = useState<string | null>(null);
+  const [hotError, setHotError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
 
   // Loading States
@@ -207,10 +209,15 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         const articles = await fetchMLBNews();
         if (isMounted) {
           setNewsArticles(articles);
+          setNewsError(null);
           setLoadingNews(false);
         }
       } catch (e) {
         console.error("Error loading news:", e);
+        if (isMounted) {
+          setNewsError("Headlines are unavailable.");
+          setLoadingNews(false);
+        }
       }
     };
 
@@ -219,10 +226,15 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         const data = await fetchWhosHot({ season: CURRENT_SEASON, timeframe: "7" });
         if (isMounted) {
           setHotData(data);
+          setHotError(null);
           setLoadingHot(false);
         }
       } catch (e) {
         console.error("Error loading who's hot:", e);
+        if (isMounted) {
+          setHotError("Hot-hitter data is unavailable.");
+          setLoadingHot(false);
+        }
       }
     };
 
@@ -471,6 +483,8 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                     gameError={gameError}
                 newsArticles={newsArticles}
                 hotData={hotData}
+                newsError={newsError}
+                hotError={hotError}
                 loadingNews={loadingNews}
                 loadingHot={loadingHot}
                 isVisible={activeSlideIndex === 0}

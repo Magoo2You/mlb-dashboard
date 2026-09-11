@@ -31,6 +31,8 @@ interface PassiveCardScheduleProps {
   gameError?: string | null;
   newsArticles?: MLBNewsArticle[];
   hotData?: any;
+  newsError?: string | null;
+  hotError?: string | null;
   loadingNews?: boolean;
   loadingHot?: boolean;
   isVisible?: boolean;
@@ -50,6 +52,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   gameError,
   newsArticles = [],
   hotData,
+  newsError = null,
+  hotError = null,
   loadingNews = false,
   loadingHot = false,
   isVisible = true,
@@ -379,7 +383,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   className="h-full flex flex-col min-h-0"
                 >
                   <div className="grid grid-rows-2 gap-2 h-full min-h-0">
-                    {(currentNewsSlice.length > 0 ? currentNewsSlice : newsArticles.slice(0, 2)).map((art, idx) => (
+                    {newsError ? (
+                      <div className="row-span-2 flex h-full items-center justify-center text-center text-xs text-amber-300" role="status">{newsError}</div>
+                    ) : (currentNewsSlice.length > 0 ? currentNewsSlice : newsArticles.slice(0, 2)).map((art, idx) => (
                       <div
                         key={art.id || idx}
                         className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow-md hover:border-slate-700 transition-all flex flex-col justify-between overflow-hidden min-h-0 h-full"
@@ -411,10 +417,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   className="h-full flex flex-col min-h-0"
                 >
                   <div className="grid grid-rows-2 gap-1.5 h-full min-h-0">
-                    {hotHittersList.length === 0 && (
-                      <div className="flex h-full items-center justify-center text-center text-xs text-slate-500" role="status">No official hot-hitter data is available.</div>
-                    )}
-                    {currentHotSlice.map((hitter: any, idx: number) => (
+                    {hotError ? (
+                      <div className="row-span-2 flex h-full items-center justify-center text-center text-xs text-amber-300" role="status">{hotError}</div>
+                    ) : hotHittersList.length === 0 ? (
+                      <div className="row-span-2 flex h-full items-center justify-center text-center text-xs text-slate-500" role="status">No official hot-hitter data is available.</div>
+                    ) : currentHotSlice.map((hitter: any, idx: number) => (
                       <div key={hitter.personId || idx} className="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">

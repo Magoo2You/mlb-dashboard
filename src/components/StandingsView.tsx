@@ -64,17 +64,29 @@ export const StandingsView: React.FC = () => {
   const [standings, setStandings] = useState<DivisionStanding[]>([]);
   const [wildCardStandings, setWildCardStandings] = useState<WildCardStanding[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [viewMode, setViewMode] = useState<"division" | "league" | "wildcard">("division");
   const [season, setSeason] = useState<string>(CURRENT_SEASON);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
+    setError(null);
     fetchStandingsBundle(season).then((data) => {
+      if (!active) return;
       setStandings(data.divisions);
       setWildCardStandings(data.wildCardStandings);
       setLoading(false);
+    }).catch(() => {
+      if (!active) return;
+      setLoading(false);
+      setError("Official standings are unavailable. Retry to check again.");
     });
-  }, [season]);
+    return () => {
+      active = false;
+    };
+  }, [season, retryNonce]);
 
   // Helper to render a team row with explicit GB and WCGB values
   const renderTeamRow = (
@@ -434,7 +446,14 @@ export const StandingsView: React.FC = () => {
         </div>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="p-12 text-center text-amber-200 space-y-3" role="alert">
+          <p className="text-sm font-semibold">{error}</p>
+          <button type="button" onClick={() => setRetryNonce((nonce) => nonce + 1)} className="focus-ring rounded-lg border border-amber-700 bg-amber-950/50 px-4 py-2 text-xs font-bold hover:bg-amber-900/60">
+            Retry standings
+          </button>
+        </div>
+      ) : loading ? (
         <div className="p-12 text-center text-slate-400 space-y-3">
           <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mx-auto"></div>
           <p className="text-sm font-semibold">Loading MLB Standings Feed...</p>
