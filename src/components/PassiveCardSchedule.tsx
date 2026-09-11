@@ -1,11 +1,49 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { BASEBALL_LORE_ITEMS, LoreItem } from "@/src/data/baseball-lore-expanded";
 import { HISTORICAL_PLAYER_PROFILES, HistoricalPlayerProfile } from "../data/historical-player-profiles";
 import { createLoreSequence } from "@/src/utils/lore-rotation";
 import { formatLocalDate } from "../utils/local-date";
+
+const TEAM_PRIMARY_COLORS: Record<string, string> = {
+  ATH: "#003831", ATL: "#CE1141", AZ: "#A71930", ARI: "#A71930", BAL: "#DF4601", BOS: "#BD3039", CHC: "#0E3386",
+  CIN: "#C6011F", CLE: "#E31937", COL: "#333366", CWS: "#27251F", CHW: "#27251F", DET: "#0C2340", HOU: "#002D62",
+  KC: "#004687", KCR: "#004687", LAA: "#BA0021", LAD: "#005A9C", MIA: "#00A3E0", MIL: "#12284B", MIN: "#002B5C",
+  NYM: "#002D72", NYY: "#003087", OAK: "#003831", PHI: "#E81828", PIT: "#FDB827", SD: "#2F241D", SDP: "#2F241D",
+  SEA: "#0C2C56", SF: "#FD5A1E", SFG: "#FD5A1E", STL: "#C41E3A", TB: "#092C5C", TBR: "#092C5C", TEX: "#003278", TOR: "#134A8E",
+  WSH: "#AB0003", WSN: "#AB0003",
+};
+
+const TEAM_ACCENT_COLORS: Record<string, string> = {
+  ATH: "#A5ACAF", ATL: "#13274F", AZ: "#00A3A3", ARI: "#00A3A3", BAL: "#000000", BOS: "#0C2340", CHC: "#CC3433",
+  CIN: "#000000", CLE: "#0C2340", COL: "#8B5CF6", CWS: "#C4CED4", CHW: "#C4CED4", DET: "#FA4616", HOU: "#EB6E1F",
+  KC: "#C8102E", KCR: "#C8102E", LAA: "#003263", LAD: "#EF3E42", MIA: "#EF3340", MIL: "#B6922E", MIN: "#D31145",
+  NYM: "#FF5910", NYY: "#C4CED4", OAK: "#EFB21E", PHI: "#284898", PIT: "#000000", SD: "#FFC425", SDP: "#FFC425",
+  SEA: "#2AB7A9", SF: "#000000", SFG: "#000000", STL: "#FEDB00", TB: "#8FBCE6", TBR: "#8FBCE6", TEX: "#C0111F", TOR: "#E8291C",
+  WSH: "#FFFFFF", WSN: "#FFFFFF",
+};
+
+function teamPanelStyle(abbreviation?: string): React.CSSProperties {
+  const color = TEAM_PRIMARY_COLORS[abbreviation || ""] || "#334155";
+  const accent = TEAM_ACCENT_COLORS[abbreviation || ""] || "#94A3B8";
+  const panelColor = `color-mix(in srgb, ${color} 78%, #0f172a 22%)`;
+  const accentColor = `color-mix(in srgb, ${accent} 62%, #0f172a 38%)`;
+  return {
+    background: `linear-gradient(135deg, ${panelColor} 0%, ${accentColor} 52%, rgba(15, 23, 42, 0.9) 90%)`,
+    borderColor: `${accent}dd`,
+    boxShadow: `inset 0 1px 0 ${accentColor}, 0 0 0 1px ${color}44`,
+  };
+}
+
+function completedPitcherLabel(game: ScheduledGame, side: "away" | "home") {
+  const isFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+  if (!isFinal) return null;
+  if (game.teams?.[side]?.isWinner === true && game.decisions?.winner?.fullName) return `W: ${game.decisions.winner.fullName}`;
+  if (game.teams?.[side]?.isWinner === false && game.decisions?.loser?.fullName) return `L: ${game.decisions.loser.fullName}`;
+  return "Final pitcher unavailable";
+}
 
 function hasUsableBiographyEvidence(profile: HistoricalPlayerProfile) {
   const evidence = profile.biographyEvidence[0];
@@ -61,6 +99,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   isAutoRotationPaused = false,
   panel = "all",
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   // Lower box active tab: 'news' | 'hot' | 'lore'
   const [lowerTab, setLowerTab] = useState<'news' | 'hot' | 'lore'>('news');
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
@@ -70,6 +109,16 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const loreVisibilityRef = useRef({ isVisible, lowerTab });
   const [loreRound, setLoreRound] = useState<number>(0);
   const [loreBoundaryId, setLoreBoundaryId] = useState<string | undefined>();
+  const [viewport, setViewport] = useState({ width: 1920, height: 1080 });
+  const [scoreboardCardSlots, setScoreboardCardSlots] = useState<number[]>([]);
+  const [scoreboardFlipSlot, setScoreboardFlipSlot] = useState(0);
+
+  useEffect(() => {
+    const updateViewport = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   // Group the local-day slate: yesterday/overnight carryover first, then
   // today's ongoing, upcoming, and completed games.
@@ -77,17 +126,22 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const getGameSection = (game: ScheduledGame) => {
     const isLive = game?.status?.abstractGameState === "Live" || game?.status?.detailedState === "In Progress";
     const isFinal = game?.status?.abstractGameState === "Final" || game?.status?.detailedState === "Final";
-    if (game.officialDate !== localToday) return "yesterday";
+    if (game.officialDate < localToday) return "yesterday";
+    if (game.officialDate > localToday) {
+      return game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "") ? "upcoming" : "other";
+    }
     if (isLive) return "ongoing";
     if (isFinal) return "completed";
-    return "upcoming";
+    if (game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "")) return "upcoming";
+    return "other";
   };
-  const sectionRank: Record<string, number> = { yesterday: 0, ongoing: 1, upcoming: 2, completed: 3 };
+  const sectionRank: Record<string, number> = { yesterday: 0, ongoing: 1, upcoming: 2, completed: 3, other: 4 };
   const sectionLabel: Record<string, string> = {
     yesterday: "Yesterday / Overnight Carryover",
     ongoing: "Ongoing Games",
     upcoming: "Upcoming Games",
     completed: "Completed Games",
+    other: "Status Unavailable",
   };
   const sortedGames = [...games].sort((a, b) => {
     const rankDifference = sectionRank[getGameSection(a)] - sectionRank[getGameSection(b)];
@@ -95,10 +149,52 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return new Date(a.gameDate).getTime() - new Date(b.gameDate).getTime();
   });
 
-  // All games remain visible on the centered Scoreboard; selectedGamePk only marks the active game.
+  // The scoreboard flips through fixed-size viewport pages; selectedGamePk only marks the active game.
   const visibleGames = sortedGames;
+  const currentLiveGames = sortedGames.filter((game) =>
+    game.officialDate === localToday &&
+    (game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress")
+  );
+  const hasCurrentLiveGame = currentLiveGames.length > 0;
+  const isScheduledPreview = (game: ScheduledGame) =>
+    game.status?.abstractGameState === "Preview" && ["Scheduled", "Pre-Game"].includes(game.status?.detailedState || "");
+  const scoreboardGames = hasCurrentLiveGame
+    ? sortedGames.filter((game) => game.officialDate === localToday && (currentLiveGames.some((liveGame) => liveGame.gamePk === game.gamePk) || isScheduledPreview(game)))
+    : sortedGames;
+  const completedGames = sortedGames.filter((game) => game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final");
+  const completedGamesInDisplayedSlate = completedGames.filter((game) => !hasCurrentLiveGame || game.officialDate === localToday);
+  const gameFeedOverviewGames = currentLiveGames.length > 0 ? [...currentLiveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
 
-  // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
+  const scoreboardColumns = viewport.width >= 1536 ? 5 : viewport.width >= 1024 ? 3 : viewport.width >= 640 ? 2 : 1;
+  const scoreboardRows = viewport.height >= 900 ? 4 : viewport.height >= 700 ? 2 : 1;
+  const scoreboardPageSize = scoreboardColumns * scoreboardRows;
+  const scoreboardSlotCount = Math.min(scoreboardPageSize, scoreboardGames.length);
+
+  useEffect(() => {
+    setScoreboardCardSlots(Array.from({ length: scoreboardSlotCount }, (_, index) => index));
+    setScoreboardFlipSlot(0);
+  }, [scoreboardSlotCount, scoreboardColumns, scoreboardRows]);
+
+  useEffect(() => {
+    if (panel !== "scoreboard" || isAutoRotationPaused || scoreboardGames.length <= scoreboardSlotCount || scoreboardSlotCount === 0) return;
+    const interval = setInterval(() => {
+      if (document.activeElement?.closest("[data-scoreboard-slot]")) return;
+      setScoreboardCardSlots((slots) => {
+        if (slots.length === 0) return slots;
+        const slot = scoreboardFlipSlot % slots.length;
+        const next = [...slots];
+        next[slot] = (next[slot] + scoreboardSlotCount) % scoreboardGames.length;
+        setScoreboardFlipSlot((current) => (current + 1) % slots.length);
+        return next;
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isAutoRotationPaused, panel, scoreboardCardSlots.length, scoreboardFlipSlot, scoreboardGames.length, scoreboardSlotCount]);
+
+  const displayedScoreboardGames = scoreboardCardSlots
+    .map((gameIndex) => scoreboardGames[gameIndex])
+    .filter(Boolean);
+
   useEffect(() => {
     if (isAutoRotationPaused) return;
     const interval = setInterval(() => {
@@ -193,7 +289,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
   // Selected Game and detailed game Feed properties
   const selectedGame = panel === "game-feed"
-    ? sortedGames.find((g) => g.gamePk === selectedGamePk && isFeedEligibleGame(g)) || sortedGames.find(isFeedEligibleGame)
+    ? gameFeedOverviewGames.find((g) => g.gamePk === selectedGamePk) || gameFeedOverviewGames[0]
     : sortedGames.find((g) => g.gamePk === selectedGamePk) || sortedGames[0];
   const displayGameFeed = gameFeed?.gamePk === selectedGame?.gamePk ? gameFeed : null;
   const isLive = selectedGame?.status?.abstractGameState === "Live" || selectedGame?.status?.detailedState === "In Progress";
@@ -223,10 +319,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     !homeProbable.fullName.toLowerCase().includes("tbd")
   );
 
-  const liveGames = sortedGames.filter((game) => game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress");
-  const completedGames = sortedGames.filter((game) => game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final");
-  const completedGamesInDisplayedSlate = completedGames;
-  const gameFeedOverviewGames = liveGames.length > 0 ? [...liveGames, ...completedGamesInDisplayedSlate] : completedGamesInDisplayedSlate;
   const recentNotablePlays = (displayGameFeed?.liveData?.plays || [])
     .filter((play: any) => {
       const description = typeof play?.description === "string" ? play.description.trim() : "";
@@ -237,7 +329,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
       );
     })
     .slice(0, 5);
-  const showLearningCard = panel === "scoreboard" && visibleGames.length <= 12;
+  const showLearningCard = panel === "scoreboard" && scoreboardGames.length <= 1;
 
   const decisions = displayGameFeed?.liveData?.decisions || selectedGame?.decisions;
   const winner = decisions?.winner;
@@ -262,7 +354,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             </div>
             
             <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-              Games {sortedGames.length} / {sortedGames.length}
+              Games {scoreboardGames.length} / {visibleGames.length}{scoreboardGames.length < visibleGames.length ? " · Active/scheduled only" : ""}{scoreboardGames.length > scoreboardSlotCount ? ` · Rotating ${scoreboardSlotCount} slots` : ""}
             </span>
           </div>
 
@@ -285,16 +377,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   <p className="mt-1 text-xs text-slate-500">This may be an official off-day.</p>
                 </div>
               ) : (
-                <AnimatePresence mode="wait">
-                <motion.div
-                  key={selectedGamePk ?? "full-slate"}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="flex flex-wrap justify-center gap-2.5"
+                <div
+                  className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
+                  style={{ perspective: 1200 }}
                 >
-                  {visibleGames.map((game, index) => {
+                  {displayedScoreboardGames.map((game, index) => {
                     if (!game) return null;
                     const gIsLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
@@ -302,14 +389,14 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     const gStatusLabel = game.status?.detailedState || "Status unavailable";
 
                     return (
-                      <React.Fragment key={game.gamePk}>
-                        {(index === 0 || getGameSection(visibleGames[index - 1]) !== getGameSection(game)) && (
-                          <div className="basis-full mt-1 border-b border-slate-700/70 pb-1 text-left text-[10px] font-black uppercase tracking-[0.18em] text-slate-400" role="heading" aria-level={4}>
-                            {sectionLabel[getGameSection(game)]}
-                          </div>
-                        )}
-                        <div
+                      <div key={`scoreboard-slot-${index}`} className="relative min-w-0" data-scoreboard-slot>
+                        <AnimatePresence mode="wait" initial={false}>
+                        <motion.div
                         key={game.gamePk}
+                        initial={{ opacity: 0, rotateY: prefersReducedMotion ? 0 : -90 }}
+                        animate={{ opacity: 1, rotateY: 0 }}
+                        exit={{ opacity: 0, rotateY: prefersReducedMotion ? 0 : 90 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.45, ease: "easeInOut" }}
                         role="button"
                         tabIndex={0}
                         aria-label={`Open ${game.teams?.away?.team?.name} at ${game.teams?.home?.team?.name} in Game Feed`}
@@ -320,7 +407,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             onSelectGame?.(game.gamePk);
                           }
                         }}
-                        className="w-[320px] max-w-full min-h-[168px] flex-none cursor-pointer rounded-xl p-3 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
+                        className="w-full min-w-0 min-h-[168px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -349,11 +436,11 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         </div>
 
                         {/* Teams, projected starters, and centered first-pitch time */}
-                        <div className="relative mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                          <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-2 text-center">
+                        <div className="relative mt-2 grid grid-cols-[minmax(0,1fr)_58px_minmax(0,1fr)] items-stretch gap-1.5">
+                          <div className="min-w-0 rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
                             <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.away?.team?.abbreviation}</div>
-                            <div className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Projected: {game.teams?.away?.probablePitcher?.fullName || "TBD"}</div>
+                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.away?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "away") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
                               <div className={`mt-1 font-mono font-black text-lg ${game.teams?.away?.isWinner ? "text-amber-400" : "text-white"}`}>
                                 {game.teams?.away?.score}
@@ -361,7 +448,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             ) : null}
                           </div>
 
-                          <div className="flex min-w-[74px] flex-col items-center justify-center text-center">
+                          <div className="flex min-w-0 flex-col items-center justify-center text-center">
                             {gIsLive || gIsFinal ? (
                               <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
                             ) : gIsUpcoming ? (
@@ -376,10 +463,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             )}
                           </div>
 
-                          <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-2 text-center">
+                          <div className="min-w-0 rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
                             <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.home?.team?.abbreviation}</div>
-                            <div className="mt-0.5 truncate text-[10px] font-medium text-slate-400">Projected: {game.teams?.home?.probablePitcher?.fullName || "TBD"}</div>
+                            <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.home?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "home") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
                               <div className={`mt-1 font-mono font-black text-lg ${game.teams?.home?.isWinner ? "text-amber-400" : "text-white"}`}>
                                 {game.teams?.home?.score}
@@ -387,13 +474,13 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             ) : null}
                           </div>
                         </div>
+                        </motion.div>
+                        </AnimatePresence>
                       </div>
-                      </React.Fragment>
                     );
                   })}
-                </motion.div>
-              </AnimatePresence>
-            )}
+                </div>
+              )}
           </div>
         </div>
         )}
@@ -573,9 +660,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
           </div>
         )}
         {panel === "game-feed" && gameFeedOverviewGames.length > 0 && (
-          <section className="mb-3 shrink-0 rounded-xl border border-slate-800 bg-slate-950/80 p-3" aria-label={liveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}>
+          <section className="mb-3 shrink-0 rounded-xl border border-slate-800 bg-slate-950/80 p-3" aria-label={currentLiveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">{liveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}</h3>
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">{currentLiveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}</h3>
               <span className="text-[10px] font-mono font-bold text-slate-500">{gameFeedOverviewGames.length} {gameFeedOverviewGames.length === 1 ? "GAME" : "GAMES"}</span>
             </div>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
@@ -690,7 +777,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             {/* Middle Section: Infield Diamond (3 cols) + Contextual Matchup Cards (9 cols) */}
             <div className="grid grid-cols-12 gap-3 flex-1 overflow-hidden">
               {/* Provider-backed recent notable plays occupy the former runner-only space when available. */}
-              {recentNotablePlays.length > 0 ? (
+              {recentNotablePlays.length > 0 && !isLive ? (
                 <aside className="col-span-3 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col min-h-0 overflow-hidden" aria-label="Recent notable plays">
                   <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-2 shrink-0">
                     <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
@@ -714,9 +801,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   <div className="text-xs font-black uppercase text-slate-300 tracking-wider mb-2 font-mono">Infield Runners</div>
                   <div className="relative w-28 h-28 border border-slate-800 bg-slate-900/60 rounded-xl flex items-center justify-center">
                     <div className="w-20 h-20 border-2 border-slate-700 transform rotate-45" />
-                    <div className={`absolute top-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
-                    <div className={`absolute left-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
-                    <div className={`absolute right-2 w-4 h-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute top-2 flex max-w-[92px] flex-col items-center text-center text-[9px] font-bold ${displayGameFeed?.liveData?.matchup?.postOnSecond ? "text-amber-300" : "text-slate-500"}`}>
+                      <span className={`h-4 w-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                      <span className="mt-1 max-w-[92px] truncate">{displayGameFeed?.liveData?.matchup?.postOnSecond?.fullName || "2B"}</span>
+                    </div>
+                    <div className={`absolute left-0 flex max-w-[92px] -translate-x-1/4 flex-col items-center text-center text-[9px] font-bold ${displayGameFeed?.liveData?.matchup?.postOnThird ? "text-amber-300" : "text-slate-500"}`}>
+                      <span className={`h-4 w-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                      <span className="mt-1 max-w-[92px] truncate">{displayGameFeed?.liveData?.matchup?.postOnThird?.fullName || "3B"}</span>
+                    </div>
+                    <div className={`absolute right-0 flex max-w-[92px] translate-x-1/4 flex-col items-center text-center text-[9px] font-bold ${displayGameFeed?.liveData?.matchup?.postOnFirst ? "text-amber-300" : "text-slate-500"}`}>
+                      <span className={`h-4 w-4 transform rotate-45 border ${displayGameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                      <span className="mt-1 max-w-[92px] truncate">{displayGameFeed?.liveData?.matchup?.postOnFirst?.fullName || "1B"}</span>
+                    </div>
                   </div>
                 </div>
               )}

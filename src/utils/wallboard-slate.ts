@@ -21,8 +21,10 @@ export function selectWallboardSlate({
   todayGames: ScheduledGame[];
   now?: Date;
 }): ScheduledGame[] {
-  if (todayGames.some((game) => hasStarted(game, now))) return todayGames;
-
   const overnightCarryover = previousGames.filter(isLiveOrFinal);
-  return [...overnightCarryover, ...todayGames];
+  const byGamePk = new Map<number, ScheduledGame>();
+  for (const game of [...overnightCarryover, ...todayGames]) {
+    byGamePk.set(game.gamePk, game);
+  }
+  return Array.from(byGamePk.values());
 }

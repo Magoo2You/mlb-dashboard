@@ -58,14 +58,14 @@ function runWallboardSlateChecks(): void {
   const todayLater = game(4, '2026-09-10T21:10:00-04:00', 'Preview');
 
   assert.deepEqual(
-    selectWallboardSlate({ previousGames: [previousFinal, overnightLive], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T10:00:00-04:00') }).map(({ gamePk }) => gamePk),
+    selectWallboardSlate({ previousGames: [previousFinal, overnightLive, previousFinal], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T10:00:00-04:00') }).map(({ gamePk }) => gamePk),
     [1, 2, 3, 4],
     'before the first local-day start, retain yesterday final/carryover games and today schedule',
   );
   assert.deepEqual(
-    selectWallboardSlate({ previousGames: [previousFinal, overnightLive], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T19:00:00-04:00') }).map(({ gamePk }) => gamePk),
-    [3, 4],
-    'after the first local-day game starts, show only the local-day slate',
+    selectWallboardSlate({ previousGames: [previousFinal, overnightLive, previousFinal], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T19:00:00-04:00') }).map(({ gamePk }) => gamePk),
+    [1, 2, 3, 4],
+    'after the first local-day game starts, retain carryover and today slate without duplicates',
   );
 }
 
@@ -125,28 +125,43 @@ function runScrollOwnershipChecks(): void {
   assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);
   assert.match(passiveScheduleComponent, /const completedGamesInDisplayedSlate = completedGames/);
   assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
-  assert.match(passiveScheduleComponent, /w-\[320px\][\s\S]*min-h-\[168px\]/);
+  assert.match(passiveScheduleComponent, /scoreboardSlotCount = Math\.min\(scoreboardPageSize, scoreboardGames\.length\)/);
+  assert.match(passiveScheduleComponent, /displayedScoreboardGames = scoreboardCardSlots/);
+  assert.match(passiveScheduleComponent, /rotateY/);
+  assert.match(passiveScheduleComponent, /min-h-\[168px\]/);
+  assert.match(passiveScheduleComponent, /grid-cols-1 gap-2\.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5/);
   assert.match(passiveScheduleComponent, /width=\{40\}[\s\S]*h-10 w-10/);
-  assert.match(passiveScheduleComponent, /Projected: \{game\.teams\?\.away\?\.probablePitcher\?\.fullName \|\| "TBD"\}/);
+  assert.match(passiveScheduleComponent, /completedPitcherLabel\(game, "away"\)/);
+  assert.match(passiveScheduleComponent, /completedPitcherLabel\(game, "home"\)/);
+  assert.match(passiveScheduleComponent, /W: \$\{game\.decisions\.winner\.fullName\}/);
+  assert.match(passiveScheduleComponent, /L: \$\{game\.decisions\.loser\.fullName\}/);
+  assert.match(passiveScheduleComponent, /TEAM_ACCENT_COLORS/);
+  assert.match(passiveScheduleComponent, /teamPanelStyle\(game\.teams\?\.away\?\.team\?\.abbreviation\)/);
   assert.match(passiveScheduleComponent, /\["Scheduled", "Pre-Game"\]\.includes/);
   assert.match(passiveScheduleComponent, /gStatusLabel/);
   assert.match(passiveScheduleComponent, /new Date\(game\.gameDate\)\.toLocaleTimeString/);
-  assert.match(passiveScheduleComponent, /flex flex-wrap justify-center/);
+  assert.match(passiveScheduleComponent, /grid-cols-1 gap-2\.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5/);
   assert.match(passiveScheduleComponent, /flex-1 min-h-0 flex flex-col gap-3 overflow-hidden/);
   assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);
   assert.match(passiveScreen, /setLoadingGame\(true\);\s*setGameFeed\(null\);/);
-  assert.match(passiveScheduleComponent, /showLearningCard = panel === "scoreboard"/);
-  assert.match(passiveScheduleComponent, /const gameFeedOverviewGames = liveGames\.length > 0 \? \[\.\.\.liveGames, \.\.\.completedGamesInDisplayedSlate\] : completedGamesInDisplayedSlate/);
+  assert.match(passiveScheduleComponent, /showLearningCard = panel === "scoreboard" && scoreboardGames\.length <= 1/);
+  assert.match(passiveScheduleComponent, /const currentLiveGames = sortedGames\.filter/);
+  assert.match(passiveScheduleComponent, /const gameFeedOverviewGames = currentLiveGames\.length > 0 \? \[\.\.\.currentLiveGames, \.\.\.completedGamesInDisplayedSlate\] : completedGamesInDisplayedSlate/);
+  assert.match(passiveScheduleComponent, /postOnFirst\?\.fullName/);
+  assert.match(passiveScheduleComponent, /postOnSecond\?\.fullName/);
+  assert.match(passiveScheduleComponent, /postOnThird\?\.fullName/);
   assert.match(passiveScheduleComponent, /role="button"[\s\S]*aria-label=\{`Open/);
   assert.match(scheduleGrid, /Provider play-by-play unavailable for this game/);
   assert.doesNotMatch(scheduleGrid, /Hard-hit drive down right-field line|Key pitching performance seals victory|Starting lineups announced/);
-  assert.match(passiveScreen, /Game Feed rotates active games first, then completed games/);
-  assert.match(passiveScreen, /return isLive \|\| isFinal/);
+  assert.match(passiveScreen, /Game Feed rotates current-day active games first, then current-day completed/);
+  assert.match(passiveScreen, /!hasCurrentLiveGame \|\| game\.officialDate === localToday/);
+  assert.match(passiveScreen, /!hasCurrentLiveGame \|\| game\.officialDate === todayStr/);
+  assert.match(passiveScreen, /return \(isLive \|\| isFinal\) && \(!hasCurrentLiveGame \|\| game\.officialDate === localToday\)/);
   assert.match(passiveScreen, /eligibleGames\.length === 0/);
   assert.match(passiveScreen, /activeSlideIndex !== 1/);
   assert.match(passiveScreen, /!eligibleGames\.some\(\(game\) => game\.gamePk === selectedGamePk\)/);
   assert.match(passiveScreen, /feedEligibleGames\.some\(\(g\) => g\.gamePk === prevPk\)/);
-  assert.match(passiveScheduleComponent, /panel === "game-feed"[\s\S]*isFeedEligibleGame/);
+  assert.match(passiveScheduleComponent, /panel === "game-feed"[\s\S]*gameFeedOverviewGames\.find/);
   assert.match(passiveScreen, /setSelectedGamePk\(eligibleGames\[gameFeedGameIndexRef\.current\]/);
   assert.doesNotMatch(passiveScreen, /GAME_STEP_SECONDS|scheduleGamesRef/);
   assert.match(passiveScheduleComponent, /Recent notable plays/);
