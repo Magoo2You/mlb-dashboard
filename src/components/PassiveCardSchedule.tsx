@@ -474,6 +474,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                                 </div>
                               </>
                             ) : gIsFinal ? (
+                              <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
+                            ) : gIsUpcoming ? (
                               <>
                                 <Clock className="h-4 w-4 text-blue-400" aria-hidden="true" />
                                 <span className="mt-0.5 whitespace-nowrap text-sm font-black text-blue-300">
