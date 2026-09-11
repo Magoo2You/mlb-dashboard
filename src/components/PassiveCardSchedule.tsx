@@ -419,7 +419,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     const gameEditorialItem = gameEditorial[game.gamePk]?.[gIsFinal ? "recap" : "preview"];
                     const showOfficialEditorial = Boolean(gameEditorialItem) && (!gameHotPerformer || editorialRotationTick % 2 === 0);
                     const displayedEditorial = showOfficialEditorial ? gameEditorialItem : undefined;
-                    const lowerCardText = displayedEditorial?.blurb || (gameHotPerformer ? `${gameHotPerformer.name} — ${gameHotPerformer.hotReason || gameHotPerformer.breakoutNotes || "hot performer"}` : gameLore?.fact) || "Editorial content unavailable";
+                    const editorialDetails = displayedEditorial?.details || [];
+                    const editorialDetail = editorialDetails.length > 0 ? editorialDetails[Math.floor(editorialRotationTick / 2) % editorialDetails.length] : displayedEditorial?.blurb;
+                    const lowerCardText = editorialDetail || (gameHotPerformer ? `${gameHotPerformer.name} — ${gameHotPerformer.hotReason || gameHotPerformer.breakoutNotes || "hot performer"}` : gameLore?.fact) || "Editorial content unavailable";
                     const lowerCardLabel = displayedEditorial?.type === "recap" ? "Recap:" : "Pregame:";
 
                     return (

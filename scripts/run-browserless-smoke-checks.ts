@@ -197,7 +197,9 @@ function runScrollOwnershipChecks(): void {
   assert.match(serverSource, /app\.get\("\/api\/game\/:gamePk\/editorial"/);
   assert.match(serverSource, /editorialArticle\(content\.editorial\?\.recap/);
   assert.match(serverSource, /previewStory/);
-  assert.match(serverSource, /previewContent\?\.parts\?\.map/);
+  assert.match(passiveScheduleComponent, /editorialDetails\[Math\.floor\(editorialRotationTick \/ 2\)/);
+  assert.match(serverSource, /previewParts/);
+  assert.match(serverSource, /\.slice\(0, 3\)/);
   assert.match(serverSource, /normalizeEditorialText/);
   assert.match(serverSource, /publisher/);
   assert.match(serverSource, /parseNewsFeed\(mlbXml, "MLB\.com"/);

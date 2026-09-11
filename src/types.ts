@@ -514,7 +514,7 @@ export interface TickerItem {
 
 export interface MLBGameEditorial {
   gamePk: number;
-  preview?: { headline: string; blurb: string; url: string; provider: "MLB"; type: "preview" };
+  preview?: { headline: string; blurb: string; details?: string[]; url: string; provider: "MLB"; type: "preview" };
   recap?: { headline: string; blurb: string; url: string; provider: "MLB"; type: "recap" };
 }
 

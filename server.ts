@@ -216,7 +216,7 @@ function editorialArticle(value: any, type: "preview" | "recap") {
   const blurb = normalizeEditorialText(value?.blurb || value?.summary || value?.description, 220);
   const url = typeof value?.url === "string" && /^https:\/\//.test(value.url) ? value.url : undefined;
   if (!headline || !blurb || !url) return undefined;
-  return { headline, blurb, url, provider: "MLB" as const, type };
+  return { headline, blurb, details: [] as string[], url, provider: "MLB" as const, type };
 }
 
 async function fetchGameEditorial(gamePk: string) {
@@ -231,13 +231,21 @@ async function fetchGameEditorial(gamePk: string) {
   if (typeof previewRef === "string" && /^https:\/\/dapi(?:\.cms)?\.mlbinfra\.com\//.test(previewRef)) {
     const previewContent = await fetchMLB(previewRef);
     const previewUrl = typeof previewContent?.selfUrl === "string" ? previewContent.selfUrl : previewRef;
-    const previewDescription = previewContent?.summary || previewContent?.fields?.summary || previewContent?.parts?.map((part: any) => part?.fields?.accessibilityText || part?.fields?.blurb || part?.contextualFields?.description).find((text: unknown) => normalizeEditorialText(text));
+    const previewParts = Array.isArray(previewContent?.parts) ? previewContent.parts
+      .map((part: any) => normalizeEditorialText(part?.fields?.accessibilityText))
+      .filter((text: string | undefined): text is string => Boolean(text))
+      .filter((text: string, index: number, all: string[]) => all.indexOf(text) === index)
+      .slice(0, 3) : [];
+    const previewDescription = normalizeEditorialText(previewContent?.summary || previewContent?.fields?.summary) || previewParts[0];
     const preview = editorialArticle({
       headline: previewContent?.title,
       blurb: previewDescription,
       url: previewUrl,
     }, "preview");
-    if (preview) result.preview = preview;
+    if (preview) {
+      preview.details = previewParts.length > 0 ? previewParts : [preview.blurb];
+      result.preview = preview;
+    }
   }
   return result;
 }
