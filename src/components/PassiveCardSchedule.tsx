@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { ScheduledGame, DetailedGameFeed, MLBNewsArticle } from "../types";
 import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Sparkles, Award, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -33,6 +33,7 @@ interface PassiveCardScheduleProps {
   hotData?: any;
   loadingNews?: boolean;
   loadingHot?: boolean;
+  isVisible?: boolean;
 }
 
 export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
@@ -49,12 +50,15 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   hotData,
   loadingNews = false,
   loadingHot = false,
+  isVisible = true,
 }) => {
   // Lower box active tab: 'news' | 'hot' | 'lore'
   const [lowerTab, setLowerTab] = useState<'news' | 'hot' | 'lore'>('news');
   const [newsPageIndex, setNewsPageIndex] = useState<number>(0);
   const [hotPageIndex, setHotPageIndex] = useState<number>(0);
   const [lorePageIndex, setLorePageIndex] = useState<number>(0);
+  const lorePageIndexRef = useRef(0);
+  const loreVisibilityRef = useRef({ isVisible, lowerTab });
   const [loreRound, setLoreRound] = useState<number>(0);
   const [loreBoundaryId, setLoreBoundaryId] = useState<string | undefined>();
 
@@ -102,6 +106,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     return () => clearInterval(interval);
   }, [hotHittersList.length]);
 
+  useLayoutEffect(() => {
+    loreVisibilityRef.current = { isVisible, lowerTab };
+  }, [isVisible, lowerTab]);
+
   const biographyLore: LoreItem[] = useMemo(
     () => HISTORICAL_PLAYER_PROFILES.filter(hasUsableBiographyEvidence).map((profile) => {
           const biographyEvidence = profile.biographyEvidence[0];
@@ -123,26 +131,35 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     ...BASEBALL_LORE_ITEMS.filter((item) => item.verificationStatus === "verified"),
     ...biographyLore,
   ], [biographyLore]);
+  const loreSeed = 20260909;
   const loreSequence = useMemo(
-    () => createLoreSequence(verifiedLore, 20260909 + loreRound, loreBoundaryId),
-    [loreBoundaryId, loreRound, verifiedLore]
+    () => createLoreSequence(verifiedLore, loreSeed + loreRound, loreBoundaryId),
+    [loreBoundaryId, loreRound, loreSeed, verifiedLore]
   );
 
   // Rotate verified lore as a shuffled pool: every item is covered before a
   // seeded reshuffle, and the boundary item cannot repeat immediately.
   useEffect(() => {
-    if (loreSequence.length <= 3) return;
+    if (!isVisible || lowerTab !== 'lore' || loreSequence.length <= 3) return;
     const interval = setInterval(() => {
-      setLorePageIndex((previous) => {
-        const next = previous + 3;
-        if (next < loreSequence.length) return next;
-        setLoreBoundaryId(loreSequence[loreSequence.length - 1]?.id);
-        setLoreRound((round) => round + 1);
-        return 0;
-      });
+      if (!loreVisibilityRef.current.isVisible || loreVisibilityRef.current.lowerTab !== 'lore') return;
+      const next = lorePageIndexRef.current + 3;
+      if (next < loreSequence.length) {
+        lorePageIndexRef.current = next;
+        setLorePageIndex(next);
+        return;
+      }
+      setLoreBoundaryId(loreSequence[loreSequence.length - 1]?.id);
+      setLoreRound((round) => round + 1);
+      lorePageIndexRef.current = 0;
+      setLorePageIndex(0);
     }, 9200);
     return () => clearInterval(interval);
-  }, [loreSequence]);
+  }, [isVisible, lowerTab, loreSequence]);
+
+  useEffect(() => {
+    lorePageIndexRef.current = lorePageIndex;
+  }, [lorePageIndex]);
 
   const currentNewsSlice = newsArticles.slice(newsPageIndex * 3, newsPageIndex * 3 + 3);
   const currentHotSlice = hotHittersList.slice(hotPageIndex * 3, hotPageIndex * 3 + 3);

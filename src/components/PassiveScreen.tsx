@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   fetchSchedule,
@@ -81,7 +81,19 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
   // Ref to hold current games list for interval access without stale closures
   const scheduleGamesRef = useRef<ScheduledGame[]>([]);
+  const scoreboardSlideRef = useRef<HTMLDivElement>(null);
   scheduleGamesRef.current = scheduleGames;
+
+  useLayoutEffect(() => {
+    const scoreboardSlide = scoreboardSlideRef.current;
+    if (!scoreboardSlide) return;
+    scoreboardSlide.inert = activeSlideIndex !== 0;
+    if (activeSlideIndex === 0) return;
+    const focusedElement = document.activeElement;
+    if (focusedElement instanceof HTMLElement && scoreboardSlide.contains(focusedElement)) {
+      focusedElement.blur();
+    }
+  }, [activeSlideIndex]);
 
   // Auto-Rotation logic across games & guaranteed transition to Division Standings
   useEffect(() => {
@@ -437,14 +449,16 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 relative overflow-hidden bg-slate-950">
         <AnimatePresence mode="wait">
-          {activeSlideIndex === 0 && (
+          {(
             <motion.div
               key="slide-0"
               initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: activeSlideIndex === 0 ? 1 : 0, scale: activeSlideIndex === 0 ? 1 : 1.01 }}
               exit={{ opacity: 0, scale: 1.01 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
-              className="w-full h-full absolute inset-0"
+              ref={scoreboardSlideRef}
+              aria-hidden={activeSlideIndex !== 0}
+              className={`w-full h-full absolute inset-0 ${activeSlideIndex === 0 ? "z-10" : "pointer-events-none"}`}
             >
               <PassiveCardSchedule
                     games={scheduleGames}
@@ -460,7 +474,8 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                 hotData={hotData}
                 loadingNews={loadingNews}
                 loadingHot={loadingHot}
-              />
+                isVisible={activeSlideIndex === 0}
+                />
             </motion.div>
           )}
 
