@@ -452,8 +452,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
                         {/* Teams, projected starters, and centered first-pitch time */}
                         <div className="relative mt-2 grid grid-cols-[minmax(0,1fr)_58px_minmax(0,1fr)] items-stretch gap-1.5">
-                          <div className="min-w-0 rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
-                            <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
+                          <div className={`min-w-0 rounded-lg border text-center ${gIsLive ? "h-[150px] px-2 py-1" : "px-2.5 py-2"}`} style={teamPanelStyle(game.teams?.away?.team?.abbreviation)}>
+                            <img src={game.teams?.away?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className={`mx-auto object-contain ${gIsLive ? "h-8 w-8" : "h-10 w-10"}`} />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.away?.team?.abbreviation}</div>
                             <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.away?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "away") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
@@ -485,8 +485,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             )}
                           </div>
 
-                          <div className="min-w-0 rounded-lg border px-2.5 py-2 text-center" style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
-                            <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className="mx-auto h-10 w-10 object-contain" />
+                          <div className={`min-w-0 rounded-lg border text-center ${gIsLive ? "h-[150px] px-2 py-1" : "px-2.5 py-2"}`} style={teamPanelStyle(game.teams?.home?.team?.abbreviation)}>
+                            <img src={game.teams?.home?.team?.logoUrl} alt="" width={40} height={40} loading="lazy" decoding="async" className={`mx-auto object-contain ${gIsLive ? "h-8 w-8" : "h-10 w-10"}`} />
                             <div className="mt-1 truncate font-bold text-sm text-white">{game.teams?.home?.team?.abbreviation}</div>
                             <div className="mt-0.5 min-h-[30px] line-clamp-2 break-words text-[11px] font-semibold leading-tight text-slate-200">{gIsUpcoming ? `Projected: ${game.teams?.home?.probablePitcher?.fullName || "TBD"}` : gIsFinal ? (completedPitcherLabel(game, "home") || "Final pitcher unavailable") : gIsLive ? "Live: see Game Feed" : "Pitcher data unavailable"}</div>
                             {gIsLive || gIsFinal ? (
@@ -504,7 +504,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                               <span className={`absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border ${liveData?.matchup?.postOnSecond ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
                               <span className={`absolute bottom-0 left-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnThird ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
                               <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnFirst ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
-                              <span className="absolute bottom-0 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border border-slate-500 bg-slate-700" />
                               </div>
                             </div>
                             <div className="min-w-0 truncate text-right text-slate-200"><span className="font-black text-amber-300">H:</span> {liveBatterName || "Unavailable"}</div>
