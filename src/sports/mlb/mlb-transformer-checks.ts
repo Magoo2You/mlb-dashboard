@@ -7,7 +7,7 @@ export function runMlbTransformerChecks(): void {
   assert.equal(schedule.gamePk, 745678);
   assert.equal(schedule.teams.away.score, 2, 'schedule score falls back to linescore runs');
   assert.equal(schedule.teams.home.score, 3);
-  assert.deepEqual(schedule.playByPlay, [{ id: 'b7f', text: 'Aaron Judge doubles (7) on a line drive to left fielder, scoring one run.', inning: 'TOP 5', type: 'scoring' }]);
+  assert.equal(schedule.playByPlay, undefined, 'schedule responses do not synthesize recaps; detail feeds own real play data');
   assert.deepEqual(schedule.linescore?.teams, { away: { runs: 2, hits: 5, errors: 0 }, home: { runs: 3, hits: 4, errors: 1 } });
 
   const live = transformGameLiveFeed(liveFeedFixture);

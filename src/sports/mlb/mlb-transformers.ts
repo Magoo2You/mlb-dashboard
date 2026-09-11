@@ -5,45 +5,30 @@ export function buildStarterStats(p: any) {
 
   const pitchingObj = p.stats?.pitching || (Array.isArray(p.stats) ? (p.stats[0]?.splits?.[0]?.stat || p.stats[0]?.stats) : {}) || {};
 
-  const era = p.era || pitchingObj.era || (p.id % 2 === 0 ? "3.24" : "3.75");
-  const wins = p.wins ?? pitchingObj.wins ?? Math.floor((p.id % 7) + 5);
-  const losses = p.losses ?? pitchingObj.losses ?? Math.floor((p.id % 5) + 3);
-  const strikeOuts = p.strikeOuts ?? pitchingObj.strikeOuts ?? pitchingObj.strikeouts ?? (wins * 12 + 28);
-  const whip = p.whip ?? pitchingObj.whip ?? (Number(era) < 3.5 ? "1.12" : "1.24");
-  const ip = p.inningsPitched ?? pitchingObj.inningsPitched ?? `${wins * 11 + 32}.1`;
+  const era = p.era || pitchingObj.era;
+  const wins = p.wins ?? pitchingObj.wins;
+  const losses = p.losses ?? pitchingObj.losses;
+  const strikeOuts = p.strikeOuts ?? pitchingObj.strikeOuts ?? pitchingObj.strikeouts;
+  const whip = p.whip ?? pitchingObj.whip;
+  const ip = p.inningsPitched ?? pitchingObj.inningsPitched;
+  const ytdText = era !== undefined && wins !== undefined && losses !== undefined && strikeOuts !== undefined
+    ? `${era} ERA • ${wins}-${losses} (${strikeOuts}K)`
+    : undefined;
 
-  const ytdText = `${era} ERA • ${wins}-${losses} (${strikeOuts}K)`;
-
-  let trendingText = "";
-  if (p.stats && Array.isArray(p.stats) && p.stats[1]?.splits?.[0]?.stat) {
-    const recentStat = p.stats[1].splits[0].stat;
-    trendingText = `L3: ${recentStat.era || era} ERA • ${recentStat.strikeOuts || 18}K`;
-  } else {
-    const eraNum = parseFloat(era) || 3.50;
-    if (eraNum <= 3.20) {
-      const recentEra = Math.max(1.45, (eraNum * 0.72)).toFixed(2);
-      const recentK = Math.floor(strikeOuts / 4) + 5;
-      trendingText = `L3: ${recentEra} ERA • ${recentK}K`;
-    } else if (eraNum <= 4.10) {
-      const recentEra = Math.max(2.10, (eraNum * 0.85)).toFixed(2);
-      const recentK = Math.floor(strikeOuts / 5) + 3;
-      trendingText = `L3: ${recentEra} ERA • ${recentK}K`;
-    } else {
-      const recentEra = (eraNum * 0.90).toFixed(2);
-      const recentK = Math.floor(strikeOuts / 6) + 2;
-      trendingText = `L3: ${recentEra} ERA • ${recentK}K`;
-    }
-  }
+  const recentStat = p.stats && Array.isArray(p.stats) ? p.stats[1]?.splits?.[0]?.stat : undefined;
+  const trendingText = recentStat?.era && recentStat?.strikeOuts
+    ? `L3: ${recentStat.era} ERA • ${recentStat.strikeOuts}K`
+    : undefined;
 
   return {
     id: p.id,
     fullName: p.fullName,
-    era: String(era),
-    wins: Number(wins),
-    losses: Number(losses),
-    strikeOuts: Number(strikeOuts),
-    whip: String(whip),
-    inningsPitched: String(ip),
+    era: era !== undefined ? String(era) : undefined,
+    wins: wins !== undefined ? Number(wins) : undefined,
+    losses: losses !== undefined ? Number(losses) : undefined,
+    strikeOuts: strikeOuts !== undefined ? Number(strikeOuts) : undefined,
+    whip: whip !== undefined ? String(whip) : undefined,
+    inningsPitched: ip !== undefined ? String(ip) : undefined,
     ytdText,
     trendingText,
     headshotUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${p.id}/headshot/silo/current`,
@@ -74,7 +59,7 @@ export function transformScheduleGame(game: any) {
           shortName: awayTeam.team.shortName || awayTeam.team.name,
           logoUrl: `https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg`,
         },
-        score: awayTeam.score ?? (game.linescore?.teams?.away?.runs ?? 0),
+        score: awayTeam.score ?? game.linescore?.teams?.away?.runs,
         leagueRecord: awayTeam.leagueRecord
           ? {
               wins: awayTeam.leagueRecord.wins,
@@ -94,7 +79,7 @@ export function transformScheduleGame(game: any) {
           shortName: homeTeam.team.shortName || homeTeam.team.name,
           logoUrl: `https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg`,
         },
-        score: homeTeam.score ?? (game.linescore?.teams?.home?.runs ?? 0),
+        score: homeTeam.score ?? game.linescore?.teams?.home?.runs,
         leagueRecord: homeTeam.leagueRecord
           ? {
               wins: homeTeam.leagueRecord.wins,
@@ -138,55 +123,6 @@ export function transformScheduleGame(game: any) {
     decisions: game.decisions,
     venue: game.venue,
     broadcasts: game.broadcasts?.map((b: any) => b.name) || [],
-    playByPlay: (() => {
-      if (game.scoringPlays && Array.isArray(game.scoringPlays) && game.scoringPlays.length > 0) {
-        return game.scoringPlays.map((sp: any, idx: number) => ({
-          id: sp.playId || `sp-${idx}`,
-          text: sp.result?.description || sp.result?.event || "Scoring play",
-          inning: sp.about ? `${sp.about.halfInning === "bottom" ? "BOT" : "TOP"} ${sp.about.inning}` : undefined,
-          type: "scoring",
-        }));
-      }
-      if (game.plays && Array.isArray(game.plays) && game.plays.length > 0) {
-        return game.plays.slice(-6).map((p: any, idx: number) => ({
-          id: p.playId || `play-${idx}`,
-          text: p.result?.description || p.result?.event || "Play update",
-          inning: p.about ? `${p.about.halfInning === "bottom" ? "BOT" : "TOP"} ${p.about.inning}` : undefined,
-          type: "play",
-        }));
-      }
-      const awayName = awayTeam.team.name || "Away";
-      const homeName = homeTeam.team.name || "Home";
-      const isLive = game.status.abstractGameState === "Live" || game.status.detailedState === "In Progress";
-      const isFinal = game.status.abstractGameState === "Final" || game.status.detailedState === "Final";
-
-      if (isLive) {
-        const inn = game.linescore?.currentInning || 7;
-        const state = game.linescore?.isTopInning ? "TOP" : "BOT";
-        return [
-          { id: "1", text: `${state} ${inn}: ${homeName} pitcher in 2-1 count with runner on 1st.`, inning: `${state} ${inn}` },
-          { id: "2", text: `Scoring Play: ${awayName} RBI single into right-center field!`, inning: `${state} ${inn}` },
-          { id: "3", text: `${state} ${inn}: Strikeout looking on 98 MPH fastball at the knees.`, inning: `${state} ${inn}` },
-          { id: "4", text: `Inning Summary: 1 Run, 2 Hits, 0 Errors, 1 LOB.`, inning: `${state} ${inn}` },
-        ];
-      } else if (isFinal) {
-        const awayR = awayTeam.score ?? 0;
-        const homeR = homeTeam.score ?? 0;
-        return [
-          { id: "f1", text: `FINAL: ${awayR > homeR ? awayName : homeName} wins ${Math.max(awayR, homeR)}-${Math.min(awayR, homeR)}.`, inning: "FINAL" },
-          { id: "f2", text: `Key Play: Go-ahead 2-run double in late innings seals victory.`, inning: "FINAL" },
-          { id: "f3", text: `Pitching: Winning pitcher threw 6.1 scoreless innings with 8 SOs.`, inning: "FINAL" },
-        ];
-      } else {
-        const awayP = awayTeam.probablePitcher?.fullName || "TBD";
-        const homeP = homeTeam.probablePitcher?.fullName || "TBD";
-        return [
-          { id: "p1", text: `PREGAME: ${awayName} @ ${homeName} — Pitching Matchup: ${awayP} vs ${homeP}.`, inning: "UPCOMING" },
-          { id: "p2", text: `Starting Lineups and batting orders submitted to umpires.`, inning: "PREGAME" },
-          { id: "p3", text: `Venue: ${game.venue?.name || "Stadium"} — Weather forecast set.`, inning: "INFO" },
-        ];
-      }
-    })(),
   };
 }
 

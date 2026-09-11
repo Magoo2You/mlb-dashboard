@@ -15,6 +15,7 @@ import { PassiveCardStandings } from "./PassiveCardStandings";
 import { Activity, CalendarDays, CircleDot, Clock, Flame, Pause, Play, Radio, Trophy, Tv, Zap } from "lucide-react";
 import { CURRENT_SEASON } from "../utils/season";
 import { formatLocalDate, shiftLocalDate } from "../utils/local-date";
+import { selectWallboardSlate } from "../utils/wallboard-slate";
 
 import type { DashboardMode } from "../domain/dashboard-navigation";
 
@@ -76,17 +77,13 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   }, []);
 
   // Timings (Slowed down by ~15% for smoother viewing)
-  const GAME_STEP_SECONDS = 9.2; // ~9.2 seconds per game step on Scoreboard
   const SLATE_DURATION_SECONDS = 30; // Scoreboard and Game Feed each remain visible long enough to read before advancing
   const STANDINGS_DURATION_SECONDS = 29; // 29 seconds on Division Standings view
 
-  // Ref to hold current games list for interval access without stale closures
-  const scheduleGamesRef = useRef<ScheduledGame[]>([]);
   const scoreboardSlideRef = useRef<HTMLDivElement>(null);
   const standingsSlideRef = useRef<HTMLDivElement>(null);
   const activeSlideIndexRef = useRef(activeSlideIndex);
   const rotationElapsedRef = useRef(0);
-  scheduleGamesRef.current = scheduleGames;
 
   useLayoutEffect(() => {
     const scoreboardSlide = scoreboardSlideRef.current;
@@ -125,24 +122,6 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
     return () => clearInterval(interval);
   }, [isAutoRotationPaused]);
-  // Cycle through games independently while the scoreboard is visible.
-  useEffect(() => {
-    if (isAutoRotationPaused || activeSlideIndex !== 0) return;
-
-    const interval = setInterval(() => {
-      const games = scheduleGamesRef.current;
-      if (games.length === 0) return;
-
-      setSelectedGamePk((currentPk) => {
-        const currentIndex = games.findIndex((game) => game.gamePk === currentPk);
-        const nextIndex = (currentIndex + 1) % games.length;
-        return games[nextIndex]?.gamePk ?? games[0]?.gamePk ?? null;
-      });
-    }, GAME_STEP_SECONDS * 1000);
-
-    return () => clearInterval(interval);
-  }, [isAutoRotationPaused, activeSlideIndex]);
-
   // Initial Data Loader & Poller
   useEffect(() => {
     let isMounted = true;
@@ -152,31 +131,11 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
         const todayStr = formatLocalDate();
         const todayGames = await fetchSchedule(todayStr);
         const previousGames = await fetchSchedule(shiftLocalDate(todayStr, -1));
-        const now = Date.now();
-        const hasStartedToday = todayGames.some((game) => {
-          if (game.status.abstractGameState === "Live" || game.status.detailedState === "In Progress") return true;
-          if (game.status.abstractGameState === "Final" || game.status.detailedState === "Final") return true;
-          const gameTime = new Date(game.gameDate).getTime();
-          return Number.isFinite(gameTime) && gameTime <= now;
+        const gamesForDisplay = selectWallboardSlate({
+          previousGames,
+          todayGames,
+          now: new Date(),
         });
-        const allTodayGamesAreFinal = todayGames.length > 0 && todayGames.every(
-          (game) => game.status.abstractGameState === "Final" || game.status.detailedState === "Final"
-        );
-        let gamesForDisplay = todayGames;
-        if (!hasStartedToday) {
-          // Bridge the overnight window with yesterday's completed scores until
-          // the first game of the local calendar day begins.
-          gamesForDisplay = [...previousGames.filter(
-            (game) => game.status.abstractGameState === "Final" || game.status.detailedState === "Final"
-          ), ...todayGames];
-        } else if (allTodayGamesAreFinal || todayGames.length === 0) {
-          // Once today's slate is complete, move forward to the next available
-          // slate rather than leaving the wallboard on an exhausted day.
-          gamesForDisplay = [];
-          for (let offset = 1; offset <= 7 && gamesForDisplay.length === 0; offset += 1) {
-            gamesForDisplay = await fetchSchedule(shiftLocalDate(todayStr, offset));
-          }
-        }
 
         if (!isMounted) return;
 
@@ -292,6 +251,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
 
     let isMounted = true;
     setLoadingGame(true);
+    setGameFeed(null);
     setGameError(null);
 
     fetchGameDetail(selectedGamePk)
@@ -305,7 +265,7 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
       .catch((e) => {
         console.warn("Failed to fetch game detail:", e);
         if (isMounted) {
-          setGameError("Live game detail is unavailable; showing the last available game state.");
+          setGameError("Selected game detail is unavailable; retrying automatically.");
           setLoadingGame(false);
         }
       });
@@ -328,6 +288,9 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
   }, [selectedGamePk]);
 
   const retryData = () => setRetryNonce((nonce) => nonce + 1);
+
+  const showSchedulePanel = activeSlideIndex < 2;
+  const showStandingsPanel = activeSlideIndex >= 2;
 
   const slideTitles = [
     { label: "1. SCOREBOARD", icon: Activity, color: "text-blue-400" },
@@ -466,15 +429,15 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
             <motion.div
               key="slide-0"
               initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: activeSlideIndex < 2 ? 1 : 0, scale: activeSlideIndex < 2 ? 1 : 1.01 }}
+              animate={{ opacity: showSchedulePanel ? 1 : 0, scale: showSchedulePanel ? 1 : 1.01 }}
               exit={{ opacity: 0, scale: 1.01 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
               ref={scoreboardSlideRef}
               id="wallboard-scoreboard-game-feed-panel"
               role="tabpanel"
               aria-labelledby="wallboard-tab-0 wallboard-tab-1"
-              aria-hidden={activeSlideIndex >= 2}
-              className={`w-full h-full absolute inset-0 ${activeSlideIndex < 2 ? "z-10" : "pointer-events-none"}`}
+              aria-hidden={!showSchedulePanel}
+              className={`w-full h-full absolute inset-0 ${showSchedulePanel ? "z-10" : "pointer-events-none"}`}
             >
               <PassiveCardSchedule
                     games={scheduleGames}
@@ -490,7 +453,8 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
                 hotData={hotData}
                 loadingNews={loadingNews}
                 loadingHot={loadingHot}
-                isVisible={activeSlideIndex < 2}
+                isVisible={activeSlideIndex === 0}
+                isAutoRotationPaused={isAutoRotationPaused}
                 panel={activeSlideIndex === 0 ? "scoreboard" : "game-feed"}
                 />
             </motion.div>
@@ -503,12 +467,12 @@ export const PassiveScreen: React.FC<PassiveScreenProps> = ({ onSelectMode }) =>
               id="wallboard-standings-panel"
               role="tabpanel"
               aria-labelledby="wallboard-tab-2 wallboard-tab-3"
-              aria-hidden={activeSlideIndex < 2}
-              inert={activeSlideIndex < 2}
+              aria-hidden={!showStandingsPanel}
+              inert={!showStandingsPanel}
               tabIndex={-1}
-              animate={{ opacity: activeSlideIndex >= 2 ? 1 : 0, scale: activeSlideIndex >= 2 ? 1 : 1.01 }}
+              animate={{ opacity: showStandingsPanel ? 1 : 0, scale: showStandingsPanel ? 1 : 1.01 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.5, ease: "easeInOut" }}
-              className={`w-full h-full absolute inset-0 ${activeSlideIndex >= 2 ? "z-10" : "pointer-events-none"}`}
+              className={`w-full h-full absolute inset-0 ${showStandingsPanel ? "z-10" : "pointer-events-none"}`}
             >
               <PassiveCardStandings standings={standings} wildCardStandings={wildCardStandings} loading={loadingStandings} error={standingsError} onRetry={retryData} league={activeSlideIndex === 2 ? "American League" : "National League"} />
             </motion.div>

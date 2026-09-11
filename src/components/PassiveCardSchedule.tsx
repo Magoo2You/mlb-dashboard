@@ -4,7 +4,7 @@ import { Clock, Tv, Activity, CheckCircle2, Newspaper, Flame, Zap, Target, Spark
 import { motion, AnimatePresence } from "motion/react";
 import { BASEBALL_LORE_ITEMS, LoreItem } from "@/src/data/baseball-lore-expanded";
 import { HISTORICAL_PLAYER_PROFILES, HistoricalPlayerProfile } from "../data/historical-player-profiles";
-import { createLoreSequence, lorePage } from "@/src/utils/lore-rotation";
+import { createLoreSequence } from "@/src/utils/lore-rotation";
 
 function hasUsableBiographyEvidence(profile: HistoricalPlayerProfile) {
   const evidence = profile.biographyEvidence[0];
@@ -34,6 +34,7 @@ interface PassiveCardScheduleProps {
   loadingNews?: boolean;
   loadingHot?: boolean;
   isVisible?: boolean;
+  isAutoRotationPaused?: boolean;
   panel?: "all" | "scoreboard" | "game-feed";
 }
 
@@ -52,6 +53,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   loadingNews = false,
   loadingHot = false,
   isVisible = true,
+  isAutoRotationPaused = false,
   panel = "all",
 }) => {
   // Lower box active tab: 'news' | 'hot' | 'lore'
@@ -64,49 +66,46 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const [loreRound, setLoreRound] = useState<number>(0);
   const [loreBoundaryId, setLoreBoundaryId] = useState<string | undefined>();
 
-  // Sort games: Live games first, then scheduled, then final
+  // Sort the full slate: live first, then scheduled, then final.
   const sortedGames = [...games].sort((a, b) => {
-    const isALive = a?.status?.abstractGameState === "Live" || a?.status?.detailedState === "In Progress";
-    const isBLive = b?.status?.abstractGameState === "Live" || b?.status?.detailedState === "In Progress";
-    if (isALive && !isBLive) return -1;
-    if (!isALive && isBLive) return 1;
-    return 0;
+    const getGameRank = (game: ScheduledGame) => {
+      const isLive = game?.status?.abstractGameState === "Live" || game?.status?.detailedState === "In Progress";
+      const isFinal = game?.status?.abstractGameState === "Final" || game?.status?.detailedState === "Final";
+      return isLive ? 0 : isFinal ? 2 : 1;
+    };
+    return getGameRank(a) - getGameRank(b);
   });
 
-  // Calculate 4-game page index based on selectedGamePk
-  const selectedIdx = sortedGames.findIndex((g) => g?.gamePk === selectedGamePk);
-  const activeIdx = selectedIdx >= 0 ? selectedIdx : 0;
-  const pageIndex = Math.floor(activeIdx / 4);
-
-  // Games for current page
-  const visibleGames = sortedGames.slice(pageIndex * 4, pageIndex * 4 + 4);
+  // All games remain visible on the centered Scoreboard; selectedGamePk only marks the active game.
+  const visibleGames = sortedGames;
 
   // Auto-switch bottom mode every 11.5 seconds between news, hot hitters, and lore (slowed down by ~15%)
   useEffect(() => {
+    if (isAutoRotationPaused) return;
     const interval = setInterval(() => {
       setLowerTab((prev) => (prev === 'news' ? 'hot' : prev === 'hot' ? 'lore' : 'news'));
     }, 11500);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAutoRotationPaused]);
 
-  // Rotate News pages every 9.2s
+  // Rotate News pages every 9.2s in pairs for wallboard readability.
   useEffect(() => {
-    if (newsArticles.length <= 3) return;
+    if (isAutoRotationPaused || newsArticles.length <= 2) return;
     const interval = setInterval(() => {
-      setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 3));
+      setNewsPageIndex((prev) => (prev + 1) % Math.ceil(newsArticles.length / 2));
     }, 9200);
     return () => clearInterval(interval);
-  }, [newsArticles.length]);
+  }, [isAutoRotationPaused, newsArticles.length]);
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
-  // Rotate Hot Hitters every 9.2s
+  // Rotate Hot Hitters every 9.2s in pairs for wallboard readability.
   useEffect(() => {
-    if (hotHittersList.length <= 3) return;
+    if (isAutoRotationPaused || hotHittersList.length <= 2) return;
     const interval = setInterval(() => {
-      setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 3));
+      setHotPageIndex((prev) => (prev + 1) % Math.ceil(hotHittersList.length / 2));
     }, 9200);
     return () => clearInterval(interval);
-  }, [hotHittersList.length]);
+  }, [isAutoRotationPaused, hotHittersList.length]);
 
   useLayoutEffect(() => {
     loreVisibilityRef.current = { isVisible, lowerTab };
@@ -142,10 +141,10 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   // Rotate verified lore as a shuffled pool: every item is covered before a
   // seeded reshuffle, and the boundary item cannot repeat immediately.
   useEffect(() => {
-    if (!isVisible || lowerTab !== 'lore' || loreSequence.length <= 3) return;
+    if (isAutoRotationPaused || !isVisible || lowerTab !== 'lore' || loreSequence.length <= 2) return;
     const interval = setInterval(() => {
       if (!loreVisibilityRef.current.isVisible || loreVisibilityRef.current.lowerTab !== 'lore') return;
-      const next = lorePageIndexRef.current + 3;
+      const next = lorePageIndexRef.current + 2;
       if (next < loreSequence.length) {
         lorePageIndexRef.current = next;
         setLorePageIndex(next);
@@ -157,15 +156,15 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
       setLorePageIndex(0);
     }, 9200);
     return () => clearInterval(interval);
-  }, [isVisible, lowerTab, loreSequence]);
+  }, [isAutoRotationPaused, isVisible, lowerTab, loreSequence]);
 
   useEffect(() => {
     lorePageIndexRef.current = lorePageIndex;
   }, [lorePageIndex]);
 
-  const currentNewsSlice = newsArticles.slice(newsPageIndex * 3, newsPageIndex * 3 + 3);
-  const currentHotSlice = hotHittersList.slice(hotPageIndex * 3, hotPageIndex * 3 + 3);
-  const currentLoreSlice = lorePage(loreSequence, lorePageIndex);
+  const currentNewsSlice = newsArticles.slice(newsPageIndex * 2, newsPageIndex * 2 + 2);
+  const currentHotSlice = hotHittersList.slice(hotPageIndex * 2, hotPageIndex * 2 + 2);
+  const currentLoreSlice = loreSequence.slice(lorePageIndex, lorePageIndex + 2);
 
   // Selected Game and detailed game Feed properties
   const selectedGame = sortedGames.find((g) => g.gamePk === selectedGamePk) || sortedGames[0];
@@ -196,6 +195,25 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
     !homeProbable.fullName.toLowerCase().includes("tbd")
   );
 
+  const liveGames = sortedGames.filter((game) => game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress");
+  const completedGames = sortedGames.filter((game) => game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final");
+  const completedGamesToday = completedGames.filter((game) => {
+    if (!game.gameDate) return false;
+    return new Date(game.gameDate).toLocaleDateString() === new Date().toLocaleDateString();
+  });
+  const gameFeedOverviewGames = liveGames.length > 0 ? liveGames : completedGamesToday.slice(0, 6);
+  const recentNotablePlays = (gameFeed?.liveData?.plays || [])
+    .filter((play: any) => {
+      const description = typeof play?.description === "string" ? play.description.trim() : "";
+      const eventType = String(play?.eventType || "").toLowerCase();
+      const hasStatcast = play?.statcast?.exitVelocityMph !== undefined || play?.statcast?.hitDistanceFt !== undefined;
+      return Boolean(description) && description !== "Play in progress..." && (
+        play?.isScoringPlay || hasStatcast || ["home_run", "triple", "double", "strikeout"].includes(eventType)
+      );
+    })
+    .slice(0, 5);
+  const showLearningCard = panel === "scoreboard" && visibleGames.length <= 12;
+
   const decisions = gameFeed?.liveData?.decisions || selectedGame?.decisions;
   const winner = decisions?.winner;
   const loser = decisions?.loser;
@@ -204,9 +222,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   return (
     <div className="w-full h-full max-w-[1920px] mx-auto grid grid-cols-12 gap-4 p-4 bg-slate-950 text-slate-100 overflow-hidden font-sans">
       {/* Left 5 Columns: Compact Scoreboard + Expanded News & Hot Hitters */}
-      <div className={`${panel === "game-feed" ? "hidden" : "col-span-5"} flex flex-col justify-between gap-3.5 h-full overflow-hidden`}>
+      <div className={`${panel === "game-feed" ? "hidden" : "col-span-12"} flex flex-col justify-between gap-3.5 h-full overflow-hidden`}>
 
-        {/* Upper Box: Compact Scoreboard & Slate */}
+        {(
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 shadow-xl flex flex-col shrink-0 overflow-hidden relative">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 shrink-0">
             <div className="flex items-center gap-2">
@@ -219,7 +237,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             </div>
             
             <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-              Games {pageIndex * 4 + 1}-{Math.min((pageIndex + 1) * 4, sortedGames.length)} / {sortedGames.length}
+              Games {sortedGames.length} / {sortedGames.length}
             </span>
           </div>
 
@@ -244,16 +262,15 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
               ) : (
                 <AnimatePresence mode="wait">
                 <motion.div
-                  key={pageIndex}
+                  key={selectedGamePk ?? "full-slate"}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="space-y-2.5"
+                  className="flex flex-wrap justify-center gap-2.5"
                 >
                   {visibleGames.map((game) => {
                     if (!game) return null;
-                    const isSelected = game.gamePk === selectedGamePk;
                     const gIsLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
                     const gIsFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
 
@@ -261,11 +278,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                       <div
                         key={game.gamePk}
                         onClick={() => onSelectGame?.(game.gamePk)}
-                        className={`cursor-pointer rounded-xl p-2.5 border transition-all duration-300 ${
-                          isSelected
-                            ? "bg-slate-800/90 border-blue-500 shadow-lg ring-1 ring-blue-500/50"
-                            : "bg-slate-950/80 border-slate-800/80 hover:border-slate-700"
-                        }`}
+                        className="w-[280px] max-w-full flex-none cursor-pointer rounded-xl p-2.5 border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -330,49 +343,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             )}
           </div>
         </div>
+        )}
 
-        {/* Lower Box: EXPANDED BROADER News Headlines & Hot Hitters */}
+        {/* Compact rotating Headlines, Hot Hitters, and Lore card uses surplus Scoreboard space only. */}
+        {showLearningCard && (
         <div className="flex-1 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between overflow-hidden">
-          {/* Header Switcher Tabs */}
+          {/* One combined learning stream; its content type changes automatically rather than using sub-tabs. */}
           <div className="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-2.5 shrink-0">
-            <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-              <button
-                onClick={() => setLowerTab('news')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
-                  lowerTab === 'news'
-                    ? "bg-blue-950 text-blue-300 border border-blue-700 shadow"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Newspaper className="w-3.5 h-3.5 text-blue-400" />
-                <span>HEADLINES</span>
-              </button>
-
-              <button
-                onClick={() => setLowerTab('hot')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
-                  lowerTab === 'hot'
-                    ? "bg-amber-950 text-amber-300 border border-amber-700 shadow"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>HOT HITTERS</span>
-              </button>
-
-              <button
-                onClick={() => setLowerTab('lore')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
-                  lowerTab === 'lore'
-                    ? "bg-purple-950 text-purple-300 border border-purple-700 shadow"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>LORE & CURIOS</span>
-              </button>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <h3 className="text-sm font-black uppercase tracking-wider text-white">Headlines · Hot Hitters · Lore & Curios</h3>
             </div>
-
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">2 per circulation</span>
           </div>
 
           <div className="flex-1 overflow-hidden relative">
@@ -387,8 +369,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   transition={{ duration: 0.3 }}
                   className="h-full flex flex-col min-h-0"
                 >
-                  <div className="grid grid-rows-3 gap-2 h-full min-h-0">
-                    {(currentNewsSlice.length > 0 ? currentNewsSlice : newsArticles.slice(0, 3)).map((art, idx) => (
+                  <div className="grid grid-rows-2 gap-2 h-full min-h-0">
+                    {(currentNewsSlice.length > 0 ? currentNewsSlice : newsArticles.slice(0, 2)).map((art, idx) => (
                       <div
                         key={art.id || idx}
                         className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow-md hover:border-slate-700 transition-all flex flex-col justify-between overflow-hidden min-h-0 h-full"
@@ -419,7 +401,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   transition={{ duration: 0.3 }}
                   className="h-full flex flex-col min-h-0"
                 >
-                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
+                  <div className="grid grid-rows-2 gap-1.5 h-full min-h-0">
                     {hotHittersList.length === 0 && (
                       <div className="flex h-full items-center justify-center text-center text-xs text-slate-500" role="status">No official hot-hitter data is available.</div>
                     )}
@@ -436,14 +418,14 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             )}
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-white truncate leading-tight">{hitter.name}</p>
-                              <p className="text-[10px] text-slate-400 font-mono leading-tight">{hitter.team} • {hitter.position || "DH"}</p>
+                              <p className="text-[10px] text-slate-400 font-mono leading-tight">{hitter.team} • {hitter.position || "Position unavailable"}</p>
                             </div>
                           </div>
 
                           <div className="text-right shrink-0 font-mono">
-                            <span className="text-xs font-black text-amber-400 block leading-tight">{hitter.ops || "1.050"} OPS</span>
+                            <span className="text-xs font-black text-amber-400 block leading-tight">{hitter.ops || "—"} OPS</span>
                             <span className="text-[10px] text-emerald-400 font-bold leading-tight">
-                              {hitter.opsSurge ? (typeof hitter.opsSurge === "number" ? (hitter.opsSurge >= 0 ? `+${hitter.opsSurge.toFixed(3)}` : hitter.opsSurge.toFixed(3)) : hitter.opsSurge) : "+.150"}
+                              {hitter.opsSurge ? (typeof hitter.opsSurge === "number" ? (hitter.opsSurge >= 0 ? `+${hitter.opsSurge.toFixed(3)}` : hitter.opsSurge.toFixed(3)) : hitter.opsSurge) : "Unavailable"}
                             </span>
                           </div>
                         </div>
@@ -469,7 +451,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                   transition={{ duration: 0.3 }}
                   className="h-full flex flex-col min-h-0"
                 >
-                  <div className="grid grid-rows-3 gap-1.5 h-full min-h-0">
+                  <div className="grid grid-rows-2 gap-1.5 h-full min-h-0">
                     {currentLoreSlice.map((item) => (
                       <div key={item.id} className="bg-slate-950 p-2 rounded-xl border border-purple-900/40 flex flex-col justify-between shadow-md overflow-hidden min-h-0 h-full">
                         <div className="flex items-center justify-between gap-2 min-w-0">
@@ -522,16 +504,40 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             </AnimatePresence>
           </div>
         </div>
+        )}
 
       </div>
 
       {/* Right 7 Columns: Featured Live Game Feed, Pitch Tracker & Contextual Matchup / Final Summary Cards */}
-      <div className={`${panel === "scoreboard" ? "hidden" : panel === "game-feed" ? "col-span-12" : "col-span-7"} flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full`}>
+      <div className={`${panel === "scoreboard" ? "hidden" : panel === "game-feed" ? "col-span-12" : "col-span-7"} flex flex-col justify-between bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden h-full`} >
         {gameError && (
           <div className="mb-2 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-200" role="status">
             {gameError}
             <button type="button" onClick={onRetrySchedule} className="ml-3 font-bold underline hover:text-white">Retry</button>
           </div>
+        )}
+        {panel === "game-feed" && gameFeedOverviewGames.length > 0 && (
+          <section className="mb-3 shrink-0 rounded-xl border border-slate-800 bg-slate-950/80 p-3" aria-label={liveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">{liveGames.length > 0 ? "Active games" : "Completed games in displayed slate"}</h3>
+              <span className="text-[10px] font-mono font-bold text-slate-500">{gameFeedOverviewGames.length} {gameFeedOverviewGames.length === 1 ? "GAME" : "GAMES"}</span>
+            </div>
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+              {gameFeedOverviewGames.map((game) => {
+                const isOverviewLive = game.status?.abstractGameState === "Live" || game.status?.detailedState === "In Progress";
+                const isOverviewFinal = game.status?.abstractGameState === "Final" || game.status?.detailedState === "Final";
+                return (
+                  <button type="button" key={game.gamePk} onClick={() => onSelectGame?.(game.gamePk)} className={`rounded-lg border px-2.5 py-2 text-left transition-colors ${game.gamePk === selectedGamePk ? "border-blue-500 bg-blue-950/40" : "border-slate-800 bg-slate-900 hover:border-slate-600"}`}>
+                    <div className={`flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider ${isOverviewLive ? "text-red-400" : "text-slate-400"}`}>
+                      <span>{isOverviewLive ? "LIVE" : isOverviewFinal ? "FINAL" : "GAME"}</span>
+                      <span className="font-mono text-slate-300">{game.teams?.away?.score ?? "-"}-{game.teams?.home?.score ?? "-"}</span>
+                    </div>
+                    <div className="mt-1 truncate text-xs font-bold text-white">{game.teams?.away?.team?.abbreviation} @ {game.teams?.home?.team?.abbreviation}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         )}
         {loadingGame && !gameFeed ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
@@ -539,10 +545,14 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
             <p className="text-sm font-semibold">Loading Live Pitch Tracker & Game Feed...</p>
           </div>
         ) : selectedGame ? (
-          <div className="h-full flex flex-col justify-between space-y-3">
+          <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
             {/* Header Title */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-              <div className="flex items-center gap-3">
+            <div className="relative overflow-hidden flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-between opacity-[0.07]" aria-hidden="true">
+                <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="h-20 w-20 object-contain -ml-4" />
+                <img src={selectedGame.teams?.home?.team?.logoUrl} alt="" className="h-20 w-20 object-contain -mr-4" />
+              </div>
+              <div className="relative flex items-center gap-3">
                 {isLive && <span className="w-3.5 h-3.5 rounded-full bg-red-500 animate-ping shrink-0" />}
                 <div>
                   <h2 className="text-lg font-black text-white flex items-center gap-2">
@@ -551,7 +561,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     {selectedGame.teams?.home?.team?.name || "Home Team"}
                   </h2>
                   <p className="text-xs text-slate-300 font-medium">
-                    {selectedGame.venue?.name || "Stadium"} • Broadcasts: {selectedGame.broadcasts?.[0] || "MLB Network"}
+                    {selectedGame.venue?.name || "Venue unavailable"} • Broadcasts: {selectedGame.broadcasts?.[0] || "Broadcast unavailable"}
                   </p>
                 </div>
               </div>
@@ -564,7 +574,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                 </div>
                 {isLive && (
                   <div className="bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-200 font-bold">
-                    B: {gameFeed?.liveData?.linescore?.balls ?? 0} | S: {gameFeed?.liveData?.linescore?.strikes ?? 0} | O: {gameFeed?.liveData?.linescore?.outs ?? 0}
+                    B: {gameFeed?.liveData?.linescore?.balls ?? "—"} | S: {gameFeed?.liveData?.linescore?.strikes ?? "—"} | O: {gameFeed?.liveData?.linescore?.outs ?? "—"}
                   </div>
                 )}
               </div>
@@ -599,9 +609,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         {i.away?.runs ?? "-"}
                       </td>
                     ))}
-                    <td className="text-amber-400 font-black text-base">{selectedGame.teams?.away?.score ?? 0}</td>
-                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? 0}</td>
-                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame.linescore?.teams?.away?.errors ?? 0}</td>
+                    <td className="text-amber-400 font-black text-base">{selectedGame.teams?.away?.score ?? "—"}</td>
+                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame.linescore?.teams?.away?.hits ?? "—"}</td>
+                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame.linescore?.teams?.away?.errors ?? "—"}</td>
                   </tr>
                   <tr>
                     <td className="text-left py-1.5 font-bold font-sans text-white text-xs sm:text-sm flex items-center gap-2">
@@ -613,9 +623,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                         {i.home?.runs ?? "-"}
                       </td>
                     ))}
-                    <td className="text-amber-400 font-black text-base">{selectedGame.teams?.home?.score ?? 0}</td>
-                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame.linescore?.teams?.home?.hits ?? 0}</td>
-                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame.linescore?.teams?.home?.errors ?? 0}</td>
+                    <td className="text-amber-400 font-black text-base">{selectedGame.teams?.home?.score ?? "—"}</td>
+                    <td className="text-slate-200 font-bold">{gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame.linescore?.teams?.home?.hits ?? "—"}</td>
+                    <td className="text-slate-400">{gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame.linescore?.teams?.home?.errors ?? "—"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -623,32 +633,37 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
             {/* Middle Section: Infield Diamond (3 cols) + Contextual Matchup Cards (9 cols) */}
             <div className="grid grid-cols-12 gap-3 flex-1 overflow-hidden">
-              {/* Field Diamond (3 cols) */}
-              <div className="col-span-3 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col items-center justify-center relative">
-                <div className="text-xs font-black uppercase text-slate-300 tracking-wider mb-2 font-mono">Infield Runners</div>
-                <div className="relative w-28 h-28 border border-slate-800 bg-slate-900/60 rounded-xl flex items-center justify-center">
-                  <div className="w-20 h-20 border-2 border-slate-700 transform rotate-45" />
-
-                  {/* 2B */}
-                  <div
-                    className={`absolute top-2 w-4 h-4 transform rotate-45 border ${
-                      gameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"
-                    }`}
-                  />
-                  {/* 3B */}
-                  <div
-                    className={`absolute left-2 w-4 h-4 transform rotate-45 border ${
-                      gameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"
-                    }`}
-                  />
-                  {/* 1B */}
-                  <div
-                    className={`absolute right-2 w-4 h-4 transform rotate-45 border ${
-                      gameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"
-                    }`}
-                  />
+              {/* Provider-backed recent notable plays occupy the former runner-only space when available. */}
+              {recentNotablePlays.length > 0 ? (
+                <aside className="col-span-3 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col min-h-0 overflow-hidden" aria-label="Recent notable plays">
+                  <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-2 shrink-0">
+                    <img src={selectedGame.teams?.away?.team?.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-200 font-mono">Recent notable plays</span>
+                    <img src={selectedGame.teams?.home?.team?.logoUrl} alt="" className="ml-auto w-5 h-5 object-contain" />
+                  </div>
+                  <ol className="space-y-1.5 min-h-0 text-[10px] font-mono">
+                    {recentNotablePlays.map((play: any) => (
+                      <li key={play.id} className="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-1.5">
+                        <div className="flex items-center justify-between gap-2 text-[9px] font-bold text-slate-400">
+                          <span>{play.halfInning ? `${play.halfInning.toUpperCase()} ${play.inning ?? "—"}` : "PLAY"}</span>
+                          <span className="text-amber-400">{play.awayScore ?? "—"}–{play.homeScore ?? "—"}</span>
+                        </div>
+                        <p className="mt-0.5 line-clamp-2 text-slate-200 leading-tight">{play.description}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </aside>
+              ) : (
+                <div className="col-span-3 bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex flex-col items-center justify-center relative">
+                  <div className="text-xs font-black uppercase text-slate-300 tracking-wider mb-2 font-mono">Infield Runners</div>
+                  <div className="relative w-28 h-28 border border-slate-800 bg-slate-900/60 rounded-xl flex items-center justify-center">
+                    <div className="w-20 h-20 border-2 border-slate-700 transform rotate-45" />
+                    <div className={`absolute top-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnSecond ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute left-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnThird ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                    <div className={`absolute right-2 w-4 h-4 transform rotate-45 border ${gameFeed?.liveData?.matchup?.postOnFirst ? "bg-amber-400 border-amber-300 shadow-md shadow-amber-400/50" : "bg-slate-800 border-slate-600"}`} />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Contextual Cards (9 cols) - SWITCH BASED ON GAME STATUS: LIVE / FINAL / SCHEDULED */}
               <div className="col-span-9 grid grid-cols-2 gap-3">
@@ -668,7 +683,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
                       <div className="flex items-center gap-2.5">
                         <img
-                          src={liveBatter?.headshotUrl || `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${liveBatter?.id || 660271}/headshot/silo/current`}
+                          src={liveBatter?.headshotUrl || "/assets/mlb-logo.svg"}
                           alt=""
                           className="w-11 h-11 rounded-full object-cover bg-slate-900 border border-blue-500/50 shrink-0"
                         />
@@ -705,7 +720,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
                       <div className="flex items-center gap-2.5">
                         <img
-                          src={livePitcher?.headshotUrl || `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_213,q_auto:best/v1/people/${livePitcher?.id || 543037}/headshot/silo/current`}
+                          src={livePitcher?.headshotUrl || "/assets/mlb-logo.svg"}
                           alt=""
                           className="w-11 h-11 rounded-full object-cover bg-slate-900 border border-red-500/50 shrink-0"
                         />
@@ -813,18 +828,18 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-200 font-bold">{selectedGame?.teams?.away?.team?.abbreviation || "Away"} Stats</span>
                               <span className="text-amber-400 font-bold">
-                                {selectedGame?.teams?.away?.score ?? 0} R, {gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame?.linescore?.teams?.away?.hits ?? 0} H, {gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame?.linescore?.teams?.away?.errors ?? 0} E
+                                {selectedGame?.teams?.away?.score ?? "—"} R, {gameFeed?.liveData?.linescore?.teams?.away?.hits ?? selectedGame?.linescore?.teams?.away?.hits ?? "—"} H, {gameFeed?.liveData?.linescore?.teams?.away?.errors ?? selectedGame?.linescore?.teams?.away?.errors ?? "—"} E
                               </span>
                             </div>
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-200 font-bold">{selectedGame?.teams?.home?.team?.abbreviation || "Home"} Stats</span>
                               <span className="text-emerald-400 font-bold">
-                                {selectedGame?.teams?.home?.score ?? 0} R, {gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame?.linescore?.teams?.home?.hits ?? 0} H, {gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame?.linescore?.teams?.home?.errors ?? 0} E
+                                {selectedGame?.teams?.home?.score ?? "—"} R, {gameFeed?.liveData?.linescore?.teams?.home?.hits ?? selectedGame?.linescore?.teams?.home?.hits ?? "—"} H, {gameFeed?.liveData?.linescore?.teams?.home?.errors ?? selectedGame?.linescore?.teams?.home?.errors ?? "—"} E
                               </span>
                             </div>
                             <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800 flex items-center justify-between">
                               <span className="text-slate-300 font-bold">Venue</span>
-                              <span className="text-white font-semibold truncate">{selectedGame?.venue?.name || "Stadium"}</span>
+                              <span className="text-white font-semibold truncate">{selectedGame?.venue?.name || "Venue unavailable"}</span>
                             </div>
                           </>
                         )}
@@ -875,7 +890,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <div className="bg-slate-900/90 border border-slate-800 rounded px-2 py-1 flex items-center justify-between min-w-0 text-slate-200">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider shrink-0">YTD</span>
                             <span className="font-extrabold text-emerald-400 truncate ml-1 text-[10.5px]">
-                              {awayProbable?.ytdText || `${awayProbable?.era || "3.41"} ERA • ${awayProbable?.wins ?? 8}-${awayProbable?.losses ?? 5} (${awayProbable?.strikeOuts ?? 99}K)`}
+                              {awayProbable?.ytdText || "Unavailable"}
                             </span>
                           </div>
                           <div className="bg-amber-950/40 border border-amber-900/50 rounded px-2 py-1 flex items-center justify-between min-w-0 text-amber-300">
@@ -883,7 +898,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                               <TrendingUp className="w-2.5 h-2.5 text-amber-400" /> TREND
                             </span>
                             <span className="font-extrabold text-amber-300 truncate ml-1 text-[10.5px]">
-                              {awayProbable?.trendingText || `L3: ${(parseFloat(awayProbable?.era || "3.41") * 0.78).toFixed(2)} ERA • ${Math.floor((awayProbable?.strikeOuts ?? 90) / 4)}K`}
+                              {awayProbable?.trendingText || "Unavailable"}
                             </span>
                           </div>
                         </div>
@@ -941,7 +956,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           <div className="bg-slate-900/90 border border-slate-800 rounded px-2 py-1 flex items-center justify-between min-w-0 text-slate-200">
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider shrink-0">YTD</span>
                             <span className="font-extrabold text-emerald-400 truncate ml-1 text-[10.5px]">
-                              {homeProbable?.ytdText || `${homeProbable?.era || "3.20"} ERA • ${homeProbable?.wins ?? 7}-${homeProbable?.losses ?? 2} (${homeProbable?.strikeOuts ?? 88}K)`}
+                              {homeProbable?.ytdText || "Unavailable"}
                             </span>
                           </div>
                           <div className="bg-blue-950/40 border border-blue-900/50 rounded px-2 py-1 flex items-center justify-between min-w-0 text-blue-300">
@@ -949,7 +964,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                               <TrendingUp className="w-2.5 h-2.5 text-blue-400" /> TREND
                             </span>
                             <span className="font-extrabold text-blue-300 truncate ml-1 text-[10.5px]">
-                              {homeProbable?.trendingText || `L3: ${(parseFloat(homeProbable?.era || "3.20") * 0.78).toFixed(2)} ERA • ${Math.floor((homeProbable?.strikeOuts ?? 88) / 4)}K`}
+                              {homeProbable?.trendingText || "Unavailable"}
                             </span>
                           </div>
                         </div>

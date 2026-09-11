@@ -14,7 +14,7 @@
 
 1. The embedded Hermes preview constrains the app to a narrow pane. This is a preview-width artifact, not evidence about the intended 1920×1080 wallboard composition.
 2. The isolated Chrome target reached `Todd's MLB Gameday` and the server returned HTTP 200. The desktop capture remained visually white while the live DOM/preview read contained the application shell and content. This is recorded as a capture/compositor limitation until reproduced in a normal browser screenshot; it is not currently classified as an app rendering defect.
-3. The fresh rendered shell exposes the primary wallboard navigation in this order: Scoreboard, Game Feed, AL Standings, NL Standings, Schedule, Statcast, Who's Hot, Sports.
+3. The fresh rendered shell exposes the primary wallboard navigation in this order: Scoreboard, Game Feed, AL Standings, NL Standings, Headlines & Learning, Schedule, Statcast, Who's Hot, Sports.
 4. The observed fallback state was honest: `Official standings are unavailable. Retry to check again.` and `No official standings are available yet.` No synthetic standings were displayed.
 
 ## Baseline hierarchy to preserve

@@ -12,6 +12,8 @@ import { isNhlScheduleResponse, isNormalizedNhlSchedule } from '../src/sports/nh
 import { isNflScoreboardRouteResponse } from '../src/sports/nfl/nfl-route-contract';
 import { isEspnNbaScoreboardRouteResponse } from '../src/sports/nba/espn/espn-route-contract';
 import { formatLocalDate, shiftLocalDate } from '../src/utils/local-date';
+import { selectWallboardSlate } from '../src/utils/wallboard-slate';
+import { ScheduledGame } from '../src/types';
 
 async function withMockFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
@@ -41,6 +43,32 @@ async function runNavigationChecks(): Promise<void> {
   assert.equal(shiftLocalDate('2026-09-09', 1), '2026-09-10');
 }
 
+function runWallboardSlateChecks(): void {
+  const game = (gamePk: number, gameDate: string, state: "Preview" | "Live" | "Final"): ScheduledGame => ({
+    gamePk,
+    gameDate,
+    officialDate: gameDate.slice(0, 10),
+    status: { abstractGameState: state, detailedState: state === "Preview" ? "Scheduled" : state === "Live" ? "In Progress" : "Final", codedGameState: state, statusCode: state },
+    teams: { away: { team: { id: gamePk, name: `Away ${gamePk}`, teamName: `Away ${gamePk}`, abbreviation: "AWY", shortName: "Away", logoUrl: "" }, score: 0 }, home: { team: { id: gamePk + 1, name: `Home ${gamePk}`, teamName: `Home ${gamePk}`, abbreviation: "HOM", shortName: "Home", logoUrl: "" }, score: 0 } },
+    broadcasts: [],
+  });
+  const previousFinal = game(1, '2026-09-09T23:05:00-04:00', 'Final');
+  const overnightLive = game(2, '2026-09-09T23:45:00-04:00', 'Live');
+  const todayScheduled = game(3, '2026-09-10T18:40:00-04:00', 'Preview');
+  const todayLater = game(4, '2026-09-10T21:10:00-04:00', 'Preview');
+
+  assert.deepEqual(
+    selectWallboardSlate({ previousGames: [previousFinal, overnightLive], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T10:00:00-04:00') }).map(({ gamePk }) => gamePk),
+    [1, 2, 3, 4],
+    'before the first local-day start, retain yesterday final/carryover games and today schedule',
+  );
+  assert.deepEqual(
+    selectWallboardSlate({ previousGames: [previousFinal, overnightLive], todayGames: [todayScheduled, todayLater], now: new Date('2026-09-10T19:00:00-04:00') }).map(({ gamePk }) => gamePk),
+    [3, 4],
+    'after the first local-day game starts, show only the local-day slate',
+  );
+}
+
 function runErrorBoundaryChecks(): void {
   assert.deepEqual(AppErrorBoundary.getDerivedStateFromError(), {hasError: true});
   const fallback = ErrorBoundaryFallback({onReset: () => undefined});
@@ -61,6 +89,7 @@ function runScrollOwnershipChecks(): void {
   const whosHotComponent = readSource('src/components/WhosHotView.tsx');
   const standingsComponent = readSource('src/components/StandingsView.tsx');
   const passiveStandingsComponent = readSource('src/components/PassiveCardStandings.tsx');
+  const passiveScheduleComponent = readSource('src/components/PassiveCardSchedule.tsx');
   const passiveScreen = readSource('src/components/PassiveScreen.tsx');
   const appSource = readSource('src/App.tsx');
   const gameView = readSource('src/components/GameView.tsx');
@@ -93,6 +122,21 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveStandingsComponent, /currentWildcard\?\.teamRecords/);
   assert.doesNotMatch(passiveStandingsComponent, /Mock \/ Calculated Wildcard/);
   assert.doesNotMatch(passiveStandingsComponent, /New York Yankees.*76/);
+  assert.match(passiveScheduleComponent, /const completedGamesToday = completedGames\.filter/);
+  assert.match(passiveScheduleComponent, /Completed games in displayed slate/);
+  assert.match(passiveScheduleComponent, /flex flex-wrap justify-center/);
+  assert.match(passiveScheduleComponent, /flex-1 min-h-0 flex flex-col gap-3 overflow-hidden/);
+  assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);
+  assert.match(passiveScreen, /setLoadingGame\(true\);\s*setGameFeed\(null\);/);
+  assert.match(passiveScheduleComponent, /showLearningCard = panel === "scoreboard"/);
+  assert.match(passiveScheduleComponent, /Recent notable plays/);
+  assert.match(passiveScheduleComponent, /description !== "Play in progress\.\.\."/);
+  assert.match(passiveScreen, /setActiveSlideIndex\(\(index\) => \(index \+ 1\) % 4\)/);
+  assert.doesNotMatch(passiveScheduleComponent, /onClick=\{\(\) => setLowerTab/);
+  assert.match(passiveScheduleComponent, /Headlines · Hot Hitters · Lore & Curios/);
+  assert.match(passiveScheduleComponent, /2 per circulation/);
+  assert.doesNotMatch(passiveScheduleComponent, /panel === "content"/);
+  assert.match(passiveScheduleComponent, /bg-slate-950\/80[\s\S]*hover:border-slate-700/);
   assert.match(gameView, /lg:col-span-6 lg:self-start[\s\S]*flex flex-col/);
   assert.match(gameView, /max-w-full overflow-x-auto flex items-center gap-1/);
   assert.match(gameView, /focus-ring shrink-0 px-2\.5 py-1 rounded-lg/);
@@ -229,6 +273,8 @@ runNbaRouteContractChecks();
 console.log('PASS NBA route contract');
 await runNavigationChecks();
 console.log('PASS dashboard navigation contract');
+runWallboardSlateChecks();
+console.log('PASS wallboard slate rollover contract');
 runErrorBoundaryChecks();
 console.log('PASS error boundary fallback contract');
 runScrollOwnershipChecks();
