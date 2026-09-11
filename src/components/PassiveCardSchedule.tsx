@@ -172,6 +172,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   const scoreboardRows = viewport.height >= 900 ? 3 : viewport.height >= 700 ? 2 : 1;
   const scoreboardPageSize = scoreboardColumns * scoreboardRows;
   const scoreboardSlotCount = Math.min(scoreboardPageSize, scoreboardGames.length);
+  const pinnedLiveSlotCount = Math.min(currentLiveGames.length, scoreboardSlotCount);
 
   useEffect(() => {
     setScoreboardCardSlots(Array.from({ length: scoreboardSlotCount }, (_, index) => index));
@@ -180,11 +181,13 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
 
   useEffect(() => {
     if (panel !== "scoreboard" || isAutoRotationPaused || scoreboardGames.length <= scoreboardSlotCount || scoreboardSlotCount === 0) return;
+    const rotatableSlotCount = scoreboardSlotCount > pinnedLiveSlotCount ? scoreboardSlotCount - pinnedLiveSlotCount : scoreboardSlotCount;
+    const firstRotatableSlot = scoreboardSlotCount > pinnedLiveSlotCount ? pinnedLiveSlotCount : 0;
     const interval = setInterval(() => {
       if (document.activeElement?.closest("[data-scoreboard-slot]")) return;
       setScoreboardCardSlots((slots) => {
         if (slots.length === 0) return slots;
-        const slot = scoreboardFlipSlot % slots.length;
+        const slot = firstRotatableSlot + (scoreboardFlipSlot % rotatableSlotCount);
         const next = [...slots];
         const occupied = new Set(next);
         let candidate = (next[slot] + scoreboardSlotCount) % scoreboardGames.length;
@@ -192,12 +195,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
           candidate = (candidate + 1) % scoreboardGames.length;
         }
         next[slot] = candidate;
-        setScoreboardFlipSlot((current) => (current + 1) % slots.length);
+        setScoreboardFlipSlot((current) => (current + 1) % rotatableSlotCount);
         return next;
       });
     }, 4500);
     return () => clearInterval(interval);
-  }, [isAutoRotationPaused, panel, scoreboardCardSlots.length, scoreboardFlipSlot, scoreboardGames.length, scoreboardSlotCount]);
+  }, [isAutoRotationPaused, panel, pinnedLiveSlotCount, scoreboardCardSlots.length, scoreboardFlipSlot, scoreboardGames.length, scoreboardSlotCount]);
 
   const displayedScoreboardGames = scoreboardCardSlots
     .map((gameIndex) => scoreboardGames[gameIndex])
@@ -461,9 +464,16 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           </div>
 
                           <div className="flex min-w-0 flex-col items-center justify-center text-center">
-                            {gIsLive || gIsFinal ? (
-                              <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
-                            ) : gIsUpcoming ? (
+                            {gIsLive ? (
+                              <>
+                                <span className="text-xs font-black uppercase tracking-widest text-slate-500">at</span>
+                                <div className="mt-2 flex items-center justify-center gap-1" aria-label={`${liveData?.linescore?.outs ?? 0} outs`}>
+                                  {Array.from({ length: 3 }, (_, outIndex) => (
+                                    <span key={outIndex} className={`h-2.5 w-2.5 rounded-full border ${outIndex < (liveData?.linescore?.outs ?? 0) ? "border-red-300 bg-red-500" : "border-slate-600 bg-slate-800"}`} aria-hidden="true" />
+                                  ))}
+                                </div>
+                              </>
+                            ) : gIsFinal ? (
                               <>
                                 <Clock className="h-4 w-4 text-blue-400" aria-hidden="true" />
                                 <span className="mt-0.5 whitespace-nowrap text-sm font-black text-blue-300">
@@ -495,11 +505,6 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                               <span className={`absolute bottom-0 left-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnThird ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
                               <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rotate-45 border ${liveData?.matchup?.postOnFirst ? "border-amber-300 bg-amber-400" : "border-slate-600 bg-slate-800"}`} />
                               <span className="absolute bottom-0 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border border-slate-500 bg-slate-700" />
-                              </div>
-                              <div className="flex items-center justify-center gap-1" aria-label={`${liveData?.linescore?.outs ?? 0} outs`}>
-                                {Array.from({ length: 3 }, (_, outIndex) => (
-                                  <span key={outIndex} className={`h-2.5 w-2.5 rounded-full border ${outIndex < (liveData?.linescore?.outs ?? 0) ? "border-red-300 bg-red-500" : "border-slate-600 bg-slate-800"}`} aria-hidden="true" />
-                                ))}
                               </div>
                             </div>
                             <div className="min-w-0 truncate text-right text-slate-200"><span className="font-black text-amber-300">H:</span> {liveBatterName || "Unavailable"}</div>
