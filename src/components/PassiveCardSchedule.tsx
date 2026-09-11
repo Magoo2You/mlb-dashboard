@@ -224,6 +224,8 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
   }, [isAutoRotationPaused, newsArticles.length]);
 
   const hotHittersList = hotData?.hotHitters || hotData?.surgeHitters || [];
+  const hotPitchersList = hotData?.hotPitchers || hotData?.surgePitchers || [];
+  const hotPerformersList = [...hotHittersList, ...hotPitchersList];
   // Rotate Hot Hitters every 9.2s in pairs for wallboard readability.
   useEffect(() => {
     if (isAutoRotationPaused || hotHittersList.length <= 2) return;
@@ -340,7 +342,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
       );
     })
     .slice(0, 5);
-  const showLearningCard = panel === "scoreboard";
+  const showLearningCard = false;
 
   const decisions = displayGameFeed?.liveData?.decisions || selectedGame?.decisions;
   const winner = decisions?.winner;
@@ -402,6 +404,9 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                     const liveData = liveFeed?.liveData;
                     const liveBatterName = liveData?.matchup?.batter?.fullName;
                     const livePitcherName = liveData?.matchup?.pitcher?.fullName;
+                    const gameTeamCodes = [game.teams?.away?.team?.abbreviation, game.teams?.home?.team?.abbreviation].filter(Boolean);
+                    const gameHotPerformer = hotPerformersList.find((performer: any) => gameTeamCodes.some((code) => String(performer.team || "").toUpperCase().includes(String(code).toUpperCase())));
+                    const gameLore = currentLoreSlice[index % Math.max(currentLoreSlice.length, 1)];
 
                     return (
                       <div key={`scoreboard-slot-${index}`} className="relative min-w-0" data-scoreboard-slot>
@@ -498,6 +503,12 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             ) : null}
                           </div>
                         </div>
+                        {gIsUpcoming && (gameHotPerformer || gameLore) && (
+                          <div className="absolute bottom-2 left-3 right-3 rounded-lg border border-amber-900/60 bg-amber-950/25 px-2 py-1 text-[10px] leading-tight text-amber-200">
+                            <span className="mr-1 font-black uppercase text-amber-400">Pregame:</span>
+                            <span className="line-clamp-2">{gameHotPerformer ? `${gameHotPerformer.name} — ${gameHotPerformer.hotReason || gameHotPerformer.breakoutNotes || "hot performer"}` : gameLore?.fact}</span>
+                          </div>
+                        )}
                         {gIsLive && (
                           <div className="absolute bottom-2 left-3 right-3 grid h-[52px] grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1 text-[10px]">
                             <div className="min-w-0 truncate text-slate-200"><span className="font-black text-red-300">P:</span> {livePitcherName || "Unavailable"}</div>

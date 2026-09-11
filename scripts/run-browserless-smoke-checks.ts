@@ -153,7 +153,10 @@ function runScrollOwnershipChecks(): void {
   assert.match(passiveScheduleComponent, /flex-1 min-h-0 flex flex-col gap-3 overflow-hidden/);
   assert.doesNotMatch(passiveScheduleComponent, /"1\.050"|"\+\.150"|660271|543037/);
   assert.match(passiveScreen, /setLoadingGame\(true\);\s*setGameFeed\(null\);/);
-  assert.match(passiveScheduleComponent, /showLearningCard = panel === "scoreboard"/);
+  assert.match(passiveScheduleComponent, /const showLearningCard = false/);
+  assert.match(passiveScheduleComponent, /gIsUpcoming && \(gameHotPerformer \|\| gameLore\)/);
+  assert.match(passiveScheduleComponent, /hotPerformersList = \[\.\.\.hotHittersList, \.\.\.hotPitchersList\]/);
+  assert.match(passiveScheduleComponent, /Pregame:/);
   assert.match(passiveScheduleComponent, /const currentLiveGames = sortedGames\.filter/);
   assert.match(passiveScheduleComponent, /const gameFeedOverviewGames = currentLiveGames\.length > 0 \? \[\.\.\.currentLiveGames, \.\.\.completedGamesInDisplayedSlate\] : completedGamesInDisplayedSlate/);
   assert.match(passiveScheduleComponent, /postOnFirst\?\.fullName/);
