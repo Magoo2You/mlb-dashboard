@@ -998,6 +998,72 @@ const VERIFIED_LORE_ITEMS: LoreItem[] = [
     source: "https://sabr.org/bioproj/person/sammy-samuels",
     verificationStatus: "verified",
     provenance: "Verified 2026-09-10 against SABR's Sammy Samuels biography, which states the debut date, fifth-player distinction, and 19th-century context."
+  },
+  {
+    id: "record-rennie-stennett-seven-for-seven-1975",
+    title: "Rennie Stennett Goes 7-for-7",
+    tag: "SINGLE-GAME RECORD",
+    statBadge: "7-for-7 · 1975",
+    fact: "Rennie Stennett went 7-for-7 in a nine-inning game as the Pirates defeated the Cubs, 22-0, at Wrigley Field on September 16, 1975.",
+    whimsy: "The National Baseball Hall of Fame identifies Stennett as the first and only modern-era player to collect seven hits in a nine-inning game.",
+    source: "https://baseballhall.org/discover/inside-pitch/stennett-goes-seven-for-seven",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the National Baseball Hall of Fame account, which records the date, 22-0 score, seven hits in seven at-bats, and nine-inning modern-era scope."
+  },
+  {
+    id: "record-twins-two-triple-plays-1990",
+    title: "The Twins Turn Two Triple Plays",
+    tag: "FIELDING RARITY",
+    statBadge: "2 triple plays · 1990",
+    fact: "Minnesota turned two 5-4-3 triple plays against Boston on July 17, 1990, one in the fourth inning and another in the eighth.",
+    whimsy: "The Twins' official history says Minnesota remains the only team to accomplish this particular feat.",
+    source: "https://www.mlb.com/twins/history/timeline-1990s",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against the Minnesota Twins' official timeline and corroborating Retrosheet triple-play records; the sources support the two innings and team-scope claim."
+  },
+  {
+    id: "record-harrah-wills-back-to-back-inside-park-1977",
+    title: "Back-to-Back Inside-the-Park Homers",
+    tag: "BASEBALL FIRST",
+    statBadge: "2 inside-the-park HRs",
+    fact: "Texas Rangers teammates Toby Harrah and Bump Wills hit consecutive inside-the-park home runs on August 27, 1977.",
+    whimsy: "MLB identifies them as the first and only players to hit back-to-back inside-the-park home runs.",
+    source: "https://www.mlb.com/news/mlb-records-that-have-only-happened-once/c-45942126",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's records-that-happened-once article, which explicitly states the date, Rangers teammates, consecutive inside-the-park home runs, and first-and-only scope."
+  },
+  {
+    id: "history-first-national-association-game-1871",
+    title: "The First National Association Game",
+    tag: "BASEBALL ORIGINS",
+    statBadge: "May 4, 1871",
+    fact: "The Fort Wayne Kekiongas defeated the Cleveland Forest Cities, 2-0, in the first National Association game on May 4, 1871.",
+    whimsy: "Retrosheet presents it as the first major-league game ever played, with the competition identified specifically as a National Association contest.",
+    source: "https://www.retrosheet.org/1stGame.htm",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against Retrosheet's complete play-by-play and box score; the entry preserves the 1871 National Association scope rather than implying modern AL/NL status."
+  },
+  {
+    id: "history-first-al-nl-night-game-1935",
+    title: "The First AL/NL Night Game",
+    tag: "BALLPARK HISTORY",
+    statBadge: "2-1 · 1935",
+    fact: "Cincinnati defeated Philadelphia, 2-1, at Crosley Field on May 24, 1935, in the first night game in American League/National League history.",
+    whimsy: "MLB's account describes Crosley Field's more-than-600 high-wattage lamps and the game as a turning point for night baseball in the AL/NL.",
+    source: "https://www.mlb.com/news/first-night-game-in-al-nl-history",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against MLB's historical account, which identifies the Reds-Phillies game, date, 2-1 result, Crosley Field setting, and AL/NL scope."
+  },
+  {
+    id: "history-comiskey-experimental-night-game-1910",
+    title: "Comiskey Park's Experimental Night Game",
+    tag: "BALLPARK HISTORY",
+    statBadge: "1910 · 3,500 fans",
+    fact: "Comiskey Park hosted an experimental night baseball game between the semipro Logan Squares and Rogers Park on August 27, 1910; Logan Squares won 3-0.",
+    whimsy: "SABR records this as a ballpark-history event, not an MLB regular-season game, with more than 3,500 fans attending.",
+    source: "https://sabr.org/gamesproj/game/august-27-1910-comiskey-park-hosts-its-first-night-baseball-game",
+    verificationStatus: "verified",
+    provenance: "Verified 2026-09-10 against SABR's Games Project account, which identifies the semipro teams, date, venue, 3-0 result, and attendance; competition scope is explicitly preserved."
   }
 ];
 
