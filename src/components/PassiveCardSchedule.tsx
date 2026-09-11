@@ -422,7 +422,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                             onSelectGame?.(game.gamePk);
                           }
                         }}
-                        className="w-full min-w-0 h-[236px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
+                        className="relative w-full min-w-0 h-[236px] p-3 flex-none cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/80 hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-300"
                       >
                         {/* Game Status Bar */}
                         <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-800/80">
@@ -497,7 +497,7 @@ export const PassiveCardSchedule: React.FC<PassiveCardScheduleProps> = ({
                           </div>
                         </div>
                         {gIsLive && (
-                          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1.5 text-[10px]">
+                          <div className="absolute bottom-2 left-3 right-3 grid h-[52px] grid-cols-[minmax(0,1fr)_70px_minmax(0,1fr)] items-center gap-1.5 rounded-lg border border-red-900/60 bg-red-950/20 px-2 py-1 text-[10px]">
                             <div className="min-w-0 truncate text-slate-200"><span className="font-black text-red-300">P:</span> {livePitcherName || "Unavailable"}</div>
                             <div className="flex min-w-0 flex-col items-center justify-center gap-1">
                               <div className="relative mx-auto h-10 w-10" aria-label={`Base runners: ${liveData?.matchup?.postOnFirst?.fullName || "no runner on first"}; ${liveData?.matchup?.postOnSecond?.fullName || "no runner on second"}; ${liveData?.matchup?.postOnThird?.fullName || "no runner on third"}`} role="img">
